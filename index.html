@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Анестезія">
+<meta name="theme-color" content="#0B0B0C">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120.png">
+<title>Ветеринарний анестезіологічний протокол</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0B0B0C; --bg2:#151517; --card:#1C1C1E; --card2:#232326; --field:#101012;
+  --border:#2C2C2E; --border-strong:#3A3A3C;
+  --text:#F2F2F2; --text2:#A0A0A3; --text3:#6B6B6E;
+  --green:#31D158; --green-dim:#1E7A34;
+  --red:#FF3B30; --red-dim:#7A1E1E;
+  --blue:#3B8AFF; --amber:#F2A93B; --coral:#FF6B4A; --purple:#B98CFF;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  --mono: "SF Mono", ui-monospace, "Menlo", monospace;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0; background:var(--bg); font-family:var(--font); color:var(--text); -webkit-font-smoothing:antialiased;}
+body{padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+h1,h2,h3{font-weight:600; margin:0 0 4px;}
+input,select,textarea{font-family:var(--font); font-size:16px;}
+input[type=number]{appearance:textfield; -moz-appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0;}
+button{font-family:var(--font); cursor:pointer;}
+
+.topbar{position:sticky; top:0; z-index:20; background:var(--bg2); color:#fff; padding:calc(14px + env(safe-area-inset-top)) 16px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--border);}
+.topbar .brand{display:flex; flex-direction:column; line-height:1.15;}
+.topbar .brand b{font-size:16px; font-weight:600;}
+.topbar .brand span{font-size:12px; color:var(--text2); font-weight:400;}
+.topbar select{background:var(--card2); color:#fff; border:1px solid var(--border-strong); border-radius:8px; padding:6px 8px; font-size:13px; max-width:110px;}
+.topbar button.icon, .home-topbar button.icon{background:var(--card2); border:1px solid var(--border-strong); color:#fff; border-radius:8px; padding:6px 10px; font-size:13px; white-space:nowrap;}
+
+.view{display:none; padding:16px; max-width:640px; margin:0 auto;}
+.view.active{display:block;}
+
+.card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:14px;}
+.card h2{font-size:15px; color:var(--text);}
+.card .sub{font-size:12px; color:var(--text2); margin-bottom:12px;}
+
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.range-row{display:flex; align-items:center; gap:8px;}
+.range-row input{flex:1; min-width:0; border:1px solid var(--border-strong); border-radius:8px; padding:10px; background:var(--field); color:var(--text); min-height:40px; font-family:var(--mono); font-size:15px;}
+.range-row .dash{color:var(--text3); flex-shrink:0;}
+.field{display:flex; flex-direction:column; gap:4px; margin-bottom:10px;}
+.field label{font-size:12px; color:var(--text2); font-weight:500;}
+.field input, .field select{border:1px solid var(--border-strong); border-radius:8px; padding:10px 10px; background:var(--field); color:var(--text); min-height:40px;}
+.field input:focus, .field select:focus{outline:2px solid var(--blue); background:#000;}
+
+.btn{border:1px solid var(--border-strong); background:var(--card2); border-radius:12px; padding:11px 16px; font-size:14px; font-weight:600; color:var(--text); min-height:44px;}
+.btn:active{background:var(--border);}
+.btn-primary{background:var(--green); border-color:var(--green); color:#04220D;}
+.btn-primary:active{background:var(--green-dim); color:#fff;}
+.btn-danger{background:var(--red); border-color:var(--red); color:#fff;}
+.btn-danger:active{background:var(--red-dim);}
+.btn-outline-danger{color:var(--red); border-color:var(--red-dim); background:transparent;}
+.btn-block{width:100%; display:block;}
+.btn-row{display:flex; gap:8px; flex-wrap:wrap;}
+.pill-btn{border-radius:22px; padding:9px 18px;}
+
+.lab-btn-row{display:flex; flex-wrap:wrap; gap:10px;}
+.lab-btn{min-width:72px; height:72px; padding:6px 8px; border-radius:14px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-weight:700; font-size:12px; text-align:center; line-height:1.15; transition:background .15s,border-color .15s,color .15s;}
+.lab-btn small{font-size:10px; font-weight:600; color:inherit; opacity:.85;}
+.lab-btn.st-todo{background:rgba(242,169,59,.16); border-color:var(--amber); color:var(--amber);}
+.lab-btn.st-done{background:rgba(49,209,88,.16); border-color:var(--green); color:var(--green);}
+.lab-btn:active{opacity:.75;}
+
+.lab-btn-row{display:flex; flex-wrap:wrap; gap:10px;}
+.lab-btn{min-width:72px; height:72px; padding:6px 8px; border-radius:14px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-weight:700; font-size:12px; text-align:center; line-height:1.15; transition:background .15s,border-color .15s,color .15s;}
+.lab-btn small{font-size:10px; font-weight:600; color:inherit; opacity:.85;}
+.lab-btn.st-todo{background:rgba(242,169,59,.16); border-color:var(--amber); color:var(--amber);}
+.lab-btn.st-done{background:rgba(49,209,88,.16); border-color:var(--green); color:var(--green);}
+.lab-btn:active{opacity:.75;}
+
+#view-labs{padding-bottom:96px;}
+.labs-save-bar{position:fixed; left:0; right:0; bottom:calc(54px + env(safe-area-inset-bottom)); z-index:25; background:linear-gradient(180deg, rgba(11,11,12,0) 0%, var(--bg) 22%); padding:14px 16px 8px; display:none;}
+.labs-save-bar.active{display:block;}
+.labs-mark-btn{display:flex; align-items:center; justify-content:center; gap:8px; font-size:16px; padding:15px 16px; min-height:52px; border-radius:16px; box-shadow:0 6px 20px rgba(49,209,88,.25);}
+
+.segmented{display:flex; background:var(--field); border:1px solid var(--border-strong); border-radius:10px; padding:3px; gap:3px;}
+
+.calc-result{display:flex; align-items:center; justify-content:space-between; background:var(--field); border:1px solid var(--border-strong); border-radius:12px; padding:14px 16px; margin-top:6px;}
+.calc-result-label{font-size:13px; color:var(--text2); font-weight:500;}
+.calc-result-value{font-family:var(--mono); font-size:22px; font-weight:800; color:var(--green);}
+.calc-result-value.invalid{color:var(--text3); font-size:15px; font-weight:600;}
+.calc-block-placeholder{opacity:.6;}
+.calc-block-placeholder h2{color:var(--text2);}
+
+.field-picker-btn{width:100%; text-align:left; border:1px solid var(--border-strong); border-radius:10px; padding:11px 12px; background:var(--field); color:var(--text); font-size:14px; display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:42px;}
+.field-picker-btn .ph{color:var(--text3);}
+.field-picker-btn .chev{color:var(--text3); font-size:12px; flex-shrink:0;}
+
+.picker-modal{background:var(--bg2); width:100%; max-width:640px; border-radius:18px 18px 0 0; padding:14px 16px calc(14px + env(safe-area-inset-bottom)); height:88vh; display:flex; flex-direction:column; border-top:1px solid var(--border-strong);}
+.picker-modal-head{display:flex; justify-content:flex-end; margin-bottom:6px;}
+.picker-modal-head button{background:none; border:none; color:var(--green); font-size:15px; font-weight:600; padding:6px 4px;}
+.picker-modal h3{font-size:26px; font-weight:800; margin-bottom:14px;}
+.picker-search{position:relative; margin-bottom:14px; flex-shrink:0;}
+.picker-search input{width:100%; border:1px solid var(--border-strong); border-radius:12px; padding:11px 40px 11px 38px; background:var(--field); color:var(--text); font-size:15px;}
+.picker-search .ic{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text3); pointer-events:none;}
+.picker-search .clr{position:absolute; right:10px; top:50%; transform:translateY(-50%); background:var(--text3); color:var(--bg); border:none; width:20px; height:20px; border-radius:50%; font-size:12px; line-height:1;}
+.picker-list{flex:1; overflow-y:auto; background:var(--card2); border:1px solid var(--border); border-radius:16px;}
+.picker-row{width:100%; display:flex; justify-content:space-between; align-items:center; gap:8px; padding:14px 14px; background:none; border:none; border-bottom:1px solid var(--border); color:var(--text); font-size:15px; text-align:left;}
+.picker-row:last-child{border-bottom:none;}
+.picker-row .ck{color:var(--green); font-size:15px; flex-shrink:0;}
+.picker-add-row{display:flex; align-items:center; gap:10px; padding:12px 4px; color:var(--text); font-size:15px; background:none; border:none; text-align:left; width:100%;}
+.picker-add-row .plus{width:22px; height:22px; border-radius:50%; background:var(--green); color:#06210f; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0;}
+.picker-empty{color:var(--text2); font-size:13px; padding:6px 4px 2px;}
+.segmented button{flex:1; background:none; border:none; border-radius:8px; padding:8px 4px; font-size:13px; font-weight:600; color:var(--text2);}
+.segmented button.active{background:var(--card2); color:var(--text); box-shadow:0 0 0 1px var(--border-strong);}
+
+/* session header card */
+.session-card{padding:16px;}
+.session-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+.session-info b{font-size:18px; display:block;}
+.session-info span{font-size:12px; color:var(--text2);}
+.timer-big{font-family:var(--mono); font-size:clamp(46px, 13vw, 68px); font-weight:800; letter-spacing:1px; color:var(--text); text-align:center; margin:14px 0 6px; line-height:1; font-variant-numeric:tabular-nums;}
+.timer-status-row{display:flex; align-items:center; justify-content:center; gap:6px;}
+.timer-dot{width:8px; height:8px; border-radius:50%; background:var(--text3); flex-shrink:0;}
+.timer-dot.live{background:var(--green); box-shadow:0 0 0 3px rgba(49,209,88,.2);}
+
+/* extra timers */
+.extra-timer{background:var(--field); border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
+.extra-timer-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
+.extra-timer-head b{font-size:14px;}
+.extra-timer-digits{font-family:var(--mono); font-size:30px; font-weight:700; text-align:center; margin:6px 0 10px;}
+.laps{margin-top:8px; max-height:120px; overflow-y:auto;}
+.lap-row{display:flex; justify-content:space-between; font-family:var(--mono); font-size:12px; color:var(--text2); padding:4px 2px; border-bottom:1px solid var(--border);}
+.lap-row:last-child{border-bottom:none;}
+
+/* drug calculator */
+.drug-row{display:grid; grid-template-columns:1fr 70px 74px; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border);}
+.drug-row:last-child{border-bottom:none;}
+.drug-name{font-size:14px; font-weight:600;}
+.drug-range{font-size:11px; color:var(--text2);}
+.drug-row input{border:1px solid var(--border-strong); border-radius:8px; padding:8px 6px; text-align:center; background:var(--field); color:var(--text); font-family:var(--mono); font-size:13px; width:100%;}
+.drug-result{grid-column:1 / -1; display:flex; justify-content:space-between; font-family:var(--mono); font-size:13px; color:var(--green); background:rgba(49,209,88,.08); border-radius:8px; padding:6px 10px; margin-top:2px;}
+.drug-add-btn{font-size:12px; padding:5px 10px; min-height:30px; border-radius:8px; background:var(--card2); color:var(--text); border:1px solid var(--border-strong);}
+
+/* vitals digit fields */
+.vgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.vfield{background:var(--field); border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; transition:border-color .15s ease, background-color .15s ease;}
+.vfield.alarm-bad{border-color:var(--red);}
+.vfield.alarm-bad input, .vfield.alarm-bad input:disabled{color:var(--red);}
+.vfield label{font-size:13px; color:var(--text2); font-weight:500; display:flex; justify-content:space-between; align-items:center;}
+.vfield .maptag{font-size:10px; color:var(--green); border:1px solid var(--green-dim); padding:1px 6px; border-radius:8px;}
+.vfield-row{display:flex; align-items:baseline; gap:6px; margin-top:8px;}
+.vfield input{background:none; border:none; outline:none; color:var(--text); font-family:var(--mono); font-size:26px; font-weight:700; width:100%; padding:0;}
+.vfield input::placeholder{color:var(--text3);}
+.vfield input:disabled{color:var(--green); opacity:1;}
+.vfield .unit{font-size:13px; color:var(--text2); white-space:nowrap;}
+
+.rrmode-seg{display:inline-flex; background:var(--bg); border:1px solid var(--border-strong); border-radius:8px; padding:2px; gap:2px; margin-top:8px;}
+.rrmode-seg button{width:26px; background:none; border:none; border-radius:6px; padding:4px 0; font-size:12px; font-weight:700; color:var(--text2); font-family:var(--font);}
+.rrmode-seg button.active{background:var(--card2); color:var(--green); box-shadow:0 0 0 1px var(--green-dim);}
+.rrmode-seg button.active.mech{color:var(--purple); box-shadow:0 0 0 1px var(--purple);}
+.rr-tag{font-size:9px; font-weight:700; padding:1px 5px; border-radius:6px; margin-left:4px; vertical-align:1px; white-space:nowrap;}
+.rr-tag.mech{color:var(--purple); border:1px solid var(--purple); background:rgba(185,140,255,.12);}
+.rr-tag.spont{color:var(--green); border:1px solid var(--green-dim); background:rgba(49,209,88,.12);}
+
+.eyelube-field{display:flex; flex-direction:column;}
+.eyelube-btn{margin-top:8px; display:flex; align-items:center; justify-content:center; gap:6px; width:100%; background:var(--card2); border:1px solid var(--border-strong); border-radius:10px; padding:8px 10px; color:var(--text); font-family:var(--font); cursor:pointer; transition:background .2s,border-color .2s,box-shadow .2s;}
+.eyelube-btn .eyelube-plus{font-size:20px; font-weight:700; line-height:1;}
+.eyelube-btn .eyelube-count{font-size:12px; font-weight:700; color:var(--text2); background:var(--bg); border-radius:8px; padding:2px 7px; min-width:20px; text-align:center;}
+.eyelube-btn:active{transform:scale(0.97);}
+.eyelube-btn.due{background:rgba(242,169,59,.14); border-color:var(--amber); box-shadow:0 0 0 1px var(--amber); animation:eyelube-pulse 1.6s ease-in-out infinite;}
+.eyelube-btn.due .eyelube-plus{color:var(--amber);}
+.eyelube-btn.due .eyelube-count{color:var(--amber); background:rgba(242,169,59,.12);}
+.eyelube-btn.locked{opacity:.55; cursor:not-allowed;}
+.eyelube-btn:disabled{opacity:.55; cursor:not-allowed;}
+@keyframes eyelube-pulse{0%,100%{opacity:1;} 50%{opacity:.6;}}
+.eyelube-pending{margin-top:6px; font-size:10.5px; color:var(--amber); line-height:1.3;}
+
+.table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px; border:1px solid var(--border);}
+table{border-collapse:collapse; width:100%; font-size:12px; font-family:var(--mono);}
+th,td{padding:7px 8px; text-align:center; border-bottom:1px solid var(--border); white-space:nowrap; color:var(--text);}
+th{background:var(--card2); font-family:var(--font); font-weight:600; color:var(--text2); position:sticky; top:0; font-size:11px;}
+td.oob{color:var(--red); font-weight:700;}
+tr td:first-child{font-weight:600; color:var(--text2);}
+
+#view-vitals{padding-bottom:96px;}
+.save-bar{position:fixed; left:0; right:0; bottom:calc(54px + env(safe-area-inset-bottom)); z-index:25; background:linear-gradient(180deg, rgba(11,11,12,0) 0%, var(--bg) 22%); padding:14px 16px 8px; display:none;}
+.save-bar.active{display:block;}
+.save-bar-inner{max-width:640px; margin:0 auto;}
+.save-bar .btn-primary{display:flex; align-items:center; justify-content:center; gap:8px;}
+.save-status{text-align:center; font-size:12px; color:var(--text2); margin-top:6px;}
+.save-status.dirty{color:var(--amber);}
+.save-status.saved{color:var(--green);}
+.save-btn-time{font-family:var(--mono); font-weight:800; font-size:13px; background:rgba(0,0,0,.16); padding:2px 8px; border-radius:8px; margin-left:2px;}
+.save-btn-timed.st-green{background:var(--green); border-color:var(--green); color:#04220D;}
+.save-btn-timed.st-amber{background:var(--amber); border-color:var(--amber); color:#241800;}
+.save-btn-timed.st-red{background:var(--red); border-color:var(--red); color:#fff;}
+.save-btn-timed.st-green .save-btn-time{background:rgba(4,34,13,.18);}
+.save-btn-timed.st-amber .save-btn-time{background:rgba(36,24,0,.18);}
+.save-btn-timed.st-red .save-btn-time{background:rgba(255,255,255,.2);}
+
+.tabbar{position:fixed; bottom:0; left:0; right:0; z-index:30; background:rgba(21,21,23,0.95); backdrop-filter:blur(10px); border-top:1px solid var(--border); display:flex; padding-bottom:env(safe-area-inset-bottom);}
+.tabbar button{flex:1; background:none; border:none; padding:8px 1px 7px; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--text3); font-size:9.5px; font-weight:500;}
+.tabbar button.active{color:var(--green);}
+.tabbar .dot{width:19px; height:19px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:var(--card2); color:var(--text3);}
+.tabbar button.active .dot{background:var(--green); color:#04220D;}
+
+.empty{text-align:center; padding:30px 10px; color:var(--text2); font-size:13px;}
+.hint{font-size:11px; color:var(--text2); margin-top:8px; line-height:1.5;}
+.chart-wrap{position:relative; height:260px; margin-top:6px;}
+.legend{display:flex; gap:12px; flex-wrap:wrap; font-size:11px; color:var(--text2); margin-top:10px;}
+.legend span{display:inline-flex; align-items:center; gap:4px;}
+.legend i{width:9px; height:9px; border-radius:2px; display:inline-block;}
+
+.list-row{display:flex; justify-content:space-between; align-items:center; padding:9px 2px; border-bottom:1px solid var(--border);}
+.list-row:last-child{border-bottom:none;}
+.list-row .name{font-size:14px; font-weight:600;}
+
+#homeScreen{max-width:640px; margin:0 auto;}
+.home-topbar{position:sticky; top:0; z-index:20; background:var(--bg2); color:#fff; padding:calc(14px + env(safe-area-inset-top)) 16px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--border); font-size:17px; font-weight:700;}
+.home-body{padding:16px 16px 110px;}
+
+.fab{position:fixed; right:20px; bottom:calc(24px + env(safe-area-inset-bottom)); width:56px; height:56px; border-radius:50%; background:var(--green); color:#04220D; border:none; font-size:26px; font-weight:700; box-shadow:0 6px 18px rgba(0,0,0,.4); z-index:60; display:flex; align-items:center; justify-content:center; line-height:0;}
+.date-sep{font-size:12px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.4px; margin:16px 0 8px; padding-bottom:6px; border-bottom:1px solid var(--border);}
+.date-sep:first-child{margin-top:0;}
+.patient-item{display:flex; gap:12px; align-items:flex-start; background:var(--field); border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
+.patient-item:active{background:var(--card2);}
+.patient-item.is-current{border-color:var(--green-dim); box-shadow:0 0 0 1px var(--green-dim);}
+.patient-item-icon{width:34px; height:34px; border-radius:10px; background:var(--green-dim); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+.patient-item-body{flex:1; min-width:0;}
+.patient-item-body b{font-size:15px; display:block; margin-bottom:2px;}
+.patient-item-meta{font-size:12px; color:var(--text2); margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.patient-item-foot{display:flex; gap:14px; font-size:11px; color:var(--text3); flex-wrap:wrap;}
+
+.modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:50; display:none; align-items:flex-end; justify-content:center;}
+.modal-bg.open{display:flex;}
+/* nested pickers (opened from inside another modal, e.g. Процедура from Новий пацієнт) must paint above the modal that opened them */
+#procedureModal-bg{z-index:60;}
+.modal{background:var(--bg2); width:100%; max-width:640px; border-radius:18px 18px 0 0; padding:18px 16px calc(18px + env(safe-area-inset-bottom)); max-height:88vh; overflow-y:auto; border-top:1px solid var(--border-strong);}
+.modal h3{font-size:16px; margin-bottom:14px;}
+.close-x{position:absolute; right:16px; top:14px; background:var(--card2); border:none; width:28px; height:28px; border-radius:50%; font-size:14px; color:var(--text); z-index:3;}
+.modal-footer{position:sticky; bottom:0; background:var(--bg2); margin:14px -16px 0; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--border-strong); z-index:2;}
+
+@media print{
+  body{background:#fff; color:#000;}
+  .topbar, .tabbar, .no-print, .modal-bg{display:none !important;}
+  #homeScreen{display:none !important;}
+  #appWorkspace{display:block !important;}
+  .view{display:block !important; max-width:100%; padding:0;}
+  .card{border:1px solid #ccc; border-radius:0; margin-bottom:18px; background:#fff; color:#000;}
+  table, th, td{color:#000 !important;}
+  th{background:#eee;}
+  #print-header{display:block !important;}
+}
+#print-header{display:none;}
+</style>
+</head>
+<body>
+
+<div id="homeScreen">
+  <div class="home-topbar no-print">
+    <b>Історія пацієнтів</b>
+    <button class="icon" onclick="showWorkspace(); showView('settings');" aria-label="Налаштування">⚙</button>
+  </div>
+  <div class="home-body">
+    <div class="field"><input id="patientSearchInput" placeholder="Пошук за кличкою" oninput="renderPatientList()"></div>
+    <div id="patientListItems"></div>
+  </div>
+  <button class="fab no-print" onclick="openModal('newPatientModal')" aria-label="Новий пацієнт">+</button>
+</div>
+
+<div id="appWorkspace" style="display:none;">
+<div class="topbar no-print">
+  <div class="brand"><b id="hdrPatientName">Новий пацієнт</b><span id="hdrPatientMeta">—</span></div>
+  <div style="display:flex; gap:6px; align-items:center;">
+    <select id="patientSelect" onchange="switchPatient(this.value)"></select>
+    <button class="icon" onclick="showHome()" aria-label="Історія пацієнтів">🕘</button>
+  </div>
+</div>
+
+<!-- ПАЦІЄНТ -->
+<div class="view active" id="view-patient">
+  <div id="print-header"><h1 style="font-size:20px;">Анестезіологічний протокол</h1></div>
+  <div class="card">
+    <h2>Дані пацієнта</h2>
+    <div class="field"><label>Кличка</label><input id="p_name" oninput="saveField('name', this.value)"></div>
+    <div class="field"><label>Власник</label><input id="p_owner" oninput="saveField('owner', this.value)"></div>
+    <div class="field"><label>Телефон власника</label><input id="p_phone" type="tel" inputmode="tel" placeholder="напр. +380 XX XXX XX XX" oninput="saveField('phone', this.value)"></div>
+    <div class="field"><label>Вид</label>
+      <select id="p_species" onchange="saveField('species', this.value)">
+        <option>Собака</option><option>Кіт</option><option>Інше</option>
+      </select>
+    </div>
+    <div class="field"><label>Порода</label><input id="p_breed" oninput="saveField('breed', this.value)"></div>
+    <div class="field"><label>Вага, кг</label><input id="p_weight" type="number" step="0.1" inputmode="decimal" oninput="saveField('weight', this.value); renderDrugs();"></div>
+    <div class="field"><label>Поточний гематокрит (Ht/PCV), %</label><input id="p_hct" type="number" step="0.1" inputmode="decimal" placeholder="напр. 28" oninput="saveField('hct', this.value)"></div>
+    <div class="field"><label>Вік</label><input id="p_age" oninput="saveField('age', this.value)"></div>
+    <div class="field"><label>Стать</label>
+      <select id="p_sex" onchange="saveField('sex', this.value)">
+        <option value="">—</option><option>Самець</option><option>Самка</option><option>Кастрат/стерилізована</option>
+      </select>
+    </div>
+    <div class="field"><label>Дата</label><input id="p_date" type="date" oninput="saveField('date', this.value)"></div>
+    <div class="field"><label>Процедура</label>
+      <button type="button" class="field-picker-btn" id="p_procedure_btn" onclick="openProcedurePicker('patient')">
+        <span id="p_procedure_label" class="ph">Оберіть процедуру</span><span class="chev">›</span>
+      </button>
+    </div>
+    <div class="field"><label>Хірург</label>
+      <select id="p_surgeon" onchange="saveField('surgeon', this.value)"><option value="">—</option></select>
+    </div>
+    <div class="field"><label>Анестезіолог</label><input id="p_doctor" oninput="saveField('doctor', this.value)"></div>
+  </div>
+  <div class="card">
+    <h2>ASA / примітки перед анестезією</h2>
+    <div class="field"><label>Загальний статус, супутні захворювання</label>
+      <input id="p_notes" oninput="saveField('preNotes', this.value)" placeholder="напр. ASA II, компенсована серцева недостатність">
+    </div>
+  </div>
+  <button class="btn btn-outline-danger btn-block no-print" onclick="deletePatient()">Видалити цього пацієнта</button>
+</div>
+
+<!-- ПЕРЕДОПЕРАЦІЙНІ ДОСЛІДЖЕННЯ -->
+<div class="view" id="view-labs">
+  <div class="card">
+    <h2>Передопераційні дослідження</h2>
+    <div class="sub" style="margin-bottom:8px;">Натисніть на кнопку: сірий — не обрано, жовтий — потрібно зробити, зелений — зроблено</div>
+    <div class="lab-btn-row" id="labButtons"></div>
+  </div>
+</div>
+
+<div class="labs-save-bar no-print" id="labsSaveBar">
+  <div class="save-bar-inner">
+    <button class="btn btn-primary btn-block labs-mark-btn" id="labsMarkBtn" onclick="markAllLabsDone()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Всі як зроблені</span>
+    </button>
+  </div>
+</div>
+
+<!-- ДОЗИ -->
+<div class="view" id="view-drugs">
+  <div class="card">
+    <h2>Калькулятор доз</h2>
+    <div class="sub">Вага пацієнта: <b id="drugWeightLabel">— кг</b>. Концентрацію вводьте зі свого флакона. Дози — довідкові, підтверджуйте власним протоколом.</div>
+    <div id="drugList"></div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn drug-add-btn" onclick="openModal('addDrugModal')">+ додати препарат</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Журнал введення препаратів</h2>
+    <div class="table-wrap">
+      <table id="drugLogTable">
+        <thead><tr><th>Час</th><th>Препарат</th><th>Доза</th><th>Шлях</th><th class="no-print">✕</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="empty" id="drugLogEmpty">Записів ще немає</div>
+  </div>
+</div>
+
+<!-- ВІТАЛЬНІ -->
+<div class="view" id="view-vitals">
+  <div class="card session-card">
+    <div class="session-top">
+      <div class="session-info">
+        <b id="sess_name">—</b>
+        <span id="sess_meta">—</span>
+      </div>
+      <button class="btn pill-btn no-print" id="sess_btn" onclick="toggleSession()">Почати</button>
+    </div>
+    <div class="timer-big" id="sess_timer">00:00:00</div>
+    <div class="timer-status-row">
+      <span class="timer-dot" id="sess_dot"></span>
+      <span class="hint" id="sess_status" style="margin:0;"></span>
+    </div>
+  </div>
+
+  <div class="card" id="extraTimersCard" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2>Додаткові таймери</h2>
+      <button class="btn drug-add-btn no-print" onclick="openModal('addTimerModal')">+ Таймер</button>
+    </div>
+    <div class="sub">Для фіксації часу окремих втручань чи подій під час операції</div>
+    <div id="extraTimersList"></div>
+  </div>
+
+  <div class="card no-print">
+    <h2>Вітальні показники</h2>
+    <div class="sub">Поля заповнюються останніми введеними — міняйте лише те, що змінилось</div>
+    <div class="field" style="margin-bottom:4px;"><label>Стадія</label>
+      <select id="v_plane" onchange="markVitalsDirty()"><option value="">—</option><option>Індукція</option><option>Легка</option><option>Хірургічна</option><option>Глибока</option><option>Пробудження</option></select>
+    </div>
+    <div class="vgrid">
+      <div class="vfield"><label>ЧСС</label><div class="vfield-row"><input id="v_hr" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div></div>
+      <div class="vfield"><label>ЧДР</label><div class="vfield-row"><input id="v_rr" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div>
+        <div class="rrmode-seg" role="group" aria-label="Тип дихання">
+          <button type="button" id="rrModeSpontBtn" onclick="setRRMode('spont')" aria-label="Самостійне дихання">С</button>
+          <button type="button" id="rrModeMechBtn" onclick="setRRMode('mech')" aria-label="Механічна вентиляція (ШВЛ)">М</button>
+        </div>
+      </div>
+      <div class="vfield"><label>SpO₂</label><div class="vfield-row"><input id="v_spo2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">%</span></div></div>
+      <div class="vfield"><label>EtCO₂</label><div class="vfield-row"><input id="v_etco2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>САТ</label><div class="vfield-row"><input id="v_sys" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>ДАТ</label><div class="vfield-row"><input id="v_dia" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>MAP <span class="maptag" id="mapTag">авто</span></label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>Температура</label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
+      <div class="vfield"><label>Iso/Sevo</label><div class="vfield-row"><input id="v_isosevo" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit">%</span></div></div>
+      <div class="vfield"><label>O₂ потік</label><div class="vfield-row"><input id="v_o2" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit">л/хв</span></div></div>
+      <div class="vfield"><label>CRI</label><div class="vfield-row"><input id="v_cri" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit">мл/год</span></div></div>
+      <div class="vfield eyelube-field">
+        <label>Зволоження очей</label>
+        <button type="button" class="eyelube-btn" id="eyeLubeBtn" onclick="logEyeLube()">
+          <span class="eyelube-plus">+</span>
+          <span class="eyelube-count" id="eyeLubeCount">0</span>
+        </button>
+        <div class="eyelube-pending" id="eyeLubePending" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Примітки</label><input id="v_notes" placeholder="напр. рухова активність, апное" oninput="markVitalsDirty()"></div>
+  </div>
+
+  <div class="card">
+    <h2>Історія записів</h2>
+    <div class="table-wrap">
+      <table id="vitalsTable">
+        <thead><tr>
+          <th>Час</th><th>ЧСС</th><th>ЧДР</th><th>SpO₂</th><th>EtCO₂</th><th>САТ</th><th>ДАТ</th><th>MAP</th><th>Т°</th><th>Iso/Sevo</th><th>O₂ потік</th><th>CRI</th><th>Очі</th><th>Стадія</th><th class="no-print">✕</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="empty" id="vitalsEmpty">Записів ще немає</div>
+  </div>
+</div>
+
+<div class="save-bar no-print" id="vitalsSaveBar">
+  <div class="save-bar-inner">
+    <button class="btn btn-primary btn-block save-btn-timed" id="vitalsSaveBtn" onclick="addVital()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Зберегти запис</span>
+      <span class="save-btn-time" id="vitalsSaveTimer"></span>
+    </button>
+    <div class="save-status" id="vitalsSaveStatus">Не збережено</div>
+  </div>
+</div>
+
+<!-- ГРАФІК -->
+<div class="view" id="view-chart">
+  <div class="card">
+    <h2>Графік анестезії</h2>
+    <div class="chart-wrap"><canvas id="vitalsChart"></canvas></div>
+    <div class="legend">
+      <span><i style="background:#FF6B4A"></i>ЧСС</span>
+      <span><i style="background:#3B8AFF"></i>SpO₂</span>
+      <span><i style="background:#FF3B30"></i>САТ</span>
+      <span><i style="background:#F2A93B"></i>ДАТ</span>
+      <span><i style="background:#B98CFF"></i>MAP</span>
+      <span><i style="background:#31D158"></i>ЧДР</span>
+    </div>
+  </div>
+</div>
+
+<!-- КАЛЬКУЛЯТОР -->
+<div class="view" id="view-calc">
+
+  <div class="card calc-block">
+    <h2>Добова інфузія (підтримуюча)</h2>
+    <div class="sub">Формула: Добовий об'єм (мл) = 30 × вага (кг) + 70. Швидкість (мл/год) = добовий об'єм / 24. Вага береться з вкладки «Пацієнт». Орієнтовний розрахунок, підтверджуйте власним протоколом.</div>
+    <div class="sub" id="calc_fluid_patient_info" style="margin-top:-4px;">—</div>
+
+    <div class="calc-result" id="calc_fluid_daily_result">
+      <span class="calc-result-label">Добовий об'єм</span>
+      <span class="calc-result-value" id="calc_fluid_daily_value">— мл</span>
+    </div>
+    <div class="calc-result" id="calc_fluid_hourly_result" style="margin-top:8px;">
+      <span class="calc-result-label">Швидкість інфузії</span>
+      <span class="calc-result-value" id="calc_fluid_hourly_value">— мл/год</span>
+    </div>
+    <div class="hint" id="calc_fluid_hint" style="display:none;"></div>
+  </div>
+
+  <div class="card calc-block">
+    <h2>Об'єм переливання крові</h2>
+    <div class="sub">Формула: Об'єм (мл) = Вага (кг) × К × (бажаний Ht − Ht пацієнта) / Ht донора. Вага, вид і поточний Ht беруться з вкладки «Пацієнт». Орієнтовний розрахунок, підтверджуйте власним протоколом.</div>
+    <div class="sub" id="calc_tr_patient_info" style="margin-top:-4px;">—</div>
+
+    <div class="vgrid">
+      <div class="vfield"><label>Бажаний Ht</label><div class="vfield-row"><input id="calc_tr_pcv_target" type="number" step="0.1" inputmode="decimal" oninput="calcTransfusion()"><span class="unit">%</span></div></div>
+      <div class="vfield"><label>Ht донора</label><div class="vfield-row"><input id="calc_tr_pcv_donor" type="number" step="0.1" inputmode="decimal" placeholder="напр. 40" oninput="calcTransfusion()"><span class="unit">%</span></div></div>
+    </div>
+
+    <div class="calc-result" id="calc_tr_result">
+      <span class="calc-result-label">Об'єм переливання</span>
+      <span class="calc-result-value" id="calc_tr_value">— мл</span>
+    </div>
+    <div class="hint" id="calc_tr_hint" style="display:none;"></div>
+  </div>
+
+  <div class="card calc-block">
+    <h2>Бікарбонат натрію (корекція ацидозу)</h2>
+    <div class="sub">Формула: Дефіцит HCO₃⁻ (мЕкв) = Вага (кг) × 0.3 × |Дефіцит основ (BE)|. Об'єм розчину (мл) = дефіцит / концентрація. Вага береться з вкладки «Пацієнт», дефіцит основ — з аналізу газів крові. Орієнтовний розрахунок, підтверджуйте власним протоколом.</div>
+    <div class="sub" id="calc_hco3_patient_info" style="margin-top:-4px;">—</div>
+
+    <div class="vgrid">
+      <div class="vfield"><label>Дефіцит основ (BE)</label><div class="vfield-row"><input id="calc_hco3_be" type="number" step="0.1" inputmode="decimal" placeholder="напр. -8" oninput="calcBicarb()"><span class="unit">ммоль/л</span></div></div>
+    </div>
+
+    <div class="field" style="margin-top:6px;"><label>Концентрація розчину NaHCO₃</label>
+      <div class="segmented">
+        <button type="button" class="active" id="calc_hco3_conc_84" onclick="setBicarbConc(1)">8.4% · 1 мЕкв/мл</button>
+        <button type="button" id="calc_hco3_conc_42" onclick="setBicarbConc(0.5)">4.2% · 0.5 мЕкв/мл</button>
+      </div>
+      <input type="hidden" id="calc_hco3_conc" value="1">
+    </div>
+
+    <div class="calc-result" id="calc_hco3_result">
+      <span class="calc-result-label">Об'єм розчину</span>
+      <span class="calc-result-value" id="calc_hco3_value">— мл</span>
+    </div>
+    <div class="hint" id="calc_hco3_hint" style="display:none;"></div>
+  </div>
+
+  <div class="card calc-block-placeholder">
+    <h2>Інші розрахунки</h2>
+    <div class="sub">Наступні блоки калькулятора додаватимуться сюди окремими картками — за тим самим принципом.</div>
+  </div>
+
+</div>
+
+<!-- НАЛАШТУВАННЯ -->
+<div class="view" id="view-settings">
+  <div class="card">
+    <h2>Пороги алармів (вітальні показники)</h2>
+    <div class="sub">Межі норми для ЧСС, ЧДР, SpO₂, EtCO₂, MAP і температури — за їх межами показник на вкладці «Вітальні» підсвічується червоним. Окремо для собак і котів.</div>
+    <div class="segmented">
+      <button id="alarmSpDogBtn" onclick="setAlarmSettingsSpecies('Собака')">Собака</button>
+      <button id="alarmSpCatBtn" onclick="setAlarmSettingsSpecies('Кіт')">Кіт</button>
+    </div>
+    <div class="grid2" style="margin-top:10px;">
+      <div class="field"><label>ЧСС, bpm</label><div class="range-row"><input id="alarm_hr_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_hr_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
+      <div class="field"><label>ЧДР, bpm</label><div class="range-row"><input id="alarm_rr_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_rr_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
+      <div class="field"><label>SpO₂, %</label><div class="range-row"><input id="alarm_spo2_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_spo2_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
+      <div class="field"><label>EtCO₂, mmHg</label><div class="range-row"><input id="alarm_etco2_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_etco2_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
+      <div class="field"><label>MAP, mmHg</label><div class="range-row"><input id="alarm_map_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_map_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
+      <div class="field"><label>Температура, °C</label><div class="range-row"><input id="alarm_temp_min" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_temp_max" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"></div></div>
+    </div>
+    <button type="button" class="btn" style="margin-top:10px;" onclick="resetAlarmRangesToDefault()">Скинути до стандартних значень</button>
+  </div>
+  <div class="card">
+    <h2>Розрахунок МАТ (MAP)</h2>
+    <div class="sub">Стосується поточного пацієнта — <span id="set_patient_name">—</span></div>
+    <div class="segmented">
+      <button id="mapModeAutoBtn" onclick="setMapMode('auto')">Автоматично</button>
+      <button id="mapModeManualBtn" onclick="setMapMode('manual')">Вручну</button>
+    </div>
+    <div class="hint">Авто: MAP = ДАТ + (САТ − ДАТ) / 3. Вручну — вводите значення самі.</div>
+  </div>
+  <div class="card">
+    <h2>Додаткові таймери</h2>
+    <div class="sub">Окремі секундоміри з кнопкою «Зафіксувати час» на вкладці «Вітальні» — для декількох втручань чи подій за одну анестезію</div>
+    <div class="segmented">
+      <button id="extraTimersOnBtn" onclick="toggleExtraTimersSetting(true)">Увімкнено</button>
+      <button id="extraTimersOffBtn" onclick="toggleExtraTimersSetting(false)">Вимкнено</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Кольоровий індикатор на кнопці «Зберегти»</h2>
+    <div class="sub">Якщо вимкнено — кнопка залишається завжди зеленою, без підказки скільки часу минуло з останнього запису</div>
+    <div class="segmented">
+      <button id="saveColorOnBtn" onclick="toggleSaveColorSetting(true)">Увімкнено</button>
+      <button id="saveColorOffBtn" onclick="toggleSaveColorSetting(false)">Вимкнено</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Інтервал протоколу запису</h2>
+    <div class="sub">Визначає, коли кнопка «Зберегти запис» стає помаранчевою / червоною, нагадуючи про черговий запис вітальних</div>
+    <div class="segmented">
+      <button id="recordInterval5Btn" onclick="setRecordInterval(5)">5 хв</button>
+      <button id="recordInterval10Btn" onclick="setRecordInterval(10)">10 хв</button>
+    </div>
+    <div class="hint" id="recordIntervalHint">Зелений — до 3 хв, помаранчевий — 3–5 хв, червоний — понад 5 хв з моменту останнього запису.</div>
+  </div>
+  <div class="card">
+    <h2>Обмеження натискань «Зволоження очей»</h2>
+    <div class="sub">Після натискання кнопка блокується. Вона розблоковується не одразу по таймеру, а лише в момент наступного натискання «Зберегти запис» — і тільки якщо на той момент уже минув обраний інтервал з моменту останнього натискання.</div>
+    <div class="segmented">
+      <button id="eyeLubeInterval15Btn" onclick="setEyeLubeInterval(15)">15 хв</button>
+      <button id="eyeLubeInterval30Btn" onclick="setEyeLubeInterval(30)">30 хв</button>
+      <button id="eyeLubeInterval60Btn" onclick="setEyeLubeInterval(60)">60 хв</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Вирівнювання часу запису</h2>
+    <div class="sub">Якщо запис вносите із запізненням (жовта/червона зона), час запису округлюється до найближчого проміжку протоколу (5 або 10 хв), а не фактичного часу внесення. Напр.: попередній запис 15:20, внесли о 15:27 — збережеться 15:25</div>
+    <div class="segmented">
+      <button id="snapGridOnBtn" onclick="toggleSnapGridSetting(true)">Увімкнено</button>
+      <button id="snapGridOffBtn" onclick="toggleSnapGridSetting(false)">Вимкнено</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Автозапуск таймера</h2>
+    <div class="sub">Запускати таймер анестезії одразу при створенні нового пацієнта, чи запускати його вручну пізніше на вкладці «Вітальні»</div>
+    <div class="segmented">
+      <button id="autoStartOnBtn" onclick="toggleAutoStartTimerSetting(true)">Увімкнено</button>
+      <button id="autoStartOffBtn" onclick="toggleAutoStartTimerSetting(false)">Вимкнено</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Анестезіолог за замовчуванням</h2>
+    <div class="sub">Вкажіть один раз — і це ім'я буде автоматично підставлятися у картку кожного нового пацієнта</div>
+    <div class="field"><input id="set_default_doctor" placeholder="напр. Іваненко О.В." oninput="setDefaultAnesthesiologist(this.value)"></div>
+  </div>
+  <div class="card">
+    <h2>Хірурги</h2>
+    <div class="sub">Список для випадаючого меню «Хірург» на вкладці «Пацієнт»</div>
+    <div class="field-row" style="display:flex; gap:8px; margin-bottom:6px;">
+      <input id="new_surgeon_name" placeholder="Прізвище хірурга" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:10px; background:var(--field); color:var(--text); min-height:40px;">
+      <button class="btn drug-add-btn" style="min-height:40px;" onclick="addSurgeon()">+ Додати</button>
+    </div>
+    <div id="surgeonsList"></div>
+  </div>
+  <div class="card">
+    <h2>Оперативні втручання</h2>
+    <div class="sub">Список процедур для вибору на вкладці «Пацієнт» та при створенні нового пацієнта</div>
+    <div class="field-row" style="display:flex; gap:8px; margin-bottom:6px;">
+      <input id="new_procedure_name" placeholder="Назва процедури" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:10px; background:var(--field); color:var(--text); min-height:40px;">
+      <button class="btn drug-add-btn" style="min-height:40px;" onclick="addProcedureType()">+ Додати</button>
+    </div>
+    <div id="proceduresList"></div>
+  </div>
+  <div class="card">
+    <h2>Зберегти файл з даними</h2>
+    <div class="sub">Створює копію цього застосунку у вигляді одного HTML-файлу з уже вбудованими поточними даними. Такий файл можна надіслати (пошта, месенджер, AirDrop) — при відкритті він одразу покаже ці дані, без інтернету й без імпорту.</div>
+    <button class="btn btn-primary btn-block" onclick="exportDataFile()">⬇ Завантажити файл з даними</button>
+    <div class="hint" style="margin-top:8px;">Браузер не вміє перезаписувати вже відкритий файл автоматично — тому щоразу, коли хочете передати актуальні дані, тисніть цю кнопку ще раз і надсилайте новий файл.</div>
+  </div>
+  <div class="card">
+    <h2>Про застосунок</h2>
+    <div class="hint">Дані зберігаються локально на цьому пристрої. Час сесій рахується від реальних міток часу, тому коректно відновлюється при повторному відкритті застосунку.</div>
+  </div>
+</div>
+
+<!-- ДРУК -->
+<div class="view" id="view-print">
+  <div class="card">
+    <h2>Друк / збереження у PDF</h2>
+    <p style="font-size:13px; color:var(--text2); line-height:1.6;">На iPhone: натисніть «Роздрукувати», у вікні друку затисніть й розтягніть прев'ю двома пальцями — з'явиться кнопка «Поділитися» → «Зберегти у Файли» (PDF).</p>
+    <button class="btn btn-primary btn-block" onclick="window.print()">Роздрукувати / зберегти PDF</button>
+  </div>
+  <div class="card">
+    <h2>Додати на головний екран</h2>
+    <p style="font-size:13px; color:var(--text2); line-height:1.6;">У Safari натисніть «Поділитися» → «На екран Домівки». Застосунок відкриватиметься на весь екран, дані зберігаються локально на пристрої.</p>
+  </div>
+</div>
+
+<div class="tabbar no-print">
+  <button class="active" data-view="patient" onclick="showView('patient')"><span class="dot">П</span>Пацієнт</button>
+  <button data-view="labs" onclick="showView('labs')"><span class="dot">🧪</span>Дослідж.</button>
+  <button data-view="drugs" onclick="showView('drugs')"><span class="dot">Д</span>Дози</button>
+  <button data-view="vitals" onclick="showView('vitals')"><span class="dot">В</span>Вітальні</button>
+  <button data-view="chart" onclick="showView('chart')"><span class="dot">Г</span>Графік</button>
+  <button data-view="calc" onclick="showView('calc')"><span class="dot">🧮</span>Калькул.</button>
+  <button data-view="settings" onclick="showView('settings')"><span class="dot">⚙</span>Налашт.</button>
+  <button data-view="print" onclick="showView('print')"><span class="dot">⎙</span>Друк</button>
+</div>
+</div><!-- /appWorkspace -->
+
+<!-- MODALS -->
+<div class="modal-bg no-print" id="confirmModal-bg" onclick="if(event.target===this) closeModal('confirmModal')">
+  <div class="modal" style="position:relative;">
+    <button class="close-x" onclick="closeModal('confirmModal')">✕</button>
+    <h3 id="confirmModalText">Ви впевнені?</h3>
+    <div class="btn-row">
+      <button class="btn" style="flex:1" onclick="closeModal('confirmModal')">Скасувати</button>
+      <button class="btn btn-danger" style="flex:1" onclick="runConfirmAction()">Видалити</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg no-print" id="procedureModal-bg" onclick="if(event.target===this) closeModal('procedureModal')">
+  <div class="picker-modal" style="position:relative;">
+    <div class="picker-modal-head"><button onclick="closeModal('procedureModal')">Закрити</button></div>
+    <h3>Процедура</h3>
+    <div class="picker-search">
+      <span class="ic">🔍</span>
+      <input id="procedureSearch" placeholder="Пошук процедури" oninput="renderProcedurePicker()">
+      <button class="clr" id="procedureSearchClr" style="display:none;" onclick="document.getElementById('procedureSearch').value=''; renderProcedurePicker();">✕</button>
+    </div>
+    <div class="picker-list" id="procedurePickerList"></div>
+  </div>
+</div>
+
+<div class="modal-bg no-print" id="newPatientModal-bg" onclick="if(event.target===this) closeModal('newPatientModal')">
+  <div class="modal" style="position:relative;">
+    <button class="close-x" onclick="closeModal('newPatientModal')">✕</button>
+    <h3>Новий пацієнт</h3>
+    <div class="field"><label>Кличка пацієнта *</label><input id="np_name" placeholder="Введіть кличку пацієнта"></div>
+    <div class="field"><label>Вид *</label>
+      <select id="np_species">
+        <option value="">Оберіть вид</option>
+        <option>Собака</option><option>Кіт</option><option>Інше</option>
+      </select>
+    </div>
+    <div class="field"><label>Вага, кг *</label><input id="np_weight" type="number" step="0.1" inputmode="decimal" placeholder="Введіть вагу в кг"></div>
+    <div class="field"><label>Процедура *</label>
+      <button type="button" class="field-picker-btn" id="np_procedure_btn" onclick="openProcedurePicker('newPatient')">
+        <span id="np_procedure_label" class="ph">Пошук та вибір процедури</span><span class="chev">›</span>
+      </button>
+    </div>
+    <div class="btn-row" style="margin-top:6px;">
+      <button class="btn" style="flex:1;" onclick="closeModal('newPatientModal')">Скасувати</button>
+      <button class="btn btn-primary" id="np_submit_btn" style="flex:1;" onclick="createPatient()">Почати анестезію</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg no-print" id="addTimerModal-bg" onclick="if(event.target===this) closeModal('addTimerModal')">
+  <div class="modal" style="position:relative;">
+    <button class="close-x" onclick="closeModal('addTimerModal')">✕</button>
+    <h3>Новий таймер</h3>
+    <div class="field"><label>Назва</label><input id="et_name" placeholder="напр. Джгут, Розтин, Гемостаз"></div>
+    <button class="btn btn-primary btn-block" onclick="addExtraTimer()">Почати таймер</button>
+  </div>
+</div>
+
+<div class="modal-bg no-print" id="addDrugModal-bg" onclick="if(event.target===this) closeModal('addDrugModal')">
+  <div class="modal" style="position:relative;">
+    <button class="close-x" onclick="closeModal('addDrugModal')">✕</button>
+    <h3>Додати препарат до списку</h3>
+    <div class="field"><label>Назва</label><input id="nd_name" placeholder="напр. Тілетамін"></div>
+    <div class="grid2">
+      <div class="field"><label>Доза мін, мг/кг</label><input id="nd_min" type="number" step="0.001" inputmode="decimal"></div>
+      <div class="field"><label>Доза макс, мг/кг</label><input id="nd_max" type="number" step="0.001" inputmode="decimal"></div>
+    </div>
+    <div class="field"><label>Типова концентрація, мг/мл</label><input id="nd_conc" type="number" step="0.1" inputmode="decimal"></div>
+    <button class="btn btn-primary btn-block" onclick="addCustomDrug()">Додати</button>
+  </div>
+</div>
+
+<div class="modal-bg no-print" id="logDrugModal-bg" onclick="if(event.target===this) closeModal('logDrugModal')">
+  <div class="modal" style="position:relative;">
+    <button class="close-x" onclick="closeModal('logDrugModal')">✕</button>
+    <h3>Записати введення: <span id="ld_drugName"></span></h3>
+    <div class="grid2">
+      <div class="field"><label>Час</label><input id="ld_time" type="time"></div>
+      <div class="field"><label>Шлях</label>
+        <select id="ld_route"><option>IV</option><option>IM</option><option>SC</option><option>Інгаляційно</option><option>Інше</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Доза (з калькулятора)</label><input id="ld_dose" readonly style="background:var(--field); color:var(--text2);"></div>
+    <button class="btn btn-primary btn-block" onclick="confirmLogDrug()">Зберегти в журнал</button>
+  </div>
+</div>
+
+<script>
+const DEFAULT_ALARM_RANGES = {
+  'Собака': { hr:[60,140], rr:[8,20], spo2:[95,100], etco2:[35,45], sys:[90,160], dia:[50,100], map:[60,120], temp:[36.5,39.0] },
+  'Кіт':    { hr:[120,180], rr:[8,30], spo2:[95,100], etco2:[35,45], sys:[90,160], dia:[50,100], map:[60,120], temp:[36.5,39.0] }
+};
+const ALARM_FIELD_KEYS = ['hr','rr','spo2','etco2','map','temp'];
+const DEFAULT_DRUGS = [
+  {id:'acepromazine', name:'Ацепромазин', min:0.01, max:0.05, conc:10},
+  {id:'ketamine', name:'Кетамін', min:2, max:10, conc:100},
+  {id:'propofol', name:'Пропофол', min:4, max:6, conc:10},
+  {id:'dexmed', name:'Дексмедетомідин', min:0.005, max:0.01, conc:0.5},
+  {id:'midazolam', name:'Мідазолам', min:0.1, max:0.3, conc:5},
+  {id:'butorphanol', name:'Буторфанол', min:0.2, max:0.4, conc:10},
+  {id:'atropine', name:'Атропін', min:0.02, max:0.04, conc:1},
+  {id:'glycopyrrolate', name:'Гліколірат', min:0.005, max:0.01, conc:0.2},
+  {id:'lidocaine', name:'Лідокаїн (болюс)', min:1, max:2, conc:20},
+  {id:'tramadol', name:'Трамадол', min:2, max:4, conc:50},
+  {id:'meloxicam', name:'Мелоксикам', min:0.1, max:0.2, conc:5},
+];
+
+const DEFAULT_PROCEDURES = ['Абдомінальна хірургія','Кастрація/стерилізація','COHAT (стоматологічна санація)','Пластика грижі','Ушивання рани','Видалення новоутворення','Остеосинтез перелому','Ортопедія — інше','TPLO','Кесарів розтин','Видалення стороннього тіла','Ендоскопія'];
+
+let DB = JSON.parse(localStorage.getItem('vetAnesthDB') || '{"patients":[],"current":null,"settings":{"extraTimersEnabled":false,"recordInterval":5}}');
+if(!DB.patients) DB.patients = [];
+if(!DB.settings) DB.settings = {extraTimersEnabled:false, recordInterval:5, snapToGrid:false, defaultAnesthesiologist:'', surgeons:[], saveColorEnabled:true, autoStartTimer:true, eyeLubeInterval:30};
+if(!DB.settings.recordInterval) DB.settings.recordInterval = 5;
+if(!DB.settings.eyeLubeInterval) DB.settings.eyeLubeInterval = 30;
+if(DB.settings.snapToGrid === undefined) DB.settings.snapToGrid = false;
+if(DB.settings.defaultAnesthesiologist === undefined) DB.settings.defaultAnesthesiologist = '';
+if(!DB.settings.surgeons) DB.settings.surgeons = [];
+if(DB.settings.saveColorEnabled === undefined) DB.settings.saveColorEnabled = true;
+if(DB.settings.autoStartTimer === undefined) DB.settings.autoStartTimer = true;
+if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
+if(!DB.settings.alarmRanges) DB.settings.alarmRanges = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES));
+Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp]) DB.settings.alarmRanges[sp] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[sp])); });
+
+function save(){ localStorage.setItem('vetAnesthDB', JSON.stringify(DB)); }
+function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
+
+function newPatientObj(name){
+  return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'',
+    date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
+    sessionStart:null, sessionEnd:null, extraTimers:[], lastVitalSaveAt:null, labs:{},
+    drugConc: {}, vitals: [], drugLog: [], customDrugs: [], eyeLubeCount:0, eyeLubeLastPressAt:null, eyeLubeLocked:false, pendingEyeLube:0 };
+}
+
+/* ---- pre-anesthesia lab checklist buttons ---- */
+/* cycle per button: none -> todo (yellow, "потрібно") -> done (green, "зроблено") -> none */
+const LAB_TESTS = [
+  {id:'zak', label:'ЗАК'},
+  {id:'bh',  label:'БХ'},
+  {id:'coag', label:'Коагулограма'},
+  {id:'electro', label:'Електроліти'},
+  {id:'uzd_cp', label:'УЗД ЧП'},
+  {id:'echo_kg', label:'ЕХО КГ'},
+  {id:'dirofilariosis', label:'Дирофіляріоз', species:['Собака']},
+  {id:'parvovirus', label:'Парвовірус', species:['Собака']},
+  {id:'mycoplasma', label:'Мікоплазма', species:['Собака']},
+  {id:'felv', label:'Лейкоз', species:['Кіт']},
+  {id:'fiv', label:'Імунодефіцит', species:['Кіт']},
+  {id:'panleukopenia', label:'Панлейкопенія', species:['Кіт']}
+];
+function activeLabTests(){
+  const p = currentPatient();
+  const sp = p ? p.species : null;
+  return LAB_TESTS.filter(t => !t.species || t.species.includes(sp));
+}
+function cycleLab(id){
+  const p = currentPatient(); if(!p) return;
+  if(!p.labs) p.labs = {};
+  const cur = p.labs[id] || 'none';
+  const next = cur === 'none' ? 'todo' : cur === 'todo' ? 'done' : 'none';
+  p.labs[id] = next;
+  save(); renderLabButtons();
+}
+function markAllLabsDone(){
+  const p = currentPatient(); if(!p) return;
+  if(!p.labs) p.labs = {};
+  activeLabTests().forEach(t=>{ if((p.labs[t.id] || 'none') === 'todo') p.labs[t.id] = 'done'; });
+  save(); renderLabButtons();
+}
+function renderLabButtons(){
+  const wrap = document.getElementById('labButtons');
+  if(!wrap) return;
+  const p = currentPatient();
+  wrap.innerHTML = activeLabTests().map(t=>{
+    const st = p && p.labs ? (p.labs[t.id] || 'none') : 'none';
+    const cls = st === 'todo' ? 'st-todo' : st === 'done' ? 'st-done' : '';
+    const sub = st === 'todo' ? 'потрібно' : st === 'done' ? 'зроблено' : '—';
+    return `<button type="button" class="lab-btn ${cls}" onclick="cycleLab('${t.id}')"><span>${escapeHtml(t.label)}</span><small>${sub}</small></button>`;
+  }).join('');
+}
+
+function createPatient(){
+  const nameEl = document.getElementById('np_name');
+  const speciesEl = document.getElementById('np_species');
+  const weightEl = document.getElementById('np_weight');
+
+  const name = nameEl.value.trim();
+  const species = speciesEl.value;
+  const weight = weightEl.value.trim();
+  const procedure = npSelectedProcedure.trim();
+
+  if(!name || !species || !weight || !procedure){
+    alert('Будь ласка, заповніть усі обов\'язкові поля (позначені *)');
+    return;
+  }
+
+  const p = newPatientObj(name);
+  p.species = species;
+  p.weight = weight;
+  p.procedure = procedure;
+  p.doctor = DB.settings.defaultAnesthesiologist || '';
+  if(autoStartTimerEnabled()){
+    p.sessionStart = Date.now();
+    p.sessionEnd = null;
+  }
+  DB.patients.push(p); DB.current = p.id; save();
+
+  nameEl.value=''; speciesEl.value=''; weightEl.value='';
+  npSelectedProcedure = '';
+  document.getElementById('np_procedure_label').textContent = 'Пошук та вибір процедури';
+  document.getElementById('np_procedure_label').classList.add('ph');
+  closeModal('newPatientModal');
+  showWorkspace();
+  showView('vitals');
+  renderAll();
+}
+
+function switchPatient(id){ DB.current = id; save(); renderAll(); }
+
+function showHome(){
+  document.getElementById('appWorkspace').style.display = 'none';
+  document.getElementById('homeScreen').style.display = 'block';
+  renderPatientList();
+}
+function showWorkspace(){
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('appWorkspace').style.display = 'block';
+}
+
+const MONTHS_GEN = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+const MONTHS_SHORT = ['січ','лют','бер','квіт','трав','черв','лип','серп','вер','жовт','лист','груд'];
+function formatDateSep(ts){ const d=new Date(ts); return d.getDate()+' '+MONTHS_GEN[d.getMonth()]+' '+d.getFullYear(); }
+function formatDateShort(ts){ const d=new Date(ts); const hh=String(d.getHours()).padStart(2,'0'), mm=String(d.getMinutes()).padStart(2,'0'); return d.getDate()+' '+MONTHS_SHORT[d.getMonth()]+' '+d.getFullYear()+', '+hh+':'+mm; }
+function formatDurationShort(ms){ const totalMin = Math.max(0,Math.floor(ms/60000)); const h = Math.floor(totalMin/60), m = totalMin%60; return h>0 ? (h+' год '+m+' хв') : (m+' хв'); }
+
+function selectPatientFromList(id){
+  switchPatient(id);
+  showWorkspace();
+  showView('patient');
+}
+function renderPatientList(){
+  const q = (document.getElementById('patientSearchInput').value || '').trim().toLowerCase();
+  const wrap = document.getElementById('patientListItems');
+  let list = DB.patients.slice().sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+  if(q) list = list.filter(p => (p.name||'').toLowerCase().includes(q));
+  if(!list.length){ wrap.innerHTML = '<div class="empty">Пацієнтів не знайдено</div>'; return; }
+  let html = ''; let lastDateKey = null;
+  list.forEach(p=>{
+    const ts = p.createdAt || Date.now();
+    const d = new Date(ts);
+    const dateKey = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+    if(dateKey !== lastDateKey){ html += `<div class="date-sep">${formatDateSep(ts)}</div>`; lastDateKey = dateKey; }
+    const durMs = p.sessionStart ? ((p.sessionEnd || Date.now()) - p.sessionStart) : null;
+    const durLabel = durMs!=null ? formatDurationShort(durMs) : '—';
+    const meta = [p.species||'—', p.weight ? p.weight+' кг' : '', p.procedure||''].filter(Boolean).join(' · ');
+    const current = p.id === DB.current ? ' is-current' : '';
+    html += `<div class="patient-item${current}" onclick="selectPatientFromList('${p.id}')">
+      <div class="patient-item-icon">🐾</div>
+      <div class="patient-item-body">
+        <b>${escapeHtml(p.name||'—')}</b>
+        <div class="patient-item-meta">${escapeHtml(meta)}</div>
+        <div class="patient-item-foot"><span>📅 ${formatDateShort(ts)}</span><span>⏱ ${durLabel}</span></div>
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function deletePatient(){
+  if(!currentPatient()) return;
+  showConfirm('Видалити цього пацієнта і всі його записи? Це незворотньо.', ()=>{
+    DB.patients = DB.patients.filter(p=>p.id!==DB.current);
+    if(!DB.patients.length){ const np = newPatientObj('Пацієнт 1'); DB.patients.push(np); DB.current = np.id; }
+    else { DB.current = DB.patients[0].id; }
+    save(); renderAll();
+  });
+}
+
+let pendingConfirmAction = null;
+function showConfirm(text, action){
+  document.getElementById('confirmModalText').textContent = text;
+  pendingConfirmAction = action;
+  document.getElementById('confirmModal-bg').classList.add('open');
+}
+function runConfirmAction(){
+  document.getElementById('confirmModal-bg').classList.remove('open');
+  if(pendingConfirmAction) pendingConfirmAction();
+  pendingConfirmAction = null;
+}
+
+function saveField(field, value){
+  const p = currentPatient(); if(!p) return;
+  p[field] = value; save(); renderHeader(); renderDrugs(); renderSession();
+  if(field === 'species') renderLabButtons();
+}
+
+function setMapMode(mode){
+  const p = currentPatient(); if(!p) return;
+  p.mapMode = mode; save(); renderSettingsUI();
+  const mapTagEl = document.getElementById('mapTag');
+  if(mapTagEl) mapTagEl.textContent = mode === 'auto' ? 'авто' : 'вручну';
+  recalcMap();
+  updateVitalAlarms();
+}
+
+function extraTimersEnabled(){ return !!(DB.settings && DB.settings.extraTimersEnabled); }
+function toggleExtraTimersSetting(on){
+  DB.settings.extraTimersEnabled = on; save();
+  renderSettingsUI(); renderExtraTimersSection();
+}
+
+function recordIntervalMinutes(){ return (DB.settings && DB.settings.recordInterval) || 5; }
+function setRecordInterval(min){
+  DB.settings.recordInterval = min; save();
+  renderSettingsUI(); updateSaveBarTimer();
+}
+
+function saveColorEnabled(){ return !!(DB.settings && DB.settings.saveColorEnabled); }
+function toggleSaveColorSetting(on){
+  DB.settings.saveColorEnabled = on; save();
+  renderSettingsUI(); updateSaveBarTimer();
+}
+
+function autoStartTimerEnabled(){ return DB.settings ? DB.settings.autoStartTimer !== false : true; }
+function toggleAutoStartTimerSetting(on){
+  DB.settings.autoStartTimer = on; save(); renderSettingsUI();
+}
+function snapToGridEnabled(){ return !!(DB.settings && DB.settings.snapToGrid); }
+function toggleSnapGridSetting(on){
+  DB.settings.snapToGrid = on; save(); renderSettingsUI();
+}
+
+/* rounds a HH:MM entry time to the nearest protocol grid slot (multiples of the
+   interval, anchored to the last saved vital or the session start) */
+function snapTimeToGrid(rawTimeStr, p){
+  const last = getLastVital();
+  let refStr;
+  if(last && last.time) refStr = last.time;
+  else if(p && p.sessionStart) refStr = nowTimeFrom(p.sessionStart);
+  else return rawTimeStr;
+  const toMin = (s)=>{ const parts = (s||'').split(':'); const h = parseInt(parts[0],10), m = parseInt(parts[1],10); if(isNaN(h)||isNaN(m)) return null; return h*60+m; };
+  const refMin = toMin(refStr), rawMin = toMin(rawTimeStr);
+  if(refMin===null || rawMin===null) return rawTimeStr;
+  let elapsed = rawMin - refMin;
+  if(elapsed < 0) elapsed += 24*60;
+  const interval = recordIntervalMinutes();
+  const steps = Math.round(elapsed / interval);
+  if(steps <= 0) return rawTimeStr;
+  const snappedMin = (refMin + steps*interval) % (24*60);
+  const hh = String(Math.floor(snappedMin/60)).padStart(2,'0');
+  const mm = String(snappedMin%60).padStart(2,'0');
+  return hh+':'+mm;
+}
+
+function renderSettingsUI(){
+  const p = currentPatient();
+  const mode = p ? p.mapMode : 'auto';
+  document.getElementById('mapModeAutoBtn').classList.toggle('active', mode==='auto');
+  document.getElementById('mapModeManualBtn').classList.toggle('active', mode==='manual');
+  document.getElementById('set_patient_name').textContent = p ? p.name : '—';
+  const on = extraTimersEnabled();
+  document.getElementById('extraTimersOnBtn').classList.toggle('active', on);
+  document.getElementById('extraTimersOffBtn').classList.toggle('active', !on);
+  const onColor = saveColorEnabled();
+  document.getElementById('saveColorOnBtn').classList.toggle('active', onColor);
+  document.getElementById('saveColorOffBtn').classList.toggle('active', !onColor);
+  const interval = recordIntervalMinutes();
+  document.getElementById('recordInterval5Btn').classList.toggle('active', interval===5);
+  document.getElementById('recordInterval10Btn').classList.toggle('active', interval===10);
+  const eyeInterval = eyeLubeIntervalMinutes();
+  document.getElementById('eyeLubeInterval15Btn').classList.toggle('active', eyeInterval===15);
+  document.getElementById('eyeLubeInterval30Btn').classList.toggle('active', eyeInterval===30);
+  document.getElementById('eyeLubeInterval60Btn').classList.toggle('active', eyeInterval===60);
+  const onAutoStart = autoStartTimerEnabled();
+  document.getElementById('autoStartOnBtn').classList.toggle('active', onAutoStart);
+  document.getElementById('autoStartOffBtn').classList.toggle('active', !onAutoStart);
+  const on2 = snapToGridEnabled();
+  document.getElementById('snapGridOnBtn').classList.toggle('active', on2);
+  document.getElementById('snapGridOffBtn').classList.toggle('active', !on2);
+  const amberStart = Math.round(interval*0.6*10)/10, redStart = interval;
+  document.getElementById('recordIntervalHint').textContent =
+    `Зелений — до ${amberStart} хв, помаранчевий — ${amberStart}–${redStart} хв, червоний — понад ${redStart} хв з моменту останнього запису.`;
+  const defDoctorEl = document.getElementById('set_default_doctor');
+  if(defDoctorEl && document.activeElement !== defDoctorEl) defDoctorEl.value = DB.settings.defaultAnesthesiologist || '';
+  renderSurgeonsSettings();
+  renderProceduresSettings();
+  renderAlarmRangesUI();
+}
+
+function setDefaultAnesthesiologist(value){
+  DB.settings.defaultAnesthesiologist = value; save();
+}
+
+/* ---- налаштування: пороги алармів вітальних показників (окремо собака/кіт) ---- */
+let alarmSettingsSpecies = 'Собака'; // локальний UI-стан вкладки редагування у Налаштуваннях, не пов'язаний з пацієнтом
+function setAlarmSettingsSpecies(sp){
+  alarmSettingsSpecies = sp;
+  renderAlarmRangesUI();
+}
+function renderAlarmRangesUI(){
+  const dogBtn = document.getElementById('alarmSpDogBtn');
+  const catBtn = document.getElementById('alarmSpCatBtn');
+  if(!dogBtn || !catBtn) return;
+  dogBtn.classList.toggle('active', alarmSettingsSpecies==='Собака');
+  catBtn.classList.toggle('active', alarmSettingsSpecies==='Кіт');
+  const r = DB.settings.alarmRanges[alarmSettingsSpecies] || DEFAULT_ALARM_RANGES[alarmSettingsSpecies];
+  ALARM_FIELD_KEYS.forEach(k=>{
+    const minEl = document.getElementById('alarm_'+k+'_min');
+    const maxEl = document.getElementById('alarm_'+k+'_max');
+    if(minEl) minEl.value = r[k][0];
+    if(maxEl) maxEl.value = r[k][1];
+  });
+}
+function saveAlarmRange(){
+  if(!DB.settings.alarmRanges[alarmSettingsSpecies]) DB.settings.alarmRanges[alarmSettingsSpecies] = {};
+  ALARM_FIELD_KEYS.forEach(k=>{
+    const minEl = document.getElementById('alarm_'+k+'_min');
+    const maxEl = document.getElementById('alarm_'+k+'_max');
+    const minV = parseFloat(minEl.value);
+    const maxV = parseFloat(maxEl.value);
+    if(!isNaN(minV) && !isNaN(maxV)) DB.settings.alarmRanges[alarmSettingsSpecies][k] = [minV, maxV];
+  });
+  save();
+  updateVitalAlarms();
+}
+function resetAlarmRangesToDefault(){
+  DB.settings.alarmRanges[alarmSettingsSpecies] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[alarmSettingsSpecies]));
+  save();
+  renderAlarmRangesUI();
+  updateVitalAlarms();
+}
+
+function addSurgeon(){
+  const input = document.getElementById('new_surgeon_name');
+  const name = (input.value || '').trim();
+  if(!name) return;
+  if(!DB.settings.surgeons) DB.settings.surgeons = [];
+  if(!DB.settings.surgeons.includes(name)) DB.settings.surgeons.push(name);
+  save();
+  input.value = '';
+  renderSurgeonsSettings();
+  renderSurgeonOptions();
+}
+
+function removeSurgeon(idx){
+  DB.settings.surgeons.splice(idx,1);
+  save();
+  renderSurgeonsSettings();
+  renderSurgeonOptions();
+}
+
+let editingSurgeonIdx = null;
+function startEditSurgeon(idx){ editingSurgeonIdx = idx; renderSurgeonsSettings(); }
+function cancelEditSurgeon(){ editingSurgeonIdx = null; renderSurgeonsSettings(); }
+function saveEditSurgeon(idx){
+  const input = document.getElementById('edit_surgeon_input_'+idx);
+  const newName = (input.value || '').trim();
+  if(!newName) return;
+  const oldName = DB.settings.surgeons[idx];
+  DB.settings.surgeons[idx] = newName;
+  DB.patients.forEach(p=>{ if(p.surgeon === oldName) p.surgeon = newName; });
+  save();
+  editingSurgeonIdx = null;
+  renderSurgeonsSettings();
+  renderSurgeonOptions();
+}
+
+function renderSurgeonsSettings(){
+  const wrap = document.getElementById('surgeonsList');
+  if(!wrap) return;
+  const list = DB.settings.surgeons || [];
+  if(!list.length){ wrap.innerHTML = '<div class="hint">Список порожній — додайте хірурга вище</div>'; return; }
+  wrap.innerHTML = list.map((name,i)=>{
+    if(editingSurgeonIdx === i){
+      return `<div class="list-row" style="gap:8px;">
+        <input id="edit_surgeon_input_${i}" value="${escapeHtml(name)}" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:8px; background:var(--field); color:var(--text); min-height:36px;">
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="saveEditSurgeon(${i})">✓</button>
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="cancelEditSurgeon()">✕</button>
+      </div>`;
+    }
+    return `<div class="list-row">
+      <span class="name">${escapeHtml(name)}</span>
+      <span style="display:flex; gap:6px;">
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="startEditSurgeon(${i})">✎</button>
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="removeSurgeon(${i})">✕</button>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function renderSurgeonOptions(){
+  const sel = document.getElementById('p_surgeon');
+  if(!sel) return;
+  const p = currentPatient();
+  const current = p ? (p.surgeon || '') : '';
+  const list = DB.settings.surgeons || [];
+  sel.innerHTML = '<option value="">—</option>' + list.map(name=>`<option value="${escapeHtml(name)}" ${name===current?'selected':''}>${escapeHtml(name)}</option>`).join('');
+}
+
+/* ---- Procedures: settings management (Налаштування → Оперативні втручання) ---- */
+function addProcedureType(){
+  const input = document.getElementById('new_procedure_name');
+  const name = (input.value || '').trim();
+  if(!name) return;
+  if(!DB.settings.procedures) DB.settings.procedures = [];
+  if(!DB.settings.procedures.includes(name)) DB.settings.procedures.push(name);
+  save();
+  input.value = '';
+  renderProceduresSettings();
+}
+
+function removeProcedureType(idx){
+  DB.settings.procedures.splice(idx,1);
+  save();
+  renderProceduresSettings();
+}
+
+let editingProcedureIdx = null;
+function startEditProcedure(idx){ editingProcedureIdx = idx; renderProceduresSettings(); }
+function cancelEditProcedure(){ editingProcedureIdx = null; renderProceduresSettings(); }
+function saveEditProcedure(idx){
+  const input = document.getElementById('edit_procedure_input_'+idx);
+  const newName = (input.value || '').trim();
+  if(!newName) return;
+  const oldName = DB.settings.procedures[idx];
+  DB.settings.procedures[idx] = newName;
+  DB.patients.forEach(p=>{ if(p.procedure === oldName) p.procedure = newName; });
+  save();
+  editingProcedureIdx = null;
+  renderProceduresSettings();
+}
+
+function renderProceduresSettings(){
+  const wrap = document.getElementById('proceduresList');
+  if(!wrap) return;
+  const list = DB.settings.procedures || [];
+  if(!list.length){ wrap.innerHTML = '<div class="hint">Список порожній — додайте процедуру вище</div>'; return; }
+  wrap.innerHTML = list.map((name,i)=>{
+    if(editingProcedureIdx === i){
+      return `<div class="list-row" style="gap:8px;">
+        <input id="edit_procedure_input_${i}" value="${escapeHtml(name)}" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:8px; background:var(--field); color:var(--text); min-height:36px;">
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="saveEditProcedure(${i})">✓</button>
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="cancelEditProcedure()">✕</button>
+      </div>`;
+    }
+    return `<div class="list-row">
+      <span class="name">${escapeHtml(name)}</span>
+      <span style="display:flex; gap:6px;">
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="startEditProcedure(${i})">✎</button>
+        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="removeProcedureType(${i})">✕</button>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+/* ---- Procedures: picker modal (used on Пацієнт page and in New Patient modal) ---- */
+let procedurePickerTarget = 'patient'; // 'patient' | 'newPatient'
+let npSelectedProcedure = '';
+
+function openProcedurePicker(target){
+  procedurePickerTarget = target;
+  document.getElementById('procedureSearch').value = '';
+  openModal('procedureModal');
+  renderProcedurePicker();
+  setTimeout(()=>{ const el = document.getElementById('procedureSearch'); if(el) el.focus(); }, 250);
+}
+
+function currentProcedureValue(){
+  if(procedurePickerTarget === 'newPatient') return npSelectedProcedure;
+  const p = currentPatient();
+  return p ? (p.procedure || '') : '';
+}
+
+function selectProcedure(name){
+  if(procedurePickerTarget === 'newPatient'){
+    npSelectedProcedure = name;
+    const lbl = document.getElementById('np_procedure_label');
+    lbl.textContent = name; lbl.classList.remove('ph');
+  } else {
+    saveField('procedure', name);
+    const lbl = document.getElementById('p_procedure_label');
+    lbl.textContent = name; lbl.classList.remove('ph');
+  }
+  closeModal('procedureModal');
+}
+
+function addProcedureFromSearch(){
+  const q = (document.getElementById('procedureSearch').value || '').trim();
+  if(!q) return;
+  if(!DB.settings.procedures) DB.settings.procedures = [];
+  if(!DB.settings.procedures.includes(q)) DB.settings.procedures.push(q);
+  save();
+  renderProceduresSettings();
+  selectProcedure(q);
+}
+
+function renderProcedurePicker(){
+  const q = (document.getElementById('procedureSearch').value || '').trim().toLowerCase();
+  const clrBtn = document.getElementById('procedureSearchClr');
+  if(clrBtn) clrBtn.style.display = q ? 'block' : 'none';
+  const list = (DB.settings.procedures || []).filter(name => name.toLowerCase().includes(q));
+  const current = currentProcedureValue();
+  const wrap = document.getElementById('procedurePickerList');
+  let html = '';
+  if(list.length){
+    html += list.map(name=>{
+      const isSel = name === current;
+      return `<button type="button" class="picker-row" onclick="selectProcedure('${escapeHtml(name).replace(/'/g,"\\'")}')"><span>${escapeHtml(name)}</span>${isSel?'<span class="ck">✓</span>':''}</button>`;
+    }).join('');
+  } else {
+    html += `<div class="picker-empty">Немає збігів</div>`;
+  }
+  if(q && !(DB.settings.procedures||[]).some(name=>name.toLowerCase()===q)){
+    html += `<div style="padding:6px 10px;"><button type="button" class="picker-add-row" onclick="addProcedureFromSearch()"><span class="plus">+</span><span>Додати «${escapeHtml(q)}»</span></button></div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+
+function updateSaveBarTimer(){
+  const btn = document.getElementById('vitalsSaveBtn');
+  const timeEl = document.getElementById('vitalsSaveTimer');
+  if(!btn || !timeEl) return;
+  const p = currentPatient();
+  btn.classList.remove('st-green','st-amber','st-red');
+  if(!p || !p.sessionStart || p.sessionEnd){
+    timeEl.textContent = ''; timeEl.style.display = 'none';
+    return;
+  }
+  const ref = p.lastVitalSaveAt || p.sessionStart;
+  const elapsedMin = Math.floor((Date.now() - ref) / 60000);
+  if(!saveColorEnabled()){
+    timeEl.textContent = ''; timeEl.style.display = 'none';
+    return;
+  }
+  timeEl.style.display = 'inline-block';
+  timeEl.textContent = elapsedMin + ' хв';
+  const interval = recordIntervalMinutes();
+  const amberStart = interval*0.6, redStart = interval;
+  let cls = 'st-green';
+  if(elapsedMin >= redStart) cls = 'st-red';
+  else if(elapsedMin >= amberStart) cls = 'st-amber';
+  btn.classList.add(cls);
+}
+
+function renderHeader(){
+  const sel = document.getElementById('patientSelect');
+  sel.innerHTML = DB.patients.map(p=>`<option value="${p.id}" ${p.id===DB.current?'selected':''}>${escapeHtml(p.name)}</option>`).join('') || '<option>—</option>';
+  const p = currentPatient();
+  document.getElementById('hdrPatientName').textContent = p ? p.name : 'Немає пацієнта';
+  document.getElementById('hdrPatientMeta').textContent = p ? [p.species, p.weight?p.weight+' кг':'', p.date].filter(Boolean).join(' · ') : 'Створіть нового пацієнта (+)';
+}
+
+function fillPatientForm(){
+  const p = currentPatient();
+  const map = {p_name:'name',p_owner:'owner',p_phone:'phone',p_species:'species',p_breed:'breed',p_weight:'weight',p_hct:'hct',p_age:'age',p_sex:'sex',p_date:'date',p_doctor:'doctor',p_notes:'preNotes'};
+  Object.entries(map).forEach(([elId, field])=>{
+    const el = document.getElementById(elId);
+    if(el) el.value = p ? (p[field] || '') : '';
+  });
+  const procLbl = document.getElementById('p_procedure_label');
+  if(procLbl){
+    const proc = p ? (p.procedure || '') : '';
+    procLbl.textContent = proc || 'Оберіть процедуру';
+    procLbl.classList.toggle('ph', !proc);
+  }
+  document.getElementById('drugWeightLabel').textContent = p && p.weight ? (p.weight+' кг') : '— кг (вкажіть на вкладці «Пацієнт»)';
+  renderLabButtons();
+}
+
+function allDrugs(){
+  const p = currentPatient();
+  const custom = p ? p.customDrugs : [];
+  return DEFAULT_DRUGS.concat(custom);
+}
+
+function renderDrugs(){
+  const p = currentPatient();
+  const list = document.getElementById('drugList');
+  if(!p){ list.innerHTML = '<div class="empty">Створіть пацієнта</div>'; return; }
+  const weight = parseFloat(p.weight) || 0;
+  list.innerHTML = allDrugs().map(d=>{
+    const conc = p.drugConc[d.id] !== undefined ? p.drugConc[d.id] : d.conc;
+    const doseMinMg = (d.min*weight), doseMaxMg = (d.max*weight);
+    const volMin = conc ? (doseMinMg/conc) : 0;
+    const volMax = conc ? (doseMaxMg/conc) : 0;
+    return `<div class="drug-row">
+      <div><div class="drug-name">${escapeHtml(d.name)}</div><div class="drug-range">${d.min}–${d.max} мг/кг</div></div>
+      <input type="number" step="0.01" inputmode="decimal" value="${conc || ''}" placeholder="мг/мл" onchange="setConc('${d.id}', this.value)">
+      <button class="btn drug-add-btn" onclick="promptLog('${d.id}')">Ввести</button>
+      <div class="drug-result">
+        <span>${weight? doseMinMg.toFixed(2)+'–'+doseMaxMg.toFixed(2)+' мг' : '— мг'}</span>
+        <span>${weight && conc ? volMin.toFixed(2)+'–'+volMax.toFixed(2)+' мл' : '— мл'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setConc(drugId, value){
+  const p = currentPatient(); if(!p) return;
+  p.drugConc[drugId] = parseFloat(value) || 0;
+  save(); renderDrugs();
+}
+
+function addCustomDrug(){
+  const p = currentPatient(); if(!p) return;
+  const name = document.getElementById('nd_name').value.trim();
+  const min = parseFloat(document.getElementById('nd_min').value) || 0;
+  const max = parseFloat(document.getElementById('nd_max').value) || min;
+  const conc = parseFloat(document.getElementById('nd_conc').value) || 0;
+  if(!name) return;
+  p.customDrugs.push({id:'c'+Date.now(), name, min, max, conc});
+  save(); closeModal('addDrugModal'); renderDrugs();
+  ['nd_name','nd_min','nd_max','nd_conc'].forEach(id=>document.getElementById(id).value='');
+}
+
+let pendingLogDrug = null;
+function promptLog(drugId){
+  const p = currentPatient(); if(!p) return;
+  const d = allDrugs().find(x=>x.id===drugId);
+  const weight = parseFloat(p.weight)||0;
+  const conc = p.drugConc[drugId] !== undefined ? p.drugConc[drugId] : d.conc;
+  const doseMg = (((d.min+d.max)/2)*weight);
+  const doseMl = conc ? (doseMg/conc) : 0;
+  pendingLogDrug = {id:d.id, name:d.name, doseMg, doseMl};
+  document.getElementById('ld_drugName').textContent = d.name;
+  document.getElementById('ld_time').value = nowTime();
+  document.getElementById('ld_dose').value = doseMg.toFixed(2)+' мг ('+doseMl.toFixed(2)+' мл)';
+  openModal('logDrugModal');
+}
+
+function confirmLogDrug(){
+  const p = currentPatient(); if(!p || !pendingLogDrug) return;
+  p.drugLog.push({ time: document.getElementById('ld_time').value || nowTime(), name: pendingLogDrug.name,
+    dose: document.getElementById('ld_dose').value, route: document.getElementById('ld_route').value });
+  p.drugLog.sort((a,b)=>a.time.localeCompare(b.time));
+  save(); closeModal('logDrugModal'); renderDrugLog();
+}
+
+function removeDrugLog(idx){
+  const p = currentPatient(); if(!p) return;
+  p.drugLog.splice(idx,1); save(); renderDrugLog();
+}
+
+function renderDrugLog(){
+  const p = currentPatient();
+  const tbody = document.querySelector('#drugLogTable tbody');
+  const empty = document.getElementById('drugLogEmpty');
+  if(!p || !p.drugLog.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = p.drugLog.map((r,i)=>`<tr><td>${r.time}</td><td style="font-family:var(--font); text-align:left;">${escapeHtml(r.name)}</td><td>${escapeHtml(r.dose)}</td><td>${r.route}</td><td class="no-print"><button class="btn" style="min-height:26px; padding:2px 8px; font-size:11px;" onclick="removeDrugLog(${i})">✕</button></td></tr>`).join('');
+}
+
+function nowTime(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function nowTimeFrom(ts){ const d=new Date(ts); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+function getLastVital(){
+  const p = currentPatient();
+  if(!p || !p.vitals.length) return null;
+  return p.vitals[p.vitals.length-1];
+}
+
+function setVfieldAlarm(inputId, key){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  const vfield = input.closest('.vfield');
+  if(!vfield) return;
+  vfield.classList.remove('alarm-bad');
+  if(input.value === '' || input.value === undefined || input.value === null) return;
+  if(oob(input.value, key)) vfield.classList.add('alarm-bad');
+}
+function updateVitalAlarms(){
+  setVfieldAlarm('v_hr','hr');
+  setVfieldAlarm('v_rr','rr');
+  setVfieldAlarm('v_spo2','spo2');
+  setVfieldAlarm('v_etco2','etco2');
+  setVfieldAlarm('v_map','map');
+  setVfieldAlarm('v_temp','temp');
+}
+
+function recalcMap(){
+  const p = currentPatient();
+  const mode = p ? p.mapMode : 'auto';
+  const mapInput = document.getElementById('v_map');
+  if(mode === 'auto'){
+    const sys = parseFloat(document.getElementById('v_sys').value);
+    const dia = parseFloat(document.getElementById('v_dia').value);
+    if(!isNaN(sys) && !isNaN(dia)){
+      mapInput.value = Math.round(dia + (sys - dia) / 3);
+    } else {
+      mapInput.value = '';
+    }
+    mapInput.disabled = true;
+  } else {
+    mapInput.disabled = false;
+  }
+}
+
+let currentRRMode = 'spont'; // 'spont' | 'mech' — тип дихання для поточного запису вітальних показників
+
+function setRRMode(mode){
+  currentRRMode = mode;
+  updateRRModeUI();
+  markVitalsDirty();
+}
+function updateRRModeUI(){
+  const spontBtn = document.getElementById('rrModeSpontBtn');
+  const mechBtn = document.getElementById('rrModeMechBtn');
+  if(spontBtn) spontBtn.classList.toggle('active', currentRRMode !== 'mech');
+  if(mechBtn){ mechBtn.classList.toggle('active', currentRRMode === 'mech'); mechBtn.classList.toggle('mech', currentRRMode === 'mech'); }
+}
+
+function loadVitalsEntryDefaults(){
+  const p = currentPatient();
+  const mode = p ? p.mapMode : 'auto';
+  const mapTagEl = document.getElementById('mapTag');
+  if(mapTagEl) mapTagEl.textContent = mode === 'auto' ? 'авто' : 'вручну';
+  const last = getLastVital();
+  const sticky = ['hr','rr','spo2','etco2','sys','dia','temp','isosevo','o2','cri'];
+  const idMap = {isosevo:'v_isosevo', o2:'v_o2'};
+  sticky.forEach(k=>{
+    const elId = idMap[k] || ('v_'+k);
+    const el = document.getElementById(elId);
+    if(el) el.value = last ? (last[k] || '') : '';
+  });
+  const planeEl = document.getElementById('v_plane'); if(planeEl) planeEl.value = last ? (last.plane || '') : '';
+  const notesEl = document.getElementById('v_notes'); if(notesEl) notesEl.value = '';
+  currentRRMode = (last && last.rrMode) ? last.rrMode : 'spont';
+  updateRRModeUI();
+  recalcMap();
+  if(mode === 'manual' && last && last.map){ const mapEl = document.getElementById('v_map'); if(mapEl) mapEl.value = last.map; }
+  const statusEl = document.getElementById('vitalsSaveStatus');
+  if(statusEl){ statusEl.textContent = 'Не збережено'; statusEl.className = 'save-status'; }
+  updateVitalAlarms();
+}
+
+function markVitalsDirty(){
+  const statusEl = document.getElementById('vitalsSaveStatus'); if(!statusEl) return;
+  statusEl.textContent = 'Незбережені зміни'; statusEl.className = 'save-status dirty';
+}
+
+function addVital(){
+  const p = currentPatient(); if(!p) return;
+  let timeVal = nowTime();
+  if(snapToGridEnabled()) timeVal = snapTimeToGrid(timeVal, p);
+  const rec = {
+    time: timeVal,
+    plane: document.getElementById('v_plane').value,
+    hr: document.getElementById('v_hr').value,
+    rr: document.getElementById('v_rr').value,
+    rrMode: currentRRMode,
+    spo2: document.getElementById('v_spo2').value,
+    etco2: document.getElementById('v_etco2').value,
+    sys: document.getElementById('v_sys').value,
+    dia: document.getElementById('v_dia').value,
+    map: document.getElementById('v_map').value,
+    temp: document.getElementById('v_temp').value,
+    isosevo: document.getElementById('v_isosevo').value,
+    o2: document.getElementById('v_o2').value,
+    cri: document.getElementById('v_cri').value,
+    notes: document.getElementById('v_notes').value,
+    eyeLube: p.pendingEyeLube > 0 ? p.pendingEyeLube : undefined
+  };
+  p.pendingEyeLube = 0;
+  checkEyeLubeUnlockOnSave(p);
+  p.vitals.push(rec); p.vitals.sort((a,b)=>a.time.localeCompare(b.time));
+  p.lastVitalSaveAt = Date.now();
+  save();
+  renderVitals(); renderChart();
+  loadVitalsEntryDefaults();
+  updateSaveBarTimer();
+  updateEyeLubeUI();
+  const statusEl = document.getElementById('vitalsSaveStatus');
+  if(statusEl){ statusEl.textContent = 'Збережено о ' + nowTime(); statusEl.className = 'save-status saved'; }
+}
+
+function removeVital(idx){
+  const p = currentPatient(); if(!p) return;
+  p.vitals.splice(idx,1); save(); renderVitals(); renderChart();
+}
+
+function alarmRangesForSpecies(species){
+  return (DB.settings.alarmRanges && DB.settings.alarmRanges[species]) || DEFAULT_ALARM_RANGES[species] || DEFAULT_ALARM_RANGES['Собака'];
+}
+function currentAlarmRanges(){
+  const p = currentPatient();
+  return alarmRangesForSpecies(p ? p.species : 'Собака');
+}
+function oob(val, key){
+  if(val==='' || val===undefined || val===null) return false;
+  const r = currentAlarmRanges()[key]; if(!r) return false;
+  const v = parseFloat(val);
+  return v < r[0] || v > r[1];
+}
+
+function renderVitals(){
+  const p = currentPatient();
+  const tbody = document.querySelector('#vitalsTable tbody');
+  const empty = document.getElementById('vitalsEmpty');
+  if(!p || !p.vitals.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = p.vitals.map((v,i)=>`<tr>
+    <td>${v.time}</td>
+    <td class="${oob(v.hr,'hr')?'oob':''}">${v.hr||'—'}</td>
+    <td class="${oob(v.rr,'rr')?'oob':''}">${v.rr||'—'}${v.rr ? `<span class="rr-tag ${v.rrMode==='mech'?'mech':'spont'}">${v.rrMode==='mech'?'М':'С'}</span>` : ''}</td>
+    <td class="${oob(v.spo2,'spo2')?'oob':''}">${v.spo2||'—'}</td>
+    <td class="${oob(v.etco2,'etco2')?'oob':''}">${v.etco2||'—'}</td>
+    <td class="${oob(v.sys,'sys')?'oob':''}">${v.sys||'—'}</td>
+    <td class="${oob(v.dia,'dia')?'oob':''}">${v.dia||'—'}</td>
+    <td class="${oob(v.map,'map')?'oob':''}">${v.map||'—'}</td>
+    <td class="${oob(v.temp,'temp')?'oob':''}">${v.temp||'—'}</td>
+    <td>${v.isosevo||'—'}</td>
+    <td>${v.o2||'—'}</td>
+    <td>${v.cri||'—'}</td>
+    <td>${v.eyeLube ? `<span class="rr-tag spont" style="margin-left:0;">+${v.eyeLube>1?v.eyeLube:''}</span>` : '—'}</td>
+    <td>${v.plane||'—'}</td>
+    <td class="no-print"><button class="btn" style="min-height:26px; padding:2px 8px; font-size:11px;" onclick="removeVital(${i})">✕</button></td>
+  </tr>`).join('');
+}
+
+/* ---- eye lubrication reminder button ---- */
+/* After a press the button locks. It only re-checks whether to unlock at the moment
+   a vitals record is saved ("Зберегти запис") — not continuously by the clock — and
+   unlocks only if the configured interval (Налаштування → Обмеження натискань) has
+   already elapsed since the last press by that point. */
+function eyeLubeIntervalMinutes(){ return (DB.settings && DB.settings.eyeLubeInterval) || 30; }
+function setEyeLubeInterval(min){
+  DB.settings.eyeLubeInterval = min; save(); renderSettingsUI(); updateEyeLubeUI();
+}
+
+function logEyeLube(){
+  const p = currentPatient(); if(!p) return;
+  if(p.eyeLubeLocked) return; // обмеження ще діє — розблокується лише наступним збереженням через N хв
+  p.eyeLubeLocked = true;
+  p.eyeLubeLastPressAt = Date.now();
+  p.eyeLubeCount = (p.eyeLubeCount||0) + 1;
+  p.pendingEyeLube = (p.pendingEyeLube||0) + 1;
+  save();
+  markVitalsDirty();
+  updateEyeLubeUI();
+}
+
+/* called from addVital() at the moment of saving a record */
+function checkEyeLubeUnlockOnSave(p){
+  if(p.eyeLubeLocked && p.eyeLubeLastPressAt && (Date.now() - p.eyeLubeLastPressAt) >= eyeLubeIntervalMinutes()*60000){
+    p.eyeLubeLocked = false;
+  }
+}
+
+function updateEyeLubeUI(){
+  const p = currentPatient();
+  const btn = document.getElementById('eyeLubeBtn');
+  const countEl = document.getElementById('eyeLubeCount');
+  const pendingEl = document.getElementById('eyeLubePending');
+  if(!btn || !countEl) return;
+  if(!p){ countEl.textContent = '0'; btn.classList.remove('due','locked'); btn.disabled = false; if(pendingEl) pendingEl.style.display='none'; return; }
+  countEl.textContent = p.eyeLubeCount || 0;
+  const refTime = p.eyeLubeLastPressAt || p.sessionStart;
+  const elapsedMin = refTime ? (Date.now() - refTime) / 60000 : 0;
+  const due = !p.eyeLubeLocked && !!refTime && elapsedMin >= eyeLubeIntervalMinutes();
+  btn.classList.toggle('due', due);
+  btn.classList.toggle('locked', p.eyeLubeLocked);
+  btn.disabled = p.eyeLubeLocked;
+  if(pendingEl){
+    if(p.pendingEyeLube > 0){ pendingEl.textContent = 'Буде збережено з наступним записом (' + p.pendingEyeLube + ')'; pendingEl.style.display='block'; }
+    else if(p.eyeLubeLocked){ pendingEl.textContent = 'Заблоковано до наступного збереження запису (мине ' + eyeLubeIntervalMinutes() + ' хв)'; pendingEl.style.display='block'; }
+    else pendingEl.style.display='none';
+  }
+}
+
+let chartInstance = null;
+function renderChart(){
+  const p = currentPatient();
+  const ctx = document.getElementById('vitalsChart');
+  const labels = p ? p.vitals.map(v=>v.time) : [];
+  const ds = (key)=> p ? p.vitals.map(v=> v[key]!=='' && v[key]!=null ? parseFloat(v[key]) : null) : [];
+  if(chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      {label:'ЧСС', data: ds('hr'), borderColor:'#FF6B4A', backgroundColor:'#FF6B4A', tension:0.3, spanGaps:true, pointRadius:3},
+      {label:'SpO2', data: ds('spo2'), borderColor:'#3B8AFF', backgroundColor:'#3B8AFF', tension:0.3, spanGaps:true, pointRadius:3},
+      {label:'САТ', data: ds('sys'), borderColor:'#FF3B30', backgroundColor:'#FF3B30', tension:0.3, spanGaps:true, pointRadius:3},
+      {label:'ДАТ', data: ds('dia'), borderColor:'#F2A93B', backgroundColor:'#F2A93B', tension:0.3, spanGaps:true, pointRadius:3},
+      {label:'MAP', data: ds('map'), borderColor:'#B98CFF', backgroundColor:'#B98CFF', tension:0.3, spanGaps:true, pointRadius:3, borderDash:[4,3]},
+      {label:'ЧДР', data: ds('rr'), borderColor:'#31D158', backgroundColor:'#31D158', tension:0.3, spanGaps:true, pointRadius:3, yAxisID:'y1'},
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        y:{ min:0, max:220, ticks:{color:'#A0A0A3'}, grid:{color:'#2C2C2E'}, title:{display:true, text:'уд/хв · мм рт.ст. · %', color:'#A0A0A3'} },
+        y1:{ position:'right', min:0, max:60, grid:{drawOnChartArea:false}, ticks:{color:'#A0A0A3'}, title:{display:true, text:'дих/хв', color:'#A0A0A3'} },
+        x:{ ticks:{color:'#A0A0A3'}, grid:{color:'#2C2C2E'} }
+      }
+    }
+  });
+}
+
+/* ---- session timer ---- */
+function toggleSession(){
+  const p = currentPatient(); if(!p) return;
+  if(!p.sessionStart || p.sessionEnd){
+    p.sessionStart = Date.now(); p.sessionEnd = null; p.lastVitalSaveAt = null;
+  } else {
+    p.sessionEnd = Date.now();
+  }
+  save(); renderSession(); updateSaveBarTimer();
+}
+
+function formatElapsed(ms){
+  const sec = Math.max(0, Math.floor(ms/1000));
+  const h = String(Math.floor(sec/3600)).padStart(2,'0');
+  const m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+  const s = String(sec%60).padStart(2,'0');
+  return h+':'+m+':'+s;
+}
+
+function updateTimerDisplay(p){
+  const end = p.sessionEnd || Date.now();
+  document.getElementById('sess_timer').textContent = formatElapsed(end - p.sessionStart);
+}
+
+function renderSession(){
+  const p = currentPatient();
+  const btn = document.getElementById('sess_btn');
+  const dot = document.getElementById('sess_dot');
+  const statusEl = document.getElementById('sess_status');
+  document.getElementById('sess_name').textContent = p ? (p.name || '—') : '—';
+  document.getElementById('sess_meta').textContent = p ? [p.species, p.weight?p.weight+' кг':''].filter(Boolean).join(' · ') : '—';
+  if(!p){ document.getElementById('sess_timer').textContent = '00:00:00'; statusEl.textContent=''; dot.classList.remove('live'); return; }
+  const startLabel = (ts)=>{ const d=new Date(ts); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  if(p.sessionStart && !p.sessionEnd){
+    btn.textContent = 'End'; btn.className = 'btn btn-danger pill-btn no-print'; dot.classList.add('live');
+    statusEl.textContent = 'Триває з ' + startLabel(p.sessionStart) + ' · збережено на пристрої';
+    updateTimerDisplay(p);
+  } else if(p.sessionStart && p.sessionEnd){
+    btn.textContent = 'Почати знову'; btn.className = 'btn pill-btn no-print'; dot.classList.remove('live');
+    statusEl.textContent = 'Завершено о ' + startLabel(p.sessionEnd) + ' · тривалість збережена';
+    updateTimerDisplay(p);
+  } else {
+    btn.textContent = 'Почати'; btn.className = 'btn btn-primary pill-btn no-print'; dot.classList.remove('live');
+    document.getElementById('sess_timer').textContent = '00:00:00';
+    statusEl.textContent = 'Дані пацієнта зберігаються локально автоматично';
+  }
+}
+
+/* ---- extra (lap) timers ---- */
+function addExtraTimer(){
+  const p = currentPatient(); if(!p) return;
+  if(!p.extraTimers) p.extraTimers = [];
+  const name = document.getElementById('et_name').value.trim() || ('Таймер ' + (p.extraTimers.length+1));
+  p.extraTimers.push({id:'t'+Date.now(), name, start:Date.now(), running:true, stoppedAt:null, laps:[]});
+  save(); document.getElementById('et_name').value=''; closeModal('addTimerModal');
+  renderExtraTimersSection();
+}
+function lapExtraTimer(id){
+  const p = currentPatient(); if(!p) return;
+  const t = p.extraTimers.find(x=>x.id===id); if(!t) return;
+  const elapsedMs = (t.running ? Date.now() : t.stoppedAt) - t.start;
+  t.laps.push({ elapsedLabel: formatElapsed(elapsedMs), wallClock: nowTime() });
+  save(); renderExtraTimersSection();
+}
+function stopExtraTimer(id){
+  const p = currentPatient(); if(!p) return;
+  const t = p.extraTimers.find(x=>x.id===id); if(!t) return;
+  t.running = false; t.stoppedAt = Date.now();
+  save(); renderExtraTimersSection();
+}
+function removeExtraTimer(id){
+  const p = currentPatient(); if(!p) return;
+  p.extraTimers = p.extraTimers.filter(x=>x.id!==id);
+  save(); renderExtraTimersSection();
+}
+function renderExtraTimersSection(){
+  const wrap = document.getElementById('extraTimersCard');
+  if(!extraTimersEnabled()){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  const p = currentPatient();
+  const list = document.getElementById('extraTimersList');
+  if(!p || !p.extraTimers || !p.extraTimers.length){ list.innerHTML='<div class="empty">Немає активних таймерів</div>'; return; }
+  list.innerHTML = p.extraTimers.map(t=>{
+    const elapsedMs = (t.running ? Date.now() : t.stoppedAt) - t.start;
+    const lapsHtml = t.laps.length ? t.laps.map((l,i)=>`<div class="lap-row"><span>#${i+1}</span><span>${l.elapsedLabel}</span><span>${l.wallClock}</span></div>`).join('') : '<div class="hint" style="margin:2px 0 0;">Записів ще немає</div>';
+    return `<div class="extra-timer">
+      <div class="extra-timer-head">
+        <b>${escapeHtml(t.name)}</b>
+        <button class="btn" style="min-height:26px; padding:2px 8px; font-size:11px;" onclick="removeExtraTimer('${t.id}')">✕</button>
+      </div>
+      <div class="extra-timer-digits" id="etd_${t.id}">${formatElapsed(elapsedMs)}</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" style="flex:1" onclick="lapExtraTimer('${t.id}')">Зафіксувати час</button>
+        ${t.running ? `<button class="btn" onclick="stopExtraTimer('${t.id}')">Стоп</button>` : ''}
+      </div>
+      <div class="laps">${lapsHtml}</div>
+    </div>`;
+  }).join('');
+}
+function tickExtraTimers(){
+  if(!extraTimersEnabled()) return;
+  const p = currentPatient(); if(!p || !p.extraTimers) return;
+  p.extraTimers.forEach(t=>{
+    if(!t.running) return;
+    const el = document.getElementById('etd_'+t.id);
+    if(el) el.textContent = formatElapsed(Date.now()-t.start);
+  });
+}
+
+function renderAll(){
+  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); updateCalcPatientInfo(); calcTransfusion(); calcBicarb(); calcFluid();
+}
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.tabbar button').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
+  document.getElementById('vitalsSaveBar').classList.toggle('active', name==='vitals');
+  document.getElementById('labsSaveBar').classList.toggle('active', name==='labs');
+  if(name==='chart') renderChart();
+  if(name==='calc') initCalcTab();
+}
+
+/* ---- калькулятор: блок «Об'єм переливання крові» ---- */
+function transfusionK(p){ return p && p.species === 'Кіт' ? 60 : 90; }
+// середньостатистичний Ht з референсних норм: собака ~37–55% (сер. 45), кіт ~24–45% (сер. 35)
+function defaultTargetHct(p){
+  if(p && p.species === 'Кіт') return 35;
+  if(p && p.species === 'Собака') return 45;
+  return 40;
+}
+function initCalcTab(){
+  const p = currentPatient();
+  const targetEl = document.getElementById('calc_tr_pcv_target');
+  if(targetEl && targetEl.value === '') targetEl.value = defaultTargetHct(p);
+  updateCalcPatientInfo();
+  calcTransfusion();
+  calcBicarb();
+  calcFluid();
+}
+function updateCalcPatientInfo(){
+  const p = currentPatient();
+  const infoEl = document.getElementById('calc_tr_patient_info');
+  if(!infoEl) return;
+  if(!p){ infoEl.textContent = '—'; return; }
+  const weightTxt = p.weight ? p.weight+' кг' : '—';
+  const hctTxt = p.hct ? p.hct+'%' : '—';
+  infoEl.innerHTML = `Пацієнт: <b>${escapeHtml(p.species||'—')}</b> · Вага <b>${weightTxt}</b> · Ht <b>${hctTxt}</b> · К=${transfusionK(p)}`;
+}
+function calcTransfusion(){
+  const p = currentPatient();
+  updateCalcPatientInfo();
+  const valueEl = document.getElementById('calc_tr_value');
+  const hintEl = document.getElementById('calc_tr_hint');
+  if(!valueEl) return;
+
+  const weight = p ? Number(p.weight) : 0;
+  const pcvPat = p ? Number(p.hct) : 0;
+  const k = transfusionK(p);
+  const pcvTargetStr = document.getElementById('calc_tr_pcv_target').value;
+  const pcvDonorStr = document.getElementById('calc_tr_pcv_donor').value;
+  const pcvTarget = Number(pcvTargetStr);
+  const pcvDonor = Number(pcvDonorStr);
+
+  if(!p || !weight || !pcvPat){
+    valueEl.textContent = '— мл';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'block';
+    hintEl.textContent = 'Вкажіть вагу та поточний гематокрит пацієнта на вкладці «Пацієнт».';
+    return;
+  }
+  if(pcvTargetStr==='' || pcvDonorStr==='' || pcvDonor<=0){
+    valueEl.textContent = '— мл';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'none';
+    return;
+  }
+  if(pcvTarget <= pcvPat){
+    valueEl.textContent = '0 мл';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'block';
+    hintEl.textContent = 'Бажаний Ht не перевищує поточний — переливання за цією формулою не потрібне.';
+    return;
+  }
+  const volume = weight * k * (pcvTarget - pcvPat) / pcvDonor;
+  valueEl.classList.remove('invalid');
+  valueEl.textContent = Math.round(volume) + ' мл';
+  hintEl.style.display = 'none';
+}
+
+/* ---- калькулятор: блок «Бікарбонат натрію» ---- */
+function setBicarbConc(val){
+  document.getElementById('calc_hco3_conc').value = val;
+  updateBicarbConcButtons();
+  calcBicarb();
+}
+function updateBicarbConcButtons(){
+  const c = Number(document.getElementById('calc_hco3_conc').value);
+  document.getElementById('calc_hco3_conc_84').classList.toggle('active', c===1);
+  document.getElementById('calc_hco3_conc_42').classList.toggle('active', c===0.5);
+}
+function calcBicarb(){
+  const p = currentPatient();
+  const infoEl = document.getElementById('calc_hco3_patient_info');
+  const valueEl = document.getElementById('calc_hco3_value');
+  const hintEl = document.getElementById('calc_hco3_hint');
+  if(!valueEl) return;
+  if(infoEl) infoEl.innerHTML = p && p.weight ? `Пацієнт: Вага <b>${p.weight} кг</b>` : '—';
+  updateBicarbConcButtons();
+
+  const weight = p ? Number(p.weight) : 0;
+  const beStr = document.getElementById('calc_hco3_be').value;
+  const be = Number(beStr);
+  const conc = Number(document.getElementById('calc_hco3_conc').value) || 1;
+
+  if(!p || !weight){
+    valueEl.textContent = '— мл';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'block';
+    hintEl.textContent = 'Вкажіть вагу пацієнта на вкладці «Пацієнт».';
+    return;
+  }
+  if(beStr===''){
+    valueEl.textContent = '— мл';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'none';
+    return;
+  }
+  if(be >= 0){
+    valueEl.textContent = '0 мл';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'block';
+    hintEl.textContent = 'Дефіциту основ немає (BE ≥ 0) — корекція бікарбонатом за цією формулою не потрібна.';
+    return;
+  }
+  const meq = weight * 0.3 * Math.abs(be);
+  const volume = meq / conc;
+  valueEl.classList.remove('invalid');
+  valueEl.textContent = Math.round(volume) + ' мл (' + meq.toFixed(1) + ' мЕкв)';
+  hintEl.style.display = 'block';
+  hintEl.textContent = 'Зазвичай вводять половину розрахованої дози повільно в/в, потім переоцінюють гази крові перед повторним введенням.';
+}
+
+/* ---- калькулятор: блок «Добова інфузія» ---- */
+function calcFluid(){
+  const p = currentPatient();
+  const infoEl = document.getElementById('calc_fluid_patient_info');
+  const dailyEl = document.getElementById('calc_fluid_daily_value');
+  const hourlyEl = document.getElementById('calc_fluid_hourly_value');
+  const hintEl = document.getElementById('calc_fluid_hint');
+  if(!dailyEl) return;
+  const weight = p ? Number(p.weight) : 0;
+  if(infoEl) infoEl.innerHTML = p && p.weight ? `Пацієнт: Вага <b>${p.weight} кг</b>` : '—';
+
+  if(!p || !weight){
+    dailyEl.textContent = '— мл'; dailyEl.classList.add('invalid');
+    hourlyEl.textContent = '— мл/год'; hourlyEl.classList.add('invalid');
+    hintEl.style.display = 'block';
+    hintEl.textContent = 'Вкажіть вагу пацієнта на вкладці «Пацієнт».';
+    return;
+  }
+  const daily = 30*weight + 70;
+  const hourly = daily/24;
+  dailyEl.classList.remove('invalid');
+  hourlyEl.classList.remove('invalid');
+  dailyEl.textContent = Math.round(daily) + ' мл/добу';
+  hourlyEl.textContent = hourly.toFixed(1) + ' мл/год';
+  hintEl.style.display = 'none';
+}
+
+function openModal(id){
+  document.getElementById(id+'-bg').classList.add('open');
+  if(id === 'newPatientModal'){
+    const btn = document.getElementById('np_submit_btn');
+    if(btn) btn.textContent = autoStartTimerEnabled() ? 'Почати анестезію' : 'Створити пацієнта';
+  }
+  const fab = document.querySelector('.fab');
+  if(fab) fab.style.display = 'none';
+}
+function closeModal(id){
+  document.getElementById(id+'-bg').classList.remove('open');
+  const anyOpen = document.querySelector('.modal-bg.open');
+  const fab = document.querySelector('.fab');
+  if(fab && !anyOpen) fab.style.display = '';
+}
+
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---- експорт: створює новий HTML-файл з поточними даними, вбудованими як стан за замовчуванням ---- */
+function exportDataFile(){
+  save(); // впевнитись, що DB актуальна
+  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const startMarker = "let DB = JSON.parse(localStorage.getItem('vetAnesthDB')";
+  const start = fullHtml.indexOf(startMarker);
+  const end = fullHtml.indexOf(');', start);
+  if(start === -1 || end === -1){
+    alert('Не вдалося підготувати файл. Спробуйте ще раз.');
+    return;
+  }
+  let dataStr = JSON.stringify(DB);
+  dataStr = dataStr.replace(/<\//g, '<\\/'); // захист від передчасного закриття тегу <script>
+  const replacement = "let DB = JSON.parse(localStorage.getItem('vetAnesthDB') || " + JSON.stringify(dataStr) + ")";
+  const newHtml = fullHtml.slice(0, start) + replacement + fullHtml.slice(end);
+
+  const blob = new Blob([newHtml], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const stamp = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'_'+pad(now.getHours())+pad(now.getMinutes());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Анестезія_дані_' + stamp + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+
+if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patients.push(p); DB.current = p.id; }
+if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
+DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.extraTimers) p.extraTimers = []; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.eyeLubeCount === undefined) p.eyeLubeCount = 0; if(p.eyeLubeLastPressAt === undefined) p.eyeLubeLastPressAt = null; if(p.eyeLubeLocked === undefined) p.eyeLubeLocked = false; if(p.pendingEyeLube === undefined) p.pendingEyeLube = 0; });
+save();
+renderAll();
+showHome();
+
+/* single global ticker drives both the main session timer and any running extra timers every second */
+setInterval(()=>{
+  const p = currentPatient();
+  if(p && p.sessionStart && !p.sessionEnd) updateTimerDisplay(p);
+  tickExtraTimers();
+  updateSaveBarTimer();
+  updateEyeLubeUI();
+}, 1000);
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
