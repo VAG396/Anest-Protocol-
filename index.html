@@ -173,6 +173,39 @@ button{font-family:var(--font); cursor:pointer;}
 .rr-tag.mech{color:var(--purple); border:1px solid var(--purple); background:rgba(185,140,255,.12);}
 .rr-tag.spont{color:var(--green); border:1px solid var(--green-dim); background:rgba(49,209,88,.12);}
 
+/* вибір анестетика: Ізофлуран АБО Севофлуран (взаємовиключний) */
+.agent-seg{display:flex; background:var(--bg); border:1px solid var(--border-strong); border-radius:8px; padding:2px; gap:2px; margin-top:8px;}
+.agent-seg button{flex:1; background:none; border:none; border-radius:6px; padding:5px 0; font-size:11px; font-weight:700; color:var(--text2); font-family:var(--font); letter-spacing:.2px;}
+.agent-seg button.active{background:var(--card2); color:var(--amber); box-shadow:0 0 0 1px #7a5a1e;}
+.agent-tag{font-size:9px; font-weight:700; padding:1px 5px; border-radius:6px; margin-left:4px; vertical-align:1px; white-space:nowrap; color:var(--amber); border:1px solid #7a5a1e; background:rgba(242,169,59,.12);}
+.isosevo-input{cursor:pointer;}
+
+/* ---- горизонтальний колесо-пікер концентрації (стиль випарника) ---- */
+.wheel-modal{position:relative; padding-top:22px;}
+.wheel-modal h3{text-align:center; color:var(--text2); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:2px;}
+.wheel-agent-sub{text-align:center; font-size:11px; color:var(--text3); margin-bottom:6px;}
+.wheel-value-display{display:flex; align-items:baseline; justify-content:center; gap:4px; margin:6px 0 18px;}
+.wheel-value-display #wheelValueBig{font-family:var(--mono); font-size:56px; font-weight:800; color:var(--amber); text-shadow:0 0 24px rgba(242,169,59,.35); line-height:1; letter-spacing:-1px; min-width:118px; text-align:right;}
+.wheel-unit{font-size:20px; font-weight:700; color:var(--text2);}
+.wheel-picker{position:relative; height:84px; margin:0 -16px; overflow:hidden; touch-action:none; background:
+  radial-gradient(ellipse 60% 100% at 50% 0%, rgba(242,169,59,.06), transparent 70%);}
+.wheel-track{position:absolute; top:0; left:50%; height:100%; display:flex; align-items:flex-end; will-change:transform; cursor:grab;}
+.wheel-track:active{cursor:grabbing;}
+.wheel-tick{position:relative; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+.wheel-tick .bar{width:2px; background:var(--border-strong); border-radius:2px; margin-bottom:24px;}
+.wheel-tick.minor .bar{height:12px;}
+.wheel-tick.mid .bar{height:20px; background:var(--text3);}
+.wheel-tick.major .bar{height:32px; background:var(--text2); width:2.5px;}
+.wheel-tick .lbl{position:absolute; left:50%; bottom:2px; font-family:var(--mono); font-size:11px; color:var(--text3); font-weight:600; transform:translateX(-50%); white-space:nowrap;}
+.wheel-center-indicator{position:absolute; left:50%; bottom:22px; transform:translateX(-50%); width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:10px solid var(--amber); pointer-events:none; filter:drop-shadow(0 0 6px rgba(242,169,59,.6));}
+.wheel-center-line{position:absolute; left:50%; top:0; bottom:24px; width:2px; background:linear-gradient(180deg, transparent, var(--amber) 70%); transform:translateX(-50%); pointer-events:none; opacity:.55;}
+.wheel-fade{position:absolute; top:0; bottom:0; width:56px; pointer-events:none; z-index:2;}
+.wheel-fade-l{left:0; background:linear-gradient(90deg, var(--bg2), transparent);}
+.wheel-fade-r{right:0; background:linear-gradient(270deg, var(--bg2), transparent);}
+.wheel-step-btns{display:flex; align-items:center; gap:10px; margin-top:18px;}
+.wheel-step-btns .btn{flex:1; font-family:var(--mono); font-size:15px;}
+.wheel-step-btns .btn-primary{flex:1.4;}
+
 .eyelube-field{display:flex; flex-direction:column;}
 .eyelube-btn{margin-top:8px; display:flex; align-items:center; justify-content:center; gap:6px; width:100%; background:var(--card2); border:1px solid var(--border-strong); border-radius:10px; padding:8px 10px; color:var(--text); font-family:var(--font); cursor:pointer; transition:background .2s,border-color .2s,box-shadow .2s;}
 .eyelube-btn .eyelube-plus{font-size:20px; font-weight:700; line-height:1;}
@@ -428,7 +461,12 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <div class="vfield"><label>ДАТ</label><div class="vfield-row"><input id="v_dia" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
       <div class="vfield"><label>MAP <span class="maptag" id="mapTag">авто</span></label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
       <div class="vfield"><label>Температура</label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
-      <div class="vfield"><label>Iso/Sevo</label><div class="vfield-row"><input id="v_isosevo" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit">%</span></div></div>
+      <div class="vfield"><label id="isoSevoLabel">Ізо/Sevo</label><div class="vfield-row"><input id="v_isosevo" class="isosevo-input" type="number" step="0.1" inputmode="decimal" placeholder="--" readonly onclick="openIsoSevoWheel()" oninput="markVitalsDirty()"><span class="unit">%</span></div>
+        <div class="agent-seg" role="group" aria-label="Анестетик">
+          <button type="button" id="agentIsoBtn" onclick="setAgent('iso')">Ізофлуран</button>
+          <button type="button" id="agentSevoBtn" onclick="setAgent('sevo')">Севофлуран</button>
+        </div>
+      </div>
       <div class="vfield"><label>O₂ потік</label><div class="vfield-row"><input id="v_o2" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit">л/хв</span></div></div>
       <div class="vfield"><label>CRI</label><div class="vfield-row"><input id="v_cri" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit">мл/год</span></div></div>
       <div class="vfield eyelube-field">
@@ -742,6 +780,27 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   </div>
 </div>
 
+<div class="modal-bg no-print" id="isoSevoWheelModal-bg" onclick="if(event.target===this) closeIsoSevoWheel()">
+  <div class="modal wheel-modal" style="position:relative;" onclick="event.stopPropagation()">
+    <button class="close-x" onclick="closeIsoSevoWheel()">✕</button>
+    <h3 id="wheelModalTitle">Концентрація</h3>
+    <div class="wheel-agent-sub" id="wheelModalSub">Крутіть колесо пальцем</div>
+    <div class="wheel-value-display"><span id="wheelValueBig">0.0</span><span class="wheel-unit">%</span></div>
+    <div class="wheel-picker" id="wheelPicker">
+      <div class="wheel-center-line"></div>
+      <div class="wheel-track" id="wheelTrack"></div>
+      <div class="wheel-center-indicator"></div>
+      <div class="wheel-fade wheel-fade-l"></div>
+      <div class="wheel-fade wheel-fade-r"></div>
+    </div>
+    <div class="wheel-step-btns">
+      <button type="button" class="btn" onclick="wheelStep(-1)">−0.1</button>
+      <button type="button" class="btn btn-primary" onclick="applyIsoSevoWheel()">Готово</button>
+      <button type="button" class="btn" onclick="wheelStep(1)">+0.1</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const DEFAULT_ALARM_RANGES = {
   'Собака': { hr:[60,140], rr:[8,20], spo2:[95,100], etco2:[35,45], sys:[90,160], dia:[50,100], map:[60,120], temp:[36.5,39.0] },
@@ -781,42 +840,6 @@ Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp])
 
 function save(){ localStorage.setItem('vetAnesthDB', JSON.stringify(DB)); }
 function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
-
-/* ---- відправка записів вітальних показників у Google Таблицю ---- */
-const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbz1ULJMhZvabX0pGJwEB-0o3NATPJWETDUz8nWQx-0_zLi_jsBGZxxNaeiGCNNavJg-Jg/exec';
-
-function getSheetQueue(){
-  try{ return JSON.parse(localStorage.getItem('vetAnesthSheetQueue') || '[]'); }
-  catch(e){ return []; }
-}
-function setSheetQueue(q){ localStorage.setItem('vetAnesthSheetQueue', JSON.stringify(q)); }
-
-function sendVitalToSheet(p, rec){
-  const payload = { patientId: p.id, patientName: p.name, ...rec };
-  // спочатку кладемо в чергу, приберемо звідти лише після успішної відправки
-  const queue = getSheetQueue();
-  const qid = Date.now() + '_' + Math.random().toString(36).slice(2);
-  queue.push({ qid, payload });
-  setSheetQueue(queue);
-  flushSheetQueue();
-}
-
-function flushSheetQueue(){
-  const queue = getSheetQueue();
-  if(!queue.length) return;
-  // відправляємо послідовно, щоб не втратити порядок і не зчепитись з office-мережею
-  const [next, ...rest] = queue;
-  fetch(SHEET_API_URL, {
-    method: 'POST',
-    body: JSON.stringify(next.payload)
-  }).then(()=>{
-    setSheetQueue(rest);
-    if(rest.length) flushSheetQueue();
-  }).catch(()=>{ /* немає інтернету — запис лишається в черзі, спробуємо пізніше */ });
-}
-
-window.addEventListener('online', flushSheetQueue);
-setInterval(flushSheetQueue, 30000); // резервна спроба кожні 30 сек, якщо подія online не спрацювала
 
 function newPatientObj(name){
   return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'',
@@ -1520,6 +1543,24 @@ function updateRRModeUI(){
   if(mechBtn){ mechBtn.classList.toggle('active', currentRRMode === 'mech'); mechBtn.classList.toggle('mech', currentRRMode === 'mech'); }
 }
 
+/* вибір анестетика для поточного запису: 'iso' (Ізофлуран) АБО 'sevo' (Севофлуран) — взаємовиключно */
+let currentAgent = 'iso';
+const AGENT_LABEL = {iso:'Ізофлуран', sevo:'Севофлуран'};
+const AGENT_RANGE = {iso:{min:0, max:5, step:0.1}, sevo:{min:0, max:8, step:0.1}};
+function setAgent(agent){
+  currentAgent = agent;
+  updateAgentUI();
+  markVitalsDirty();
+}
+function updateAgentUI(){
+  const isoBtn = document.getElementById('agentIsoBtn');
+  const sevoBtn = document.getElementById('agentSevoBtn');
+  if(isoBtn) isoBtn.classList.toggle('active', currentAgent === 'iso');
+  if(sevoBtn) sevoBtn.classList.toggle('active', currentAgent === 'sevo');
+  const labelEl = document.getElementById('isoSevoLabel');
+  if(labelEl) labelEl.textContent = AGENT_LABEL[currentAgent];
+}
+
 function loadVitalsEntryDefaults(){
   const p = currentPatient();
   const mode = p ? p.mapMode : 'auto';
@@ -1537,6 +1578,8 @@ function loadVitalsEntryDefaults(){
   const notesEl = document.getElementById('v_notes'); if(notesEl) notesEl.value = '';
   currentRRMode = (last && last.rrMode) ? last.rrMode : 'spont';
   updateRRModeUI();
+  currentAgent = (last && last.agent) ? last.agent : 'iso';
+  updateAgentUI();
   recalcMap();
   if(mode === 'manual' && last && last.map){ const mapEl = document.getElementById('v_map'); if(mapEl) mapEl.value = last.map; }
   const statusEl = document.getElementById('vitalsSaveStatus');
@@ -1566,6 +1609,7 @@ function addVital(){
     map: document.getElementById('v_map').value,
     temp: document.getElementById('v_temp').value,
     isosevo: document.getElementById('v_isosevo').value,
+    agent: currentAgent,
     o2: document.getElementById('v_o2').value,
     cri: document.getElementById('v_cri').value,
     notes: document.getElementById('v_notes').value,
@@ -1576,7 +1620,6 @@ function addVital(){
   p.vitals.push(rec); p.vitals.sort((a,b)=>a.time.localeCompare(b.time));
   p.lastVitalSaveAt = Date.now();
   save();
-  sendVitalToSheet(p, rec);
   renderVitals(); renderChart();
   loadVitalsEntryDefaults();
   updateSaveBarTimer();
@@ -1621,7 +1664,7 @@ function renderVitals(){
     <td class="${oob(v.dia,'dia')?'oob':''}">${v.dia||'—'}</td>
     <td class="${oob(v.map,'map')?'oob':''}">${v.map||'—'}</td>
     <td class="${oob(v.temp,'temp')?'oob':''}">${v.temp||'—'}</td>
-    <td>${v.isosevo||'—'}</td>
+    <td>${v.isosevo||'—'}${v.isosevo && v.agent ? `<span class="agent-tag">${v.agent==='sevo'?'Sevo':'Ізо'}</span>` : ''}</td>
     <td>${v.o2||'—'}</td>
     <td>${v.cri||'—'}</td>
     <td>${v.eyeLube ? `<span class="rr-tag spont" style="margin-left:0;">+${v.eyeLube>1?v.eyeLube:''}</span>` : '—'}</td>
@@ -1989,6 +2032,117 @@ function closeModal(id){
   if(fab && !anyOpen) fab.style.display = '';
 }
 
+/* ---- горизонтальний колесо-пікер для концентрації Ізо/Sevo (стиль випарника) ---- */
+const wheelState = {min:0, max:5, step:0.1, tickPx:16, value:0, dragging:false, startX:0, startOffset:0, offset:0};
+
+function wheelDecimals(step){ return (String(step).split('.')[1]||'').length; }
+function wheelClamp(v){ return Math.min(wheelState.max, Math.max(wheelState.min, v)); }
+function wheelRound(v){ const d=wheelDecimals(wheelState.step); const f=Math.pow(10,d); return Math.round(v*f)/f; }
+
+function buildWheelTrack(){
+  const track = document.getElementById('wheelTrack');
+  const n = Math.round((wheelState.max - wheelState.min) / wheelState.step);
+  let html = '';
+  for(let i=0;i<=n;i++){
+    const val = wheelRound(wheelState.min + i*wheelState.step);
+    const isMajor = Math.abs(val - Math.round(val)) < 1e-6;
+    const isMid = !isMajor && Math.abs((val*2) - Math.round(val*2)) < 1e-6;
+    const cls = isMajor ? 'major' : (isMid ? 'mid' : 'minor');
+    html += '<div class="wheel-tick '+cls+'" style="width:'+wheelState.tickPx+'px;">'
+      + '<div class="bar"></div>'
+      + (isMajor ? '<div class="lbl">'+val.toFixed(0)+'</div>' : '')
+      + '</div>';
+  }
+  track.innerHTML = html;
+  track.style.width = ((n+1)*wheelState.tickPx) + 'px';
+}
+
+function wheelOffsetForValue(v){
+  return -((v - wheelState.min) / wheelState.step) * wheelState.tickPx;
+}
+function wheelValueForOffset(off){
+  return wheelClamp(wheelState.min + (-off / wheelState.tickPx) * wheelState.step);
+}
+
+function setWheelTransform(off, animate){
+  const track = document.getElementById('wheelTrack');
+  track.style.transition = animate ? 'transform .22s cubic-bezier(.22,1,.36,1)' : 'none';
+  track.style.transform = 'translateX(' + off + 'px)';
+}
+
+function updateWheelDisplay(){
+  document.getElementById('wheelValueBig').textContent = wheelState.value.toFixed(wheelDecimals(wheelState.step));
+}
+
+function snapWheelToValue(v, animate){
+  wheelState.value = wheelRound(wheelClamp(v));
+  wheelState.offset = wheelOffsetForValue(wheelState.value);
+  setWheelTransform(wheelState.offset, animate);
+  updateWheelDisplay();
+}
+
+function wheelPointerDown(e){
+  wheelState.dragging = true;
+  wheelState.startX = (e.touches ? e.touches[0].clientX : e.clientX);
+  wheelState.startOffset = wheelState.offset;
+  document.getElementById('wheelTrack').style.transition = 'none';
+}
+function wheelPointerMove(e){
+  if(!wheelState.dragging) return;
+  e.preventDefault();
+  const x = (e.touches ? e.touches[0].clientX : e.clientX);
+  const dx = x - wheelState.startX;
+  const off = wheelState.startOffset + dx;
+  wheelState.offset = off;
+  setWheelTransform(off, false);
+  wheelState.value = wheelRound(wheelValueForOffset(off));
+  updateWheelDisplay();
+}
+function wheelPointerUp(){
+  if(!wheelState.dragging) return;
+  wheelState.dragging = false;
+  snapWheelToValue(wheelState.value, true);
+}
+
+let wheelListenersBound = false;
+function bindWheelListeners(){
+  if(wheelListenersBound) return;
+  wheelListenersBound = true;
+  const track = document.getElementById('wheelTrack');
+  track.addEventListener('mousedown', wheelPointerDown);
+  window.addEventListener('mousemove', wheelPointerMove, {passive:false});
+  window.addEventListener('mouseup', wheelPointerUp);
+  track.addEventListener('touchstart', wheelPointerDown, {passive:true});
+  window.addEventListener('touchmove', wheelPointerMove, {passive:false});
+  window.addEventListener('touchend', wheelPointerUp);
+}
+
+function wheelStep(dir){
+  snapWheelToValue(wheelState.value + dir*wheelState.step, true);
+}
+
+function openIsoSevoWheel(){
+  const range = AGENT_RANGE[currentAgent] || AGENT_RANGE.iso;
+  wheelState.min = range.min; wheelState.max = range.max; wheelState.step = range.step;
+  const curVal = parseFloat(document.getElementById('v_isosevo').value);
+  const startVal = !isNaN(curVal) ? wheelClamp(curVal) : wheelState.min;
+  document.getElementById('wheelModalTitle').textContent = AGENT_LABEL[currentAgent];
+  document.getElementById('wheelModalSub').textContent = 'Крутіть колесо пальцем · ' + wheelState.min.toFixed(0) + '–' + wheelState.max.toFixed(0) + '%';
+  buildWheelTrack();
+  bindWheelListeners();
+  openModal('isoSevoWheelModal');
+  requestAnimationFrame(()=>{ snapWheelToValue(startVal, false); });
+}
+function closeIsoSevoWheel(){
+  closeModal('isoSevoWheelModal');
+}
+function applyIsoSevoWheel(){
+  const el = document.getElementById('v_isosevo');
+  el.value = wheelState.value.toFixed(wheelDecimals(wheelState.step));
+  markVitalsDirty();
+  closeIsoSevoWheel();
+}
+
 function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 /* ---- формалізований лист моніторингу анестезії для друку/PDF (за зразком форми AVA) ---- */
@@ -2026,7 +2180,7 @@ function renderPrintSheet(){
       + '<td>' + psVal(v.dia) + '</td>'
       + '<td>' + psVal(v.map) + '</td>'
       + '<td>' + psVal(v.temp) + '</td>'
-      + '<td>' + psVal(v.isosevo) + '</td>'
+      + '<td>' + psVal(v.isosevo) + (v.isosevo && v.agent ? ' <small>(' + (v.agent==='sevo'?'Sevo':'Ізо') + ')</small>' : '') + '</td>'
       + '<td>' + psVal(v.o2) + '</td>'
       + '<td>' + psVal(v.cri) + '</td>'
       + '<td style="text-align:left;">' + escapeHtml(v.notes||'') + '</td>'
