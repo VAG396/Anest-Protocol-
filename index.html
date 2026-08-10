@@ -782,6 +782,42 @@ Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp])
 function save(){ localStorage.setItem('vetAnesthDB', JSON.stringify(DB)); }
 function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
 
+/* ---- відправка записів вітальних показників у Google Таблицю ---- */
+const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbz1ULJMhZvabX0pGJwEB-0o3NATPJWETDUz8nWQx-0_zLi_jsBGZxxNaeiGCNNavJg-Jg/exec';
+
+function getSheetQueue(){
+  try{ return JSON.parse(localStorage.getItem('vetAnesthSheetQueue') || '[]'); }
+  catch(e){ return []; }
+}
+function setSheetQueue(q){ localStorage.setItem('vetAnesthSheetQueue', JSON.stringify(q)); }
+
+function sendVitalToSheet(p, rec){
+  const payload = { patientId: p.id, patientName: p.name, ...rec };
+  // спочатку кладемо в чергу, приберемо звідти лише після успішної відправки
+  const queue = getSheetQueue();
+  const qid = Date.now() + '_' + Math.random().toString(36).slice(2);
+  queue.push({ qid, payload });
+  setSheetQueue(queue);
+  flushSheetQueue();
+}
+
+function flushSheetQueue(){
+  const queue = getSheetQueue();
+  if(!queue.length) return;
+  // відправляємо послідовно, щоб не втратити порядок і не зчепитись з office-мережею
+  const [next, ...rest] = queue;
+  fetch(SHEET_API_URL, {
+    method: 'POST',
+    body: JSON.stringify(next.payload)
+  }).then(()=>{
+    setSheetQueue(rest);
+    if(rest.length) flushSheetQueue();
+  }).catch(()=>{ /* немає інтернету — запис лишається в черзі, спробуємо пізніше */ });
+}
+
+window.addEventListener('online', flushSheetQueue);
+setInterval(flushSheetQueue, 30000); // резервна спроба кожні 30 сек, якщо подія online не спрацювала
+
 function newPatientObj(name){
   return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'',
     date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
@@ -1540,6 +1576,7 @@ function addVital(){
   p.vitals.push(rec); p.vitals.sort((a,b)=>a.time.localeCompare(b.time));
   p.lastVitalSaveAt = Date.now();
   save();
+  sendVitalToSheet(p, rec);
   renderVitals(); renderChart();
   loadVitalsEntryDefaults();
   updateSaveBarTimer();
