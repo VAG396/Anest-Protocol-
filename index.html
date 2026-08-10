@@ -53,6 +53,11 @@ button{font-family:var(--font); cursor:pointer;}
 .range-row{display:flex; align-items:center; gap:8px;}
 .range-row input{flex:1; min-width:0; border:1px solid var(--border-strong); border-radius:8px; padding:10px; background:var(--field); color:var(--text); min-height:40px; font-family:var(--mono); font-size:15px;}
 .range-row .dash{color:var(--text3); flex-shrink:0;}
+.collapse-toggle{display:flex; align-items:center; justify-content:space-between; width:100%; background:var(--field); border:1px solid var(--border-strong); border-radius:10px; padding:12px 14px; color:var(--text); font-size:14px; font-weight:600; margin-top:10px; cursor:pointer; font-family:var(--font);}
+.collapse-arrow{color:var(--text2); font-size:15px; transition:transform .2s ease; display:inline-block;}
+.collapse-arrow.open{transform:rotate(90deg);}
+.collapse-body{display:none; flex-direction:column; gap:10px; margin-top:10px;}
+.collapse-body.open{display:flex;}
 .field{display:flex; flex-direction:column; gap:4px; margin-bottom:10px;}
 .field label{font-size:12px; color:var(--text2); font-weight:500;}
 .field input, .field select{border:1px solid var(--border-strong); border-radius:8px; padding:10px 10px; background:var(--field); color:var(--text); min-height:40px;}
@@ -250,13 +255,26 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   body{background:#fff; color:#000;}
   .topbar, .tabbar, .no-print, .modal-bg{display:none !important;}
   #homeScreen{display:none !important;}
-  #appWorkspace{display:block !important;}
-  .view{display:block !important; max-width:100%; padding:0;}
-  .card{border:1px solid #ccc; border-radius:0; margin-bottom:18px; background:#fff; color:#000;}
-  table, th, td{color:#000 !important;}
-  th{background:#eee;}
-  #print-header{display:block !important;}
+  #appWorkspace{display:none !important;}
+  #printSheet{display:block !important;}
 }
+#printSheet{display:none;}
+#printSheet{font-family:Arial, Helvetica, sans-serif; color:#111; background:#fff; font-size:10px; line-height:1.35; padding:6mm;}
+#printSheet .ps-title{display:flex; align-items:center; justify-content:space-between; border:2px solid #16407a; padding:6px 10px; margin-bottom:4px;}
+#printSheet .ps-title h1{font-size:16px; margin:0; color:#16407a; letter-spacing:.5px;}
+#printSheet .ps-title .ps-date{font-size:11px; color:#333;}
+#printSheet .ps-bar{background:#16407a; color:#fff; font-weight:700; font-size:10px; padding:3px 8px; text-transform:uppercase; letter-spacing:.3px;}
+#printSheet table{border-collapse:collapse; width:100%; margin-bottom:4px;}
+#printSheet td, #printSheet th{border:1px solid #16407a; padding:3px 6px; vertical-align:top; font-size:10px;}
+#printSheet th{background:#eaf0fa; text-align:left; font-weight:700;}
+#printSheet .ps-label{background:#eaf0fa; font-weight:700; white-space:nowrap; width:1%;}
+#printSheet .ps-section{margin-bottom:6px;}
+#printSheet .ps-notes-box{border:1px solid #16407a; min-height:60px; padding:6px; white-space:pre-wrap;}
+#printSheet .ps-asa-box{display:inline-block; border:1px solid #16407a; width:16px; height:16px; text-align:center; line-height:16px; margin-right:4px; font-weight:700;}
+#printSheet .ps-asa-box.ps-on{background:#16407a; color:#fff;}
+#printSheet .ps-two-col{display:grid; grid-template-columns:1fr 1fr; gap:6mm;}
+#printSheet .ps-small{font-size:8.5px; color:#444;}
+#printSheet tr{page-break-inside:avoid;}
 #print-header{display:none;}
 </style>
 </head>
@@ -298,7 +316,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
     <div class="field"><label>Порода</label><input id="p_breed" oninput="saveField('breed', this.value)"></div>
     <div class="field"><label>Вага, кг</label><input id="p_weight" type="number" step="0.1" inputmode="decimal" oninput="saveField('weight', this.value); renderDrugs();"></div>
-    <div class="field"><label>Поточний гематокрит (Ht/PCV), %</label><input id="p_hct" type="number" step="0.1" inputmode="decimal" placeholder="напр. 28" oninput="saveField('hct', this.value)"></div>
     <div class="field"><label>Вік</label><input id="p_age" oninput="saveField('age', this.value)"></div>
     <div class="field"><label>Стать</label>
       <select id="p_sex" onchange="saveField('sex', this.value)">
@@ -486,47 +503,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     <div class="hint" id="calc_fluid_hint" style="display:none;"></div>
   </div>
 
-  <div class="card calc-block">
-    <h2>Об'єм переливання крові</h2>
-    <div class="sub">Формула: Об'єм (мл) = Вага (кг) × К × (бажаний Ht − Ht пацієнта) / Ht донора. Вага, вид і поточний Ht беруться з вкладки «Пацієнт». Орієнтовний розрахунок, підтверджуйте власним протоколом.</div>
-    <div class="sub" id="calc_tr_patient_info" style="margin-top:-4px;">—</div>
-
-    <div class="vgrid">
-      <div class="vfield"><label>Бажаний Ht</label><div class="vfield-row"><input id="calc_tr_pcv_target" type="number" step="0.1" inputmode="decimal" oninput="calcTransfusion()"><span class="unit">%</span></div></div>
-      <div class="vfield"><label>Ht донора</label><div class="vfield-row"><input id="calc_tr_pcv_donor" type="number" step="0.1" inputmode="decimal" placeholder="напр. 40" oninput="calcTransfusion()"><span class="unit">%</span></div></div>
-    </div>
-
-    <div class="calc-result" id="calc_tr_result">
-      <span class="calc-result-label">Об'єм переливання</span>
-      <span class="calc-result-value" id="calc_tr_value">— мл</span>
-    </div>
-    <div class="hint" id="calc_tr_hint" style="display:none;"></div>
-  </div>
-
-  <div class="card calc-block">
-    <h2>Бікарбонат натрію (корекція ацидозу)</h2>
-    <div class="sub">Формула: Дефіцит HCO₃⁻ (мЕкв) = Вага (кг) × 0.3 × |Дефіцит основ (BE)|. Об'єм розчину (мл) = дефіцит / концентрація. Вага береться з вкладки «Пацієнт», дефіцит основ — з аналізу газів крові. Орієнтовний розрахунок, підтверджуйте власним протоколом.</div>
-    <div class="sub" id="calc_hco3_patient_info" style="margin-top:-4px;">—</div>
-
-    <div class="vgrid">
-      <div class="vfield"><label>Дефіцит основ (BE)</label><div class="vfield-row"><input id="calc_hco3_be" type="number" step="0.1" inputmode="decimal" placeholder="напр. -8" oninput="calcBicarb()"><span class="unit">ммоль/л</span></div></div>
-    </div>
-
-    <div class="field" style="margin-top:6px;"><label>Концентрація розчину NaHCO₃</label>
-      <div class="segmented">
-        <button type="button" class="active" id="calc_hco3_conc_84" onclick="setBicarbConc(1)">8.4% · 1 мЕкв/мл</button>
-        <button type="button" id="calc_hco3_conc_42" onclick="setBicarbConc(0.5)">4.2% · 0.5 мЕкв/мл</button>
-      </div>
-      <input type="hidden" id="calc_hco3_conc" value="1">
-    </div>
-
-    <div class="calc-result" id="calc_hco3_result">
-      <span class="calc-result-label">Об'єм розчину</span>
-      <span class="calc-result-value" id="calc_hco3_value">— мл</span>
-    </div>
-    <div class="hint" id="calc_hco3_hint" style="display:none;"></div>
-  </div>
-
   <div class="card calc-block-placeholder">
     <h2>Інші розрахунки</h2>
     <div class="sub">Наступні блоки калькулятора додаватимуться сюди окремими картками — за тим самим принципом.</div>
@@ -538,20 +514,25 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 <div class="view" id="view-settings">
   <div class="card">
     <h2>Пороги алармів (вітальні показники)</h2>
-    <div class="sub">Межі норми для ЧСС, ЧДР, SpO₂, EtCO₂, MAP і температури — за їх межами показник на вкладці «Вітальні» підсвічується червоним. Окремо для собак і котів.</div>
+    <div class="sub">Межі норми для ЧСС, ЧДР, SpO₂, EtCO₂, MAP і температури — за їх межами показник на вкладці «Вітальні» підсвічується червоним. Окремо для собак і котів. Значення спільні для всіх пацієнтів відповідного виду.</div>
     <div class="segmented">
-      <button id="alarmSpDogBtn" onclick="setAlarmSettingsSpecies('Собака')">Собака</button>
-      <button id="alarmSpCatBtn" onclick="setAlarmSettingsSpecies('Кіт')">Кіт</button>
+      <button id="alarmsEnabledOnBtn" onclick="toggleAlarmsEnabled(true)">Увімкнено</button>
+      <button id="alarmsEnabledOffBtn" onclick="toggleAlarmsEnabled(false)">Вимкнено</button>
     </div>
-    <div class="grid2" style="margin-top:10px;">
+    <div class="sub" id="alarmSpeciesLabel" style="margin-top:8px;">—</div>
+    <button type="button" class="collapse-toggle" id="alarmThresholdsToggleBtn" onclick="toggleAlarmThresholdsPanel()">
+      <span>Налаштувати пороги</span>
+      <span class="collapse-arrow" id="alarmThresholdsArrow">›</span>
+    </button>
+    <div class="collapse-body" id="alarmThresholdsBody">
       <div class="field"><label>ЧСС, bpm</label><div class="range-row"><input id="alarm_hr_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_hr_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
       <div class="field"><label>ЧДР, bpm</label><div class="range-row"><input id="alarm_rr_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_rr_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
       <div class="field"><label>SpO₂, %</label><div class="range-row"><input id="alarm_spo2_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_spo2_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
       <div class="field"><label>EtCO₂, mmHg</label><div class="range-row"><input id="alarm_etco2_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_etco2_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
       <div class="field"><label>MAP, mmHg</label><div class="range-row"><input id="alarm_map_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_map_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
       <div class="field"><label>Температура, °C</label><div class="range-row"><input id="alarm_temp_min" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_temp_max" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"></div></div>
+      <button type="button" class="btn" onclick="resetAlarmRangesToDefault()">Скинути до стандартних значень</button>
     </div>
-    <button type="button" class="btn" style="margin-top:10px;" onclick="resetAlarmRangesToDefault()">Скинути до стандартних значень</button>
   </div>
   <div class="card">
     <h2>Розрахунок МАТ (MAP)</h2>
@@ -651,8 +632,8 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 <div class="view" id="view-print">
   <div class="card">
     <h2>Друк / збереження у PDF</h2>
-    <p style="font-size:13px; color:var(--text2); line-height:1.6;">На iPhone: натисніть «Роздрукувати», у вікні друку затисніть й розтягніть прев'ю двома пальцями — з'явиться кнопка «Поділитися» → «Зберегти у Файли» (PDF).</p>
-    <button class="btn btn-primary btn-block" onclick="window.print()">Роздрукувати / зберегти PDF</button>
+    <p style="font-size:13px; color:var(--text2); line-height:1.6;">Формується формалізований лист моніторингу анестезії (за зразком форми AVA) з даними поточного пацієнта: картка, дослідження, журнал препаратів, таблиця вітальних показників. На iPhone: у вікні друку затисніть й розтягніть прев'ю двома пальцями — з'явиться кнопка «Поділитися» → «Зберегти у Файли» (PDF).</p>
+    <button class="btn btn-primary btn-block" onclick="printAnesthesiaSheet()">Роздрукувати / зберегти PDF</button>
   </div>
   <div class="card">
     <h2>Додати на головний екран</h2>
@@ -671,6 +652,8 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   <button data-view="print" onclick="showView('print')"><span class="dot">⎙</span>Друк</button>
 </div>
 </div><!-- /appWorkspace -->
+
+<div id="printSheet"><div id="printSheetContent"></div></div>
 
 <!-- MODALS -->
 <div class="modal-bg no-print" id="confirmModal-bg" onclick="if(event.target===this) closeModal('confirmModal')">
@@ -783,14 +766,15 @@ const DEFAULT_PROCEDURES = ['Абдомінальна хірургія','Кас�
 
 let DB = JSON.parse(localStorage.getItem('vetAnesthDB') || '{"patients":[],"current":null,"settings":{"extraTimersEnabled":false,"recordInterval":5}}');
 if(!DB.patients) DB.patients = [];
-if(!DB.settings) DB.settings = {extraTimersEnabled:false, recordInterval:5, snapToGrid:false, defaultAnesthesiologist:'', surgeons:[], saveColorEnabled:true, autoStartTimer:true, eyeLubeInterval:30};
+if(!DB.settings) DB.settings = {extraTimersEnabled:false, recordInterval:5, snapToGrid:true, defaultAnesthesiologist:'', surgeons:[], saveColorEnabled:true, autoStartTimer:true, eyeLubeInterval:30, alarmsEnabled:true};
 if(!DB.settings.recordInterval) DB.settings.recordInterval = 5;
 if(!DB.settings.eyeLubeInterval) DB.settings.eyeLubeInterval = 30;
-if(DB.settings.snapToGrid === undefined) DB.settings.snapToGrid = false;
+if(DB.settings.snapToGrid === undefined) DB.settings.snapToGrid = true;
 if(DB.settings.defaultAnesthesiologist === undefined) DB.settings.defaultAnesthesiologist = '';
 if(!DB.settings.surgeons) DB.settings.surgeons = [];
 if(DB.settings.saveColorEnabled === undefined) DB.settings.saveColorEnabled = true;
 if(DB.settings.autoStartTimer === undefined) DB.settings.autoStartTimer = true;
+if(DB.settings.alarmsEnabled === undefined) DB.settings.alarmsEnabled = true;
 if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
 if(!DB.settings.alarmRanges) DB.settings.alarmRanges = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES));
 Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp]) DB.settings.alarmRanges[sp] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[sp])); });
@@ -876,7 +860,7 @@ function createPatient(){
     p.sessionStart = Date.now();
     p.sessionEnd = null;
   }
-  DB.patients.push(p); DB.current = p.id; save();
+  DB.patients.push(p); DB.current = p.id; save(); syncAlarmSettingsSpeciesToPatient();
 
   nameEl.value=''; speciesEl.value=''; weightEl.value='';
   npSelectedProcedure = '';
@@ -888,7 +872,7 @@ function createPatient(){
   renderAll();
 }
 
-function switchPatient(id){ DB.current = id; save(); renderAll(); }
+function switchPatient(id){ DB.current = id; save(); syncAlarmSettingsSpeciesToPatient(); renderAll(); }
 
 function showHome(){
   document.getElementById('appWorkspace').style.display = 'none';
@@ -945,7 +929,7 @@ function deletePatient(){
     DB.patients = DB.patients.filter(p=>p.id!==DB.current);
     if(!DB.patients.length){ const np = newPatientObj('Пацієнт 1'); DB.patients.push(np); DB.current = np.id; }
     else { DB.current = DB.patients[0].id; }
-    save(); renderAll();
+    save(); syncAlarmSettingsSpeciesToPatient(); renderAll();
   });
 }
 
@@ -964,7 +948,7 @@ function runConfirmAction(){
 function saveField(field, value){
   const p = currentPatient(); if(!p) return;
   p[field] = value; save(); renderHeader(); renderDrugs(); renderSession();
-  if(field === 'species') renderLabButtons();
+  if(field === 'species'){ renderLabButtons(); syncAlarmSettingsSpeciesToPatient(); renderAlarmRangesUI(); updateVitalAlarms(); }
 }
 
 function setMapMode(mode){
@@ -1064,18 +1048,35 @@ function setDefaultAnesthesiologist(value){
   DB.settings.defaultAnesthesiologist = value; save();
 }
 
-/* ---- налаштування: пороги алармів вітальних показників (окремо собака/кіт) ---- */
-let alarmSettingsSpecies = 'Собака'; // локальний UI-стан вкладки редагування у Налаштуваннях, не пов'язаний з пацієнтом
-function setAlarmSettingsSpecies(sp){
-  alarmSettingsSpecies = sp;
+/* ---- налаштування: пороги алармів вітальних показників (окремо собака/кіт, спільно для всіх пацієнтів цього виду) ---- */
+let alarmSettingsSpecies = 'Собака'; // локальний UI-стан вкладки редагування у Налаштуваннях; автоматично підлаштовується під вид поточного пацієнта
+function alarmsEnabled(){ return !!(DB.settings && DB.settings.alarmsEnabled); }
+function toggleAlarmsEnabled(on){
+  DB.settings.alarmsEnabled = on; save();
   renderAlarmRangesUI();
+  updateVitalAlarms();
+}
+function toggleAlarmThresholdsPanel(){
+  const body = document.getElementById('alarmThresholdsBody');
+  const arrow = document.getElementById('alarmThresholdsArrow');
+  if(!body || !arrow) return;
+  const open = !body.classList.contains('open');
+  body.classList.toggle('open', open);
+  arrow.classList.toggle('open', open);
+}
+function syncAlarmSettingsSpeciesToPatient(){
+  const p = currentPatient();
+  if(p && (p.species === 'Собака' || p.species === 'Кіт')) alarmSettingsSpecies = p.species;
 }
 function renderAlarmRangesUI(){
-  const dogBtn = document.getElementById('alarmSpDogBtn');
-  const catBtn = document.getElementById('alarmSpCatBtn');
-  if(!dogBtn || !catBtn) return;
-  dogBtn.classList.toggle('active', alarmSettingsSpecies==='Собака');
-  catBtn.classList.toggle('active', alarmSettingsSpecies==='Кіт');
+  const labelEl = document.getElementById('alarmSpeciesLabel');
+  if(!labelEl) return;
+  const onBtn = document.getElementById('alarmsEnabledOnBtn');
+  const offBtn = document.getElementById('alarmsEnabledOffBtn');
+  const on = alarmsEnabled();
+  if(onBtn) onBtn.classList.toggle('active', on);
+  if(offBtn) offBtn.classList.toggle('active', !on);
+  labelEl.innerHTML = `Показано пороги для: <b>${alarmSettingsSpecies}</b> (вид поточного пацієнта)`;
   const r = DB.settings.alarmRanges[alarmSettingsSpecies] || DEFAULT_ALARM_RANGES[alarmSettingsSpecies];
   ALARM_FIELD_KEYS.forEach(k=>{
     const minEl = document.getElementById('alarm_'+k+'_min');
@@ -1326,7 +1327,7 @@ function renderHeader(){
 
 function fillPatientForm(){
   const p = currentPatient();
-  const map = {p_name:'name',p_owner:'owner',p_phone:'phone',p_species:'species',p_breed:'breed',p_weight:'weight',p_hct:'hct',p_age:'age',p_sex:'sex',p_date:'date',p_doctor:'doctor',p_notes:'preNotes'};
+  const map = {p_name:'name',p_owner:'owner',p_phone:'phone',p_species:'species',p_breed:'breed',p_weight:'weight',p_age:'age',p_sex:'sex',p_date:'date',p_doctor:'doctor',p_notes:'preNotes'};
   Object.entries(map).forEach(([elId, field])=>{
     const el = document.getElementById(elId);
     if(el) el.value = p ? (p[field] || '') : '';
@@ -1560,6 +1561,7 @@ function currentAlarmRanges(){
   return alarmRangesForSpecies(p ? p.species : 'Собака');
 }
 function oob(val, key){
+  if(!alarmsEnabled()) return false;
   if(val==='' || val===undefined || val===null) return false;
   const r = currentAlarmRanges()[key]; if(!r) return false;
   const v = parseFloat(val);
@@ -1779,7 +1781,7 @@ function tickExtraTimers(){
 }
 
 function renderAll(){
-  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); updateCalcPatientInfo(); calcTransfusion(); calcBicarb(); calcFluid();
+  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); calcFluid();
 }
 
 function showView(name){
@@ -1790,6 +1792,7 @@ function showView(name){
   document.getElementById('labsSaveBar').classList.toggle('active', name==='labs');
   if(name==='chart') renderChart();
   if(name==='calc') initCalcTab();
+  if(name==='settings'){ syncAlarmSettingsSpeciesToPatient(); renderAlarmRangesUI(); }
 }
 
 /* ---- калькулятор: блок «Об'єм переливання крові» ---- */
@@ -1801,12 +1804,6 @@ function defaultTargetHct(p){
   return 40;
 }
 function initCalcTab(){
-  const p = currentPatient();
-  const targetEl = document.getElementById('calc_tr_pcv_target');
-  if(targetEl && targetEl.value === '') targetEl.value = defaultTargetHct(p);
-  updateCalcPatientInfo();
-  calcTransfusion();
-  calcBicarb();
   calcFluid();
 }
 function updateCalcPatientInfo(){
@@ -1957,6 +1954,101 @@ function closeModal(id){
 
 function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+/* ---- формалізований лист моніторингу анестезії для друку/PDF (за зразком форми AVA) ---- */
+function printAnesthesiaSheet(){
+  renderPrintSheet();
+  setTimeout(function(){ window.print(); }, 30);
+}
+function psVal(v, unit){ return (v===undefined || v===null || v==='') ? '—' : escapeHtml(String(v))+(unit||''); }
+function renderPrintSheet(){
+  const p = currentPatient();
+  const container = document.getElementById('printSheetContent');
+  if(!container) return;
+  if(!p){ container.innerHTML = '<p>Немає обраного пацієнта.</p>'; return; }
+
+  const labs = activeLabTests().map(function(t){
+    const st = p.labs ? (p.labs[t.id] || 'none') : 'none';
+    const sub = st === 'todo' ? 'потрібно' : st === 'done' ? 'зроблено' : 'не позначено';
+    return '<span style="display:inline-block; margin:0 10px 3px 0;"><b>' + escapeHtml(t.label) + ':</b> ' + sub + '</span>';
+  }).join('');
+
+  const drugRows = (p.drugLog||[]).map(function(r){
+    return '<tr><td>' + psVal(r.time) + '</td><td style="text-align:left;">' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.dose) + '</td><td>' + escapeHtml(r.route) + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center; color:#888;">Записів немає</td></tr>';
+
+  const vitalsRows = (p.vitals||[]).map(function(v){
+    const rrLabel = psVal(v.rr) + (v.rrMode==='mech' ? ' (ШВЛ)' : v.rrMode==='spont' ? ' (сам.)' : '');
+    return '<tr>'
+      + '<td>' + psVal(v.time) + '</td>'
+      + '<td>' + psVal(v.plane) + '</td>'
+      + '<td>' + psVal(v.hr) + '</td>'
+      + '<td>' + rrLabel + '</td>'
+      + '<td>' + psVal(v.spo2) + '</td>'
+      + '<td>' + psVal(v.etco2) + '</td>'
+      + '<td>' + psVal(v.sys) + '</td>'
+      + '<td>' + psVal(v.dia) + '</td>'
+      + '<td>' + psVal(v.map) + '</td>'
+      + '<td>' + psVal(v.temp) + '</td>'
+      + '<td>' + psVal(v.isosevo) + '</td>'
+      + '<td>' + psVal(v.o2) + '</td>'
+      + '<td>' + psVal(v.cri) + '</td>'
+      + '<td style="text-align:left;">' + escapeHtml(v.notes||'') + '</td>'
+      + '</tr>';
+  }).join('') || '<tr><td colspan="14" style="text-align:center; color:#888;">Записів немає</td></tr>';
+
+  const weight = p.weight ? Number(p.weight) : null;
+  const bloodFactor = p.species === 'Кіт' ? 60 : 90;
+  const bloodVolume = weight ? Math.round(weight*bloodFactor) : null;
+  const bvTxt = bloodVolume!==null ? bloodVolume+' мл' : '—';
+  const bv10 = bloodVolume!==null ? Math.round(bloodVolume*0.10)+' мл' : '—';
+  const bv20 = bloodVolume!==null ? Math.round(bloodVolume*0.20)+' мл' : '—';
+  const bv30 = bloodVolume!==null ? Math.round(bloodVolume*0.30)+' мл' : '—';
+  const bloodFactorLabel = p.species === 'Кіт' ? 'Кіт = 60 мл/кг' : 'Собака = 90 мл/кг';
+
+  let html = '';
+  html += '<div class="ps-title"><h1>ЛИСТ МОНІТОРИНГУ АНЕСТЕЗІЇ</h1><div class="ps-date">Дата: ' + psVal(p.date) + '</div></div>';
+
+  html += '<table class="ps-section">';
+  html += '<tr><td class="ps-label">Пацієнт</td><td>' + psVal(p.name) + '</td><td class="ps-label">Власник</td><td>' + psVal(p.owner) + '</td></tr>';
+  html += '<tr><td class="ps-label">Вид</td><td>' + psVal(p.species) + '</td><td class="ps-label">Порода</td><td>' + psVal(p.breed) + '</td></tr>';
+  html += '<tr><td class="ps-label">Вага, кг</td><td>' + psVal(p.weight) + '</td><td class="ps-label">Стать</td><td>' + psVal(p.sex) + '</td></tr>';
+  html += '<tr><td class="ps-label">Вік</td><td>' + psVal(p.age) + '</td><td class="ps-label">Телефон</td><td>' + psVal(p.phone) + '</td></tr>';
+  html += '<tr><td class="ps-label">Процедура</td><td>' + psVal(p.procedure) + '</td><td class="ps-label">Лікар / анестезіолог</td><td>' + psVal(p.doctor) + '</td></tr>';
+  html += '<tr><td class="ps-label">Хірург</td><td colspan="3">' + psVal(p.surgeon) + '</td></tr>';
+  html += '</table>';
+
+  html += '<div class="ps-bar">ASA / Примітки перед анестезією</div>';
+  html += '<div class="ps-notes-box" style="margin-bottom:6px;">' + escapeHtml(p.preNotes||'—') + '</div>';
+
+  html += '<div class="ps-bar">Передопераційні дослідження</div>';
+  html += '<div style="border:1px solid #16407a; padding:5px 8px; margin-bottom:6px;">' + (labs || '—') + '</div>';
+
+  html += '<div class="ps-bar">Об\'єм крові (орієнтовно)</div>';
+  html += '<div style="border:1px solid #16407a; padding:5px 8px; margin-bottom:6px;">' + bloodFactorLabel + ' · Розрахунковий об\'єм: <b>' + bvTxt + '</b>'
+    + '&nbsp;&nbsp;|&nbsp;&nbsp; 10%: ' + bv10 + '&nbsp;&nbsp; 20%: ' + bv20 + '&nbsp;&nbsp; 30%: ' + bv30 + '</div>';
+
+  html += '<div class="ps-bar">Журнал введення препаратів</div>';
+  html += '<table class="ps-section"><thead><tr><th>Час</th><th>Препарат</th><th>Доза</th><th>Шлях</th></tr></thead><tbody>' + drugRows + '</tbody></table>';
+
+  html += '<div class="ps-bar">Вітальні показники за часом</div>';
+  html += '<table class="ps-section"><thead><tr>'
+    + '<th>Час</th><th>План</th><th>ЧСС</th><th>ЧДР</th><th>SpO₂</th><th>EtCO₂</th>'
+    + '<th>САТ</th><th>ДАТ</th><th>MAP</th><th>T°C</th><th>Ізо/Sevo%</th><th>O₂ л/хв</th><th>CRI</th><th>Нотатки</th>'
+    + '</tr></thead><tbody>' + vitalsRows + '</tbody></table>';
+
+  html += '<div class="ps-two-col">';
+  html += '<div><div class="ps-bar">Нотатки</div><div class="ps-notes-box"></div></div>';
+  html += '<div><div class="ps-bar">Післяопераційний період</div><table>'
+    + '<tr><td class="ps-label">T °C</td><td></td><td class="ps-label">P/хв</td><td></td></tr>'
+    + '<tr><td class="ps-label">R/хв</td><td></td><td class="ps-label">Реверсія</td><td></td></tr>'
+    + '</table></div>';
+  html += '</div>';
+  html += '<div class="ps-small">Згенеровано автоматично · Ветеринарний протокол анестезії</div>';
+
+  container.innerHTML = html;
+}
+window.addEventListener('beforeprint', renderPrintSheet);
+
 /* ---- експорт: створює новий HTML-файл з поточними даними, вбудованими як стан за замовчуванням ---- */
 function exportDataFile(){
   save(); // впевнитись, що DB актуальна
@@ -1991,6 +2083,7 @@ if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patient
 if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
 DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.extraTimers) p.extraTimers = []; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.eyeLubeCount === undefined) p.eyeLubeCount = 0; if(p.eyeLubeLastPressAt === undefined) p.eyeLubeLastPressAt = null; if(p.eyeLubeLocked === undefined) p.eyeLubeLocked = false; if(p.pendingEyeLube === undefined) p.pendingEyeLube = 0; });
 save();
+syncAlarmSettingsSpeciesToPatient();
 renderAll();
 showHome();
 
