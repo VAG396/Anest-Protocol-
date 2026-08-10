@@ -176,8 +176,12 @@ button{font-family:var(--font); cursor:pointer;}
 /* вибір анестетика: Ізофлуран АБО Севофлуран (взаємовиключний) */
 .agent-seg{display:flex; background:var(--bg); border:1px solid var(--border-strong); border-radius:8px; padding:2px; gap:2px; margin-top:8px;}
 .agent-seg button{flex:1; background:none; border:none; border-radius:6px; padding:5px 0; font-size:11px; font-weight:700; color:var(--text2); font-family:var(--font); letter-spacing:.2px;}
-.agent-seg button.active{background:var(--card2); color:var(--amber); box-shadow:0 0 0 1px #7a5a1e;}
-.agent-tag{font-size:9px; font-weight:700; padding:1px 5px; border-radius:6px; margin-left:4px; vertical-align:1px; white-space:nowrap; color:var(--amber); border:1px solid #7a5a1e; background:rgba(242,169,59,.12);}
+.agent-seg button.active{background:var(--card2); box-shadow:0 0 0 1px #5a3f8a;}
+#agentIsoBtn.active{color:var(--purple); box-shadow:0 0 0 1px #5a3f8a;}
+#agentSevoBtn.active{color:var(--amber); box-shadow:0 0 0 1px #7a5a1e;}
+.agent-tag{font-size:9px; font-weight:700; padding:1px 5px; border-radius:6px; margin-left:4px; vertical-align:1px; white-space:nowrap;}
+.agent-tag.iso{color:var(--purple); border:1px solid #5a3f8a; background:rgba(185,140,255,.12);}
+.agent-tag.sevo{color:var(--amber); border:1px solid #7a5a1e; background:rgba(242,169,59,.12);}
 .isosevo-input{cursor:pointer;}
 
 /* ---- горизонтальний колесо-пікер концентрації (стиль випарника) ---- */
@@ -185,10 +189,10 @@ button{font-family:var(--font); cursor:pointer;}
 .wheel-modal h3{text-align:center; color:var(--text2); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:2px;}
 .wheel-agent-sub{text-align:center; font-size:11px; color:var(--text3); margin-bottom:6px;}
 .wheel-value-display{display:flex; align-items:baseline; justify-content:center; gap:4px; margin:6px 0 18px;}
-.wheel-value-display #wheelValueBig{font-family:var(--mono); font-size:56px; font-weight:800; color:var(--amber); text-shadow:0 0 24px rgba(242,169,59,.35); line-height:1; letter-spacing:-1px; min-width:118px; text-align:right;}
+.wheel-value-display #wheelValueBig{font-family:var(--mono); font-size:56px; font-weight:800; color:var(--purple); text-shadow:0 0 24px rgba(185,140,255,.35); line-height:1; letter-spacing:-1px; min-width:118px; text-align:right;}
 .wheel-unit{font-size:20px; font-weight:700; color:var(--text2);}
 .wheel-picker{position:relative; height:84px; margin:0 -16px; overflow:hidden; touch-action:none; background:
-  radial-gradient(ellipse 60% 100% at 50% 0%, rgba(242,169,59,.06), transparent 70%);}
+  radial-gradient(ellipse 60% 100% at 50% 0%, rgba(185,140,255,.06), transparent 70%);}
 .wheel-track{position:absolute; top:0; left:50%; height:100%; display:flex; align-items:flex-end; will-change:transform; cursor:grab;}
 .wheel-track:active{cursor:grabbing;}
 .wheel-tick{position:relative; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
@@ -197,11 +201,15 @@ button{font-family:var(--font); cursor:pointer;}
 .wheel-tick.mid .bar{height:20px; background:var(--text3);}
 .wheel-tick.major .bar{height:32px; background:var(--text2); width:2.5px;}
 .wheel-tick .lbl{position:absolute; left:50%; bottom:2px; font-family:var(--mono); font-size:11px; color:var(--text3); font-weight:600; transform:translateX(-50%); white-space:nowrap;}
-.wheel-center-indicator{position:absolute; left:50%; bottom:22px; transform:translateX(-50%); width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:10px solid var(--amber); pointer-events:none; filter:drop-shadow(0 0 6px rgba(242,169,59,.6));}
-.wheel-center-line{position:absolute; left:50%; top:0; bottom:24px; width:2px; background:linear-gradient(180deg, transparent, var(--amber) 70%); transform:translateX(-50%); pointer-events:none; opacity:.55;}
+.wheel-center-indicator{position:absolute; left:50%; bottom:22px; transform:translateX(-50%); width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:10px solid var(--purple); pointer-events:none; filter:drop-shadow(0 0 6px rgba(185,140,255,.6));}
+.wheel-center-line{position:absolute; left:50%; top:0; bottom:24px; width:2px; background:linear-gradient(180deg, transparent, var(--purple) 70%); transform:translateX(-50%); pointer-events:none; opacity:.55;}
 .wheel-fade{position:absolute; top:0; bottom:0; width:56px; pointer-events:none; z-index:2;}
 .wheel-fade-l{left:0; background:linear-gradient(90deg, var(--bg2), transparent);}
 .wheel-fade-r{right:0; background:linear-gradient(270deg, var(--bg2), transparent);}
+.wheel-modal.agent-sevo .wheel-picker{background:radial-gradient(ellipse 60% 100% at 50% 0%, rgba(242,169,59,.06), transparent 70%);}
+.wheel-modal.agent-sevo .wheel-center-indicator{border-top-color:var(--amber); filter:drop-shadow(0 0 6px rgba(242,169,59,.6));}
+.wheel-modal.agent-sevo .wheel-center-line{background:linear-gradient(180deg, transparent, var(--amber) 70%);}
+.wheel-modal.agent-sevo #wheelValueBig{color:var(--amber); text-shadow:0 0 24px rgba(242,169,59,.35);}
 .wheel-step-btns{display:flex; align-items:center; gap:10px; margin-top:18px;}
 .wheel-step-btns .btn{flex:1; font-family:var(--mono); font-size:15px;}
 .wheel-step-btns .btn-primary{flex:1.4;}
@@ -463,8 +471,8 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <div class="vfield"><label>Температура</label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
       <div class="vfield"><label id="isoSevoLabel">Ізо/Sevo</label><div class="vfield-row"><input id="v_isosevo" class="isosevo-input" type="number" step="0.1" inputmode="decimal" placeholder="--" readonly onclick="openIsoSevoWheel()" oninput="markVitalsDirty()"><span class="unit">%</span></div>
         <div class="agent-seg" role="group" aria-label="Анестетик">
-          <button type="button" id="agentIsoBtn" onclick="setAgent('iso')">Ізофлуран</button>
-          <button type="button" id="agentSevoBtn" onclick="setAgent('sevo')">Севофлуран</button>
+          <button type="button" id="agentIsoBtn" onclick="setAgent('iso')" aria-label="Ізофлуран">І</button>
+          <button type="button" id="agentSevoBtn" onclick="setAgent('sevo')" aria-label="Севофлуран">С</button>
         </div>
       </div>
       <div class="vfield"><label>O₂ потік</label><div class="vfield-row"><input id="v_o2" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit">л/хв</span></div></div>
@@ -1546,7 +1554,7 @@ function updateRRModeUI(){
 /* вибір анестетика для поточного запису: 'iso' (Ізофлуран) АБО 'sevo' (Севофлуран) — взаємовиключно */
 let currentAgent = 'iso';
 const AGENT_LABEL = {iso:'Ізофлуран', sevo:'Севофлуран'};
-const AGENT_RANGE = {iso:{min:0, max:5, step:0.1}, sevo:{min:0, max:8, step:0.1}};
+const AGENT_RANGE = {iso:{min:0, max:6, step:0.1}, sevo:{min:0, max:8, step:0.1}};
 function setAgent(agent){
   currentAgent = agent;
   updateAgentUI();
@@ -1664,7 +1672,7 @@ function renderVitals(){
     <td class="${oob(v.dia,'dia')?'oob':''}">${v.dia||'—'}</td>
     <td class="${oob(v.map,'map')?'oob':''}">${v.map||'—'}</td>
     <td class="${oob(v.temp,'temp')?'oob':''}">${v.temp||'—'}</td>
-    <td>${v.isosevo||'—'}${v.isosevo && v.agent ? `<span class="agent-tag">${v.agent==='sevo'?'Sevo':'Ізо'}</span>` : ''}</td>
+    <td>${v.isosevo||'—'}${v.isosevo && v.agent ? `<span class="agent-tag ${v.agent==='sevo'?'sevo':'iso'}">${v.agent==='sevo'?'Sevo':'Ізо'}</span>` : ''}</td>
     <td>${v.o2||'—'}</td>
     <td>${v.cri||'—'}</td>
     <td>${v.eyeLube ? `<span class="rr-tag spont" style="margin-left:0;">+${v.eyeLube>1?v.eyeLube:''}</span>` : '—'}</td>
@@ -2128,6 +2136,8 @@ function openIsoSevoWheel(){
   const startVal = !isNaN(curVal) ? wheelClamp(curVal) : wheelState.min;
   document.getElementById('wheelModalTitle').textContent = AGENT_LABEL[currentAgent];
   document.getElementById('wheelModalSub').textContent = 'Крутіть колесо пальцем · ' + wheelState.min.toFixed(0) + '–' + wheelState.max.toFixed(0) + '%';
+  const wheelModalEl = document.querySelector('#isoSevoWheelModal-bg .wheel-modal');
+  if(wheelModalEl) wheelModalEl.classList.toggle('agent-sevo', currentAgent === 'sevo');
   buildWheelTrack();
   bindWheelListeners();
   openModal('isoSevoWheelModal');
