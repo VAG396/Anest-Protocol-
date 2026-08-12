@@ -600,6 +600,18 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     <div class="hint" id="calc_fluid_hint" style="display:none;"></div>
   </div>
 
+  <div class="card calc-block">
+    <h2>Резервний мішок наркозного апарату</h2>
+    <div class="sub">Рекомендований об'єм резервного (дихального) мішка залежно від ваги пацієнта. Вага береться з вкладки «Пацієнт». Орієнтовний вибір, підтверджуйте власним протоколом.</div>
+    <div class="sub" id="calc_bag_patient_info" style="margin-top:-4px;">—</div>
+
+    <div class="calc-result" id="calc_bag_result">
+      <span class="calc-result-label">Об'єм мішка</span>
+      <span class="calc-result-value" id="calc_bag_value">— л</span>
+    </div>
+    <div class="hint" id="calc_bag_hint" style="display:none;"></div>
+  </div>
+
   <div class="card calc-block-placeholder">
     <h2>Інші розрахунки</h2>
     <div class="sub">Наступні блоки калькулятора додаватимуться сюди окремими картками — за тим самим принципом.</div>
@@ -1956,7 +1968,7 @@ function tickExtraTimers(){
 }
 
 function renderAll(){
-  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); calcFluid(); renderAudioList();
+  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); calcFluid(); calcBag(); renderAudioList();
 }
 
 function showView(name){
@@ -2173,6 +2185,7 @@ function defaultTargetHct(p){
 }
 function initCalcTab(){
   calcFluid();
+  calcBag();
 }
 function updateCalcPatientInfo(){
   const p = currentPatient();
@@ -2301,6 +2314,46 @@ function calcFluid(){
   hourlyEl.classList.remove('invalid');
   dailyEl.textContent = Math.round(daily) + ' мл/добу';
   hourlyEl.textContent = hourly.toFixed(1) + ' мл/год';
+  hintEl.style.display = 'none';
+}
+
+/* ---- калькулятор: блок «Резервний мішок» ---- */
+function bagVolumeForWeight(weight){
+  if(weight <= 8) return 0.5;
+  if(weight <= 16) return 1;
+  if(weight <= 33) return 2;
+  if(weight <= 50) return 3;
+  if(weight <= 66) return 4;
+  if(weight <= 83) return 5;
+  return null;
+}
+function calcBag(){
+  const p = currentPatient();
+  const infoEl = document.getElementById('calc_bag_patient_info');
+  const valueEl = document.getElementById('calc_bag_value');
+  const hintEl = document.getElementById('calc_bag_hint');
+  if(!valueEl) return;
+  const weight = p ? Number(p.weight) : 0;
+  if(infoEl) infoEl.innerHTML = p && p.weight ? `Пацієнт: Вага <b>${p.weight} кг</b>` : '—';
+
+  if(!p || !weight){
+    valueEl.textContent = '— л';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'block';
+    hintEl.textContent = 'Вкажіть вагу пацієнта на вкладці «Пацієнт».';
+    return;
+  }
+
+  const vol = bagVolumeForWeight(weight);
+  if(vol === null){
+    valueEl.textContent = '— л';
+    valueEl.classList.add('invalid');
+    hintEl.style.display = 'block';
+    hintEl.textContent = 'Вага понад 83 кг — оберіть мішок індивідуально за протоколом.';
+    return;
+  }
+  valueEl.classList.remove('invalid');
+  valueEl.textContent = vol + ' л';
   hintEl.style.display = 'none';
 }
 
