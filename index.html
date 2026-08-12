@@ -95,6 +95,20 @@ button{font-family:var(--font); cursor:pointer;}
 
 .segmented{display:flex; background:var(--field); border:1px solid var(--border-strong); border-radius:10px; padding:3px; gap:3px;}
 
+.rec-panel{display:flex; flex-direction:column; align-items:center; gap:10px; padding:10px 0 4px;}
+.rec-btn{width:76px; height:76px; border-radius:50%; border:none; background:var(--red); color:#fff; font-size:26px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(255,59,48,.3);}
+.rec-btn.recording{animation:recPulse 1.4s ease-in-out infinite;}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.5);} 50%{box-shadow:0 0 0 14px rgba(255,59,48,0);}}
+.rec-time{font-family:var(--mono); font-size:22px; font-weight:700; color:var(--text);}
+.rec-hint{font-size:12px; color:var(--text2); text-align:center;}
+.rec-item{background:var(--field); border:1px solid var(--border-strong); border-radius:12px; padding:10px 12px; margin-bottom:10px;}
+.rec-item-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;}
+.rec-item-title{font-size:13px; font-weight:600; color:var(--text);}
+.rec-item-meta{font-size:11px; color:var(--text3); flex-shrink:0;}
+.rec-item audio{width:100%; height:34px; margin-bottom:8px;}
+.rec-item-actions{display:flex; gap:8px;}
+.rec-item-actions button{flex:1; font-size:12px; padding:7px; min-height:32px;}
+
 .calc-result{display:flex; align-items:center; justify-content:space-between; background:var(--field); border:1px solid var(--border-strong); border-radius:12px; padding:14px 16px; margin-top:6px;}
 .calc-result-label{font-size:13px; color:var(--text2); font-weight:500;}
 .calc-result-value{font-family:var(--mono); font-size:22px; font-weight:800; color:var(--green);}
@@ -695,12 +709,31 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   </div>
 </div>
 
+<!-- ДИКТОФОН -->
+<div class="view" id="view-audio">
+  <div class="card">
+    <h2>Голосовий диктофон</h2>
+    <div class="sub">Записуйте голосові нотатки під час анестезії. Записи зберігаються локально на цьому пристрої і прив'язані до поточного пацієнта.</div>
+    <div class="rec-panel">
+      <button type="button" class="rec-btn" id="recBtn" onclick="toggleRecording()" aria-label="Почати/зупинити запис">⏺</button>
+      <div class="rec-time" id="recTime">00:00</div>
+      <div class="rec-hint" id="recHint">Натисніть, щоб почати запис</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Записи цього пацієнта</h2>
+    <div id="audioList"></div>
+    <div class="empty" id="audioListEmpty" style="display:none;">Записів ще немає</div>
+  </div>
+</div>
+
 <div class="tabbar no-print">
   <button class="active" data-view="patient" onclick="showView('patient')"><span class="dot">П</span>Пацієнт</button>
   <button data-view="labs" onclick="showView('labs')"><span class="dot">🧪</span>Дослідж.</button>
   <button data-view="drugs" onclick="showView('drugs')"><span class="dot">Д</span>Дози</button>
   <button data-view="vitals" onclick="showView('vitals')"><span class="dot">В</span>Вітальні</button>
   <button data-view="chart" onclick="showView('chart')"><span class="dot">Г</span>Графік</button>
+  <button data-view="audio" onclick="showView('audio')"><span class="dot">🎙</span>Диктофон</button>
   <button data-view="calc" onclick="showView('calc')"><span class="dot">🧮</span>Калькул.</button>
   <button data-view="settings" onclick="showView('settings')"><span class="dot">⚙</span>Налашт.</button>
   <button data-view="print" onclick="showView('print')"><span class="dot">⎙</span>Друк</button>
@@ -947,7 +980,10 @@ function createPatient(){
   renderAll();
 }
 
-function switchPatient(id){ DB.current = id; save(); syncAlarmSettingsSpeciesToPatient(); renderAll(); }
+function switchPatient(id){
+  if(mediaRecorder && mediaRecorder.state === 'recording') stopRecording();
+  DB.current = id; save(); syncAlarmSettingsSpeciesToPatient(); renderAll(); renderAudioList();
+}
 
 function showHome(){
   document.getElementById('appWorkspace').style.display = 'none';
@@ -1001,10 +1037,12 @@ function renderPatientList(){
 function deletePatient(){
   if(!currentPatient()) return;
   showConfirm('Видалити цього пацієнта і всі його записи? Це незворотньо.', ()=>{
+    const removedId = DB.current;
     DB.patients = DB.patients.filter(p=>p.id!==DB.current);
     if(!DB.patients.length){ const np = newPatientObj('Пацієнт 1'); DB.patients.push(np); DB.current = np.id; }
     else { DB.current = DB.patients[0].id; }
     save(); syncAlarmSettingsSpeciesToPatient(); renderAll();
+    audioDbDeleteByPatient(removedId);
   });
 }
 
@@ -1919,7 +1957,193 @@ function showView(name){
   document.getElementById('labsSaveBar').classList.toggle('active', name==='labs');
   if(name==='chart') renderChart();
   if(name==='calc') initCalcTab();
+  if(name==='audio') renderAudioList();
   if(name==='settings'){ syncAlarmSettingsSpeciesToPatient(); renderAlarmRangesUI(); }
+}
+
+/* ---- Диктофон: запис голосу через мікрофон і збереження записів у IndexedDB ----
+   IndexedDB використовується замість localStorage, бо аудіо-файли можуть бути
+   завеликі для localStorage (ліміт ~5-10МБ на весь застосунок). */
+const AUDIO_DB_NAME = 'vetAnesthAudioDB';
+const AUDIO_STORE = 'recordings';
+let audioDbPromise = null;
+function openAudioDB(){
+  if(audioDbPromise) return audioDbPromise;
+  audioDbPromise = new Promise((resolve, reject)=>{
+    if(!('indexedDB' in window)){ reject(new Error('IndexedDB недоступний')); return; }
+    const req = indexedDB.open(AUDIO_DB_NAME, 1);
+    req.onupgradeneeded = ()=>{
+      const db = req.result;
+      if(!db.objectStoreNames.contains(AUDIO_STORE)){
+        const store = db.createObjectStore(AUDIO_STORE, {keyPath:'id'});
+        store.createIndex('patientId', 'patientId', {unique:false});
+      }
+    };
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=> reject(req.error);
+  });
+  return audioDbPromise;
+}
+function audioDbAdd(record){
+  return openAudioDB().then(db => new Promise((resolve, reject)=>{
+    const tx = db.transaction(AUDIO_STORE, 'readwrite');
+    tx.objectStore(AUDIO_STORE).add(record);
+    tx.oncomplete = ()=>resolve();
+    tx.onerror = ()=>reject(tx.error);
+  }));
+}
+function audioDbDelete(id){
+  return openAudioDB().then(db => new Promise((resolve, reject)=>{
+    const tx = db.transaction(AUDIO_STORE, 'readwrite');
+    tx.objectStore(AUDIO_STORE).delete(id);
+    tx.oncomplete = ()=>resolve();
+    tx.onerror = ()=>reject(tx.error);
+  }));
+}
+function audioDbGetByPatient(patientId){
+  return openAudioDB().then(db => new Promise((resolve, reject)=>{
+    const tx = db.transaction(AUDIO_STORE, 'readonly');
+    const idx = tx.objectStore(AUDIO_STORE).index('patientId');
+    const req = idx.getAll(patientId);
+    req.onsuccess = ()=> resolve(req.result || []);
+    req.onerror = ()=> reject(req.error);
+  }));
+}
+async function audioDbDeleteByPatient(patientId){
+  let list = [];
+  try{ list = await audioDbGetByPatient(patientId); }catch(err){ return; }
+  for(const r of list){ try{ await audioDbDelete(r.id); }catch(err){} }
+}
+
+let mediaRecorder = null;
+let mediaStream = null;
+let recChunks = [];
+let recStartTs = 0;
+let recTimerInt = null;
+
+function toggleRecording(){
+  if(mediaRecorder && mediaRecorder.state === 'recording'){ stopRecording(); }
+  else{ startRecording(); }
+}
+
+async function startRecording(){
+  if(!currentPatient()){ alert('Спочатку оберіть або створіть пацієнта.'); return; }
+  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)){
+    alert('Запис звуку не підтримується цим браузером, або сторінка відкрита не через https/localhost (мікрофон вимагає безпечного з’єднання).');
+    return;
+  }
+  try{
+    mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(err){
+    alert('Не вдалося отримати доступ до мікрофона. Перевірте дозволи для цього сайту в налаштуваннях браузера/пристрою.');
+    return;
+  }
+  recChunks = [];
+  let mimeType = '';
+  const candidates = ['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'];
+  for(const c of candidates){ if(MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)){ mimeType = c; break; } }
+  try{
+    mediaRecorder = mimeType ? new MediaRecorder(mediaStream, {mimeType}) : new MediaRecorder(mediaStream);
+  }catch(err){
+    mediaRecorder = new MediaRecorder(mediaStream);
+  }
+  mediaRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) recChunks.push(e.data); };
+  mediaRecorder.onstop = onRecordingStop;
+  mediaRecorder.start();
+  recStartTs = Date.now();
+  document.getElementById('recBtn').classList.add('recording');
+  document.getElementById('recBtn').textContent = '⏹';
+  document.getElementById('recHint').textContent = 'Йде запис… натисніть, щоб зупинити';
+  recTimerInt = setInterval(updateRecTimer, 250);
+  updateRecTimer();
+}
+
+function updateRecTimer(){
+  const el = document.getElementById('recTime');
+  if(el) el.textContent = formatElapsed(Date.now() - recStartTs);
+}
+
+function stopRecording(){
+  if(!mediaRecorder) return;
+  if(mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
+  if(recTimerInt){ clearInterval(recTimerInt); recTimerInt = null; }
+  document.getElementById('recBtn').classList.remove('recording');
+  document.getElementById('recBtn').textContent = '⏺';
+  document.getElementById('recHint').textContent = 'Натисніть, щоб почати запис';
+  document.getElementById('recTime').textContent = '00:00';
+}
+
+async function onRecordingStop(){
+  const p = currentPatient();
+  const chunks = recChunks; recChunks = [];
+  if(!p || !chunks.length) return;
+  const blob = new Blob(chunks, {type: (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm'});
+  const record = {
+    id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+    patientId: p.id,
+    createdAt: Date.now(),
+    durationMs: Date.now() - recStartTs,
+    mimeType: blob.type,
+    blob: blob
+  };
+  try{
+    await audioDbAdd(record);
+  }catch(err){
+    alert('Не вдалося зберегти запис (можливо, недостатньо вільного місця на пристрої).');
+  }
+  renderAudioList();
+}
+
+async function renderAudioList(){
+  const wrap = document.getElementById('audioList');
+  const empty = document.getElementById('audioListEmpty');
+  if(!wrap || !empty) return;
+  const p = currentPatient();
+  if(!p){ wrap.innerHTML=''; empty.style.display='block'; return; }
+  let list = [];
+  try{ list = await audioDbGetByPatient(p.id); }catch(err){ list = []; }
+  list.sort((a,b)=> b.createdAt - a.createdAt);
+  if(!list.length){ wrap.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  wrap.innerHTML = list.map(r=>{
+    const url = URL.createObjectURL(r.blob);
+    return '<div class="rec-item">'
+      + '<div class="rec-item-head"><span class="rec-item-title">🎙 ' + formatDateShort(r.createdAt) + '</span>'
+      + '<span class="rec-item-meta">' + formatElapsed(r.durationMs) + '</span></div>'
+      + '<audio controls src="' + url + '"></audio>'
+      + '<div class="rec-item-actions">'
+      + '<button type="button" class="btn" onclick="downloadAudioRec(\'' + r.id + '\')">Завантажити</button>'
+      + '<button type="button" class="btn btn-outline-danger" onclick="deleteAudioRec(\'' + r.id + '\')">Видалити</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function downloadAudioRec(id){
+  const p = currentPatient(); if(!p) return;
+  let list = [];
+  try{ list = await audioDbGetByPatient(p.id); }catch(err){ return; }
+  const r = list.find(x=>x.id===id);
+  if(!r) return;
+  const ext = (r.mimeType||'').includes('mp4') ? 'm4a' : ((r.mimeType||'').includes('ogg') ? 'ogg' : 'webm');
+  const url = URL.createObjectURL(r.blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date(r.createdAt);
+  const pad = n => String(n).padStart(2,'0');
+  const stamp = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes());
+  a.download = 'Запис_' + (p.name||'пацієнт') + '_' + stamp + '.' + ext;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+
+function deleteAudioRec(id){
+  showConfirm('Видалити цей запис? Це незворотньо.', async ()=>{
+    try{ await audioDbDelete(id); }catch(err){}
+    renderAudioList();
+  });
 }
 
 /* ---- калькулятор: блок «Об'єм переливання крові» ---- */
