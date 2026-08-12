@@ -95,16 +95,23 @@ button{font-family:var(--font); cursor:pointer;}
 
 .segmented{display:flex; background:var(--field); border:1px solid var(--border-strong); border-radius:10px; padding:3px; gap:3px;}
 
-.rec-panel{display:flex; flex-direction:column; align-items:center; gap:10px; padding:10px 0 4px;}
-.rec-btn{width:76px; height:76px; border-radius:50%; border:none; background:var(--red); color:#fff; font-size:26px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(255,59,48,.3);}
-.rec-btn.recording{animation:recPulse 1.4s ease-in-out infinite;}
-@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.5);} 50%{box-shadow:0 0 0 14px rgba(255,59,48,0);}}
-.rec-time{font-family:var(--mono); font-size:22px; font-weight:700; color:var(--text);}
-.rec-hint{font-size:12px; color:var(--text2); text-align:center;}
+.voice-note-card{padding-bottom:6px;}
+.voice-note-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:6px; flex-wrap:wrap;}
+.voice-note-row{display:flex; align-items:center; justify-content:center; padding:0;}
+.rec-btn{border:none; border-radius:10px; background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; box-shadow:0 3px 10px rgba(255,59,48,.35); transition:background .15s, transform .1s;}
+.rec-btn:active{transform:scale(.96);}
+.rec-btn .rec-icon-stop{display:none;}
+.rec-btn.recording{background:var(--card2); animation:recPulse 1.4s ease-in-out infinite;}
+.rec-btn.recording .rec-icon-mic{display:none;}
+.rec-btn.recording .rec-icon-stop{display:block; color:var(--red);}
+.rec-btn.recording .rec-time{color:var(--text);}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.45);} 50%{box-shadow:0 0 0 7px rgba(255,59,48,0);}}
+.rec-time{font-family:var(--mono); font-size:15px; font-weight:700; color:#fff; letter-spacing:.3px;}
 .rec-item{background:var(--field); border:1px solid var(--border-strong); border-radius:12px; padding:10px 12px; margin-bottom:10px;}
+.rec-item:last-child{margin-bottom:0;}
 .rec-item-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;}
 .rec-item-title{font-size:13px; font-weight:600; color:var(--text);}
-.rec-item-meta{font-size:11px; color:var(--text3); flex-shrink:0;}
+.rec-item-meta{font-size:11px; color:var(--text3); flex-shrink:0; font-family:var(--mono);}
 .rec-item audio{width:100%; height:34px; margin-bottom:8px;}
 .rec-item-actions{display:flex; gap:8px;}
 .rec-item-actions button{flex:1; font-size:12px; padding:7px; min-height:32px;}
@@ -457,6 +464,28 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
   </div>
 
+  <div class="card voice-note-card">
+    <div class="voice-note-head">
+      <h2>Голосова нотатка</h2>
+      <span class="sub" style="margin:0;">Записуйте нотатки під час анестезії</span>
+    </div>
+    <div class="voice-note-row">
+      <button type="button" class="rec-btn" id="recBtn" onclick="toggleRecording()" aria-label="Почати або зупинити запис">
+        <svg class="rec-icon-mic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <svg class="rec-icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+        <span class="rec-time" id="recTime">00:00</span>
+      </button>
+    </div>
+    <button type="button" class="collapse-toggle" id="audioListToggleBtn" onclick="toggleAudioListPanel()">
+      <span>Записи (<span id="audioListCount">0</span>)</span>
+      <span class="collapse-arrow" id="audioListArrow">›</span>
+    </button>
+    <div class="collapse-body" id="audioListBody">
+      <div id="audioList"></div>
+      <div class="empty" id="audioListEmpty" style="display:none;">Записів ще немає</div>
+    </div>
+  </div>
+
   <div class="card" id="extraTimersCard" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h2>Додаткові таймери</h2>
@@ -709,31 +738,12 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   </div>
 </div>
 
-<!-- ДИКТОФОН -->
-<div class="view" id="view-audio">
-  <div class="card">
-    <h2>Голосовий диктофон</h2>
-    <div class="sub">Записуйте голосові нотатки під час анестезії. Записи зберігаються локально на цьому пристрої і прив'язані до поточного пацієнта.</div>
-    <div class="rec-panel">
-      <button type="button" class="rec-btn" id="recBtn" onclick="toggleRecording()" aria-label="Почати/зупинити запис">⏺</button>
-      <div class="rec-time" id="recTime">00:00</div>
-      <div class="rec-hint" id="recHint">Натисніть, щоб почати запис</div>
-    </div>
-  </div>
-  <div class="card">
-    <h2>Записи цього пацієнта</h2>
-    <div id="audioList"></div>
-    <div class="empty" id="audioListEmpty" style="display:none;">Записів ще немає</div>
-  </div>
-</div>
-
 <div class="tabbar no-print">
   <button class="active" data-view="patient" onclick="showView('patient')"><span class="dot">П</span>Пацієнт</button>
   <button data-view="labs" onclick="showView('labs')"><span class="dot">🧪</span>Дослідж.</button>
   <button data-view="drugs" onclick="showView('drugs')"><span class="dot">Д</span>Дози</button>
   <button data-view="vitals" onclick="showView('vitals')"><span class="dot">В</span>Вітальні</button>
   <button data-view="chart" onclick="showView('chart')"><span class="dot">Г</span>Графік</button>
-  <button data-view="audio" onclick="showView('audio')"><span class="dot">🎙</span>Диктофон</button>
   <button data-view="calc" onclick="showView('calc')"><span class="dot">🧮</span>Калькул.</button>
   <button data-view="settings" onclick="showView('settings')"><span class="dot">⚙</span>Налашт.</button>
   <button data-view="print" onclick="showView('print')"><span class="dot">⎙</span>Друк</button>
@@ -982,7 +992,7 @@ function createPatient(){
 
 function switchPatient(id){
   if(mediaRecorder && mediaRecorder.state === 'recording') stopRecording();
-  DB.current = id; save(); syncAlarmSettingsSpeciesToPatient(); renderAll(); renderAudioList();
+  DB.current = id; save(); syncAlarmSettingsSpeciesToPatient(); renderAll();
 }
 
 function showHome(){
@@ -1946,7 +1956,7 @@ function tickExtraTimers(){
 }
 
 function renderAll(){
-  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); calcFluid();
+  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); calcFluid(); renderAudioList();
 }
 
 function showView(name){
@@ -1957,7 +1967,7 @@ function showView(name){
   document.getElementById('labsSaveBar').classList.toggle('active', name==='labs');
   if(name==='chart') renderChart();
   if(name==='calc') initCalcTab();
-  if(name==='audio') renderAudioList();
+  if(name==='vitals') renderAudioList();
   if(name==='settings'){ syncAlarmSettingsSpeciesToPatient(); renderAlarmRangesUI(); }
 }
 
@@ -2052,8 +2062,6 @@ async function startRecording(){
   mediaRecorder.start();
   recStartTs = Date.now();
   document.getElementById('recBtn').classList.add('recording');
-  document.getElementById('recBtn').textContent = '⏹';
-  document.getElementById('recHint').textContent = 'Йде запис… натисніть, щоб зупинити';
   recTimerInt = setInterval(updateRecTimer, 250);
   updateRecTimer();
 }
@@ -2069,8 +2077,6 @@ function stopRecording(){
   if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
   if(recTimerInt){ clearInterval(recTimerInt); recTimerInt = null; }
   document.getElementById('recBtn').classList.remove('recording');
-  document.getElementById('recBtn').textContent = '⏺';
-  document.getElementById('recHint').textContent = 'Натисніть, щоб почати запис';
   document.getElementById('recTime').textContent = '00:00';
 }
 
@@ -2098,12 +2104,14 @@ async function onRecordingStop(){
 async function renderAudioList(){
   const wrap = document.getElementById('audioList');
   const empty = document.getElementById('audioListEmpty');
+  const countEl = document.getElementById('audioListCount');
   if(!wrap || !empty) return;
   const p = currentPatient();
-  if(!p){ wrap.innerHTML=''; empty.style.display='block'; return; }
+  if(!p){ wrap.innerHTML=''; empty.style.display='block'; if(countEl) countEl.textContent='0'; return; }
   let list = [];
   try{ list = await audioDbGetByPatient(p.id); }catch(err){ list = []; }
   list.sort((a,b)=> b.createdAt - a.createdAt);
+  if(countEl) countEl.textContent = String(list.length);
   if(!list.length){ wrap.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
   wrap.innerHTML = list.map(r=>{
@@ -2117,6 +2125,15 @@ async function renderAudioList(){
       + '<button type="button" class="btn btn-outline-danger" onclick="deleteAudioRec(\'' + r.id + '\')">Видалити</button>'
       + '</div></div>';
   }).join('');
+}
+
+function toggleAudioListPanel(){
+  const body = document.getElementById('audioListBody');
+  const arrow = document.getElementById('audioListArrow');
+  if(!body || !arrow) return;
+  const open = !body.classList.contains('open');
+  body.classList.toggle('open', open);
+  arrow.classList.toggle('open', open);
 }
 
 async function downloadAudioRec(id){
