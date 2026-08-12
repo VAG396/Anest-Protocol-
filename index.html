@@ -123,6 +123,9 @@ button{font-family:var(--font); cursor:pointer;}
 .picker-empty{color:var(--text2); font-size:13px; padding:6px 4px 2px;}
 .segmented button{flex:1; background:none; border:none; border-radius:8px; padding:8px 4px; font-size:13px; font-weight:600; color:var(--text2);}
 .segmented button.active{background:var(--card2); color:var(--text); box-shadow:0 0 0 1px var(--border-strong);}
+#v_plane_btns{background:none; border:none; padding:0; gap:8px;}
+#v_plane_btns button{background:var(--field); border:1px solid var(--border-strong); border-radius:14px; padding:10px 4px;}
+#v_plane_btns button.active{background:var(--card2); color:var(--text); box-shadow:0 0 0 1px var(--text2);}
 
 /* session header card */
 .session-card{padding:16px;}
@@ -165,8 +168,8 @@ button{font-family:var(--font); cursor:pointer;}
 .vfield input:disabled{color:var(--green); opacity:1;}
 .vfield .unit{font-size:13px; color:var(--text2); white-space:nowrap;}
 
-.rrmode-seg{display:inline-flex; background:var(--bg); border:1px solid var(--border-strong); border-radius:8px; padding:2px; gap:2px; margin-top:8px;}
-.rrmode-seg button{width:26px; background:none; border:none; border-radius:6px; padding:4px 0; font-size:12px; font-weight:700; color:var(--text2); font-family:var(--font);}
+.rrmode-seg{display:flex; background:var(--bg); border:1px solid var(--border-strong); border-radius:8px; padding:2px; gap:2px; margin-top:8px;}
+.rrmode-seg button{flex:1; background:none; border:none; border-radius:6px; padding:5px 0; font-size:11px; font-weight:700; color:var(--text2); font-family:var(--font); letter-spacing:.2px;}
 .rrmode-seg button.active{background:var(--card2); color:var(--green); box-shadow:0 0 0 1px var(--green-dim);}
 .rrmode-seg button.active.mech{color:var(--purple); box-shadow:0 0 0 1px var(--purple);}
 .rr-tag{font-size:9px; font-weight:700; padding:1px 5px; border-radius:6px; margin-left:4px; vertical-align:1px; white-space:nowrap;}
@@ -453,7 +456,12 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     <h2>Вітальні показники</h2>
     <div class="sub">Поля заповнюються останніми введеними — міняйте лише те, що змінилось</div>
     <div class="field" style="margin-bottom:4px;"><label>Стадія</label>
-      <select id="v_plane" onchange="markVitalsDirty()"><option value="">—</option><option>Індукція</option><option>Легка</option><option>Хірургічна</option><option>Глибока</option><option>Пробудження</option></select>
+      <div class="segmented" id="v_plane_btns">
+        <button type="button" data-value="Індукція" onclick="setVitalsPlane(this)">І</button>
+        <button type="button" data-value="Хірургічна" onclick="setVitalsPlane(this)">Х</button>
+        <button type="button" data-value="Пробудження" onclick="setVitalsPlane(this)">П</button>
+      </div>
+      <input type="hidden" id="v_plane" value="">
     </div>
     <div class="vgrid">
       <div class="vfield"><label>ЧСС</label><div class="vfield-row"><input id="v_hr" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div></div>
@@ -1583,6 +1591,7 @@ function loadVitalsEntryDefaults(){
     if(el) el.value = last ? (last[k] || '') : '';
   });
   const planeEl = document.getElementById('v_plane'); if(planeEl) planeEl.value = last ? (last.plane || '') : '';
+  updateVitalsPlaneUI();
   const notesEl = document.getElementById('v_notes'); if(notesEl) notesEl.value = '';
   currentRRMode = (last && last.rrMode) ? last.rrMode : 'spont';
   updateRRModeUI();
@@ -1593,6 +1602,36 @@ function loadVitalsEntryDefaults(){
   const statusEl = document.getElementById('vitalsSaveStatus');
   if(statusEl){ statusEl.textContent = 'Не збережено'; statusEl.className = 'save-status'; }
   updateVitalAlarms();
+}
+
+const PLANE_PRESETS = {
+  'Індукція': {isosevo:2, o2:1},
+  'Хірургічна': {isosevo:1.5, o2:1},
+  'Пробудження': {isosevo:0, o2:4}
+};
+
+function setVitalsPlane(btn){
+  const hidden = document.getElementById('v_plane');
+  const wasActive = btn.classList.contains('active');
+  const newVal = wasActive ? '' : btn.dataset.value;
+  hidden.value = newVal;
+  updateVitalsPlaneUI();
+  const preset = PLANE_PRESETS[newVal];
+  if(preset){
+    const isosevoEl = document.getElementById('v_isosevo');
+    const o2El = document.getElementById('v_o2');
+    if(isosevoEl) isosevoEl.value = preset.isosevo;
+    if(o2El) o2El.value = preset.o2;
+  }
+  markVitalsDirty();
+}
+
+function updateVitalsPlaneUI(){
+  const hidden = document.getElementById('v_plane');
+  const val = hidden ? hidden.value : '';
+  document.querySelectorAll('#v_plane_btns button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.value === val && val !== '');
+  });
 }
 
 function markVitalsDirty(){
