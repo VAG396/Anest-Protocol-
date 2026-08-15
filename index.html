@@ -64,6 +64,7 @@ button{font-family:var(--font); cursor:pointer;}
 .field input:focus, .field select:focus{outline:2px solid var(--blue); background:#000;}
 
 .btn{border:1px solid var(--border-strong); background:var(--card2); border-radius:12px; padding:11px 16px; font-size:14px; font-weight:600; color:var(--text); min-height:44px;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
 .btn:active{background:var(--border);}
 .btn-primary{background:var(--green); border-color:var(--green); color:#04220D;}
 .btn-primary:active{background:var(--green-dim); color:#fff;}
@@ -687,6 +688,19 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
   </div>
   <div class="card">
+    <h2>Автопауза таймера анестезії без запису</h2>
+    <div class="sub">Якщо з моменту старту таймера на вкладці «Вітальні» (або останнього збереженого запису) минув обраний інтервал без нового запису — таймер хірургічного втручання зупиняється автоматично (як натискання «End»)</div>
+    <div class="segmented">
+      <button id="autoPauseNoRecordOnBtn" onclick="toggleAutoPauseNoRecordSetting(true)">Увімкнено</button>
+      <button id="autoPauseNoRecordOffBtn" onclick="toggleAutoPauseNoRecordSetting(false)">Вимкнено</button>
+    </div>
+    <div class="segmented" style="margin-top:8px;">
+      <button id="autoPauseNoRecordInterval15Btn" onclick="setAutoPauseNoRecordInterval(2)">2 хв</button>
+      <button id="autoPauseNoRecordInterval20Btn" onclick="setAutoPauseNoRecordInterval(20)">20 хв</button>
+      <button id="autoPauseNoRecordInterval30Btn" onclick="setAutoPauseNoRecordInterval(30)">30 хв</button>
+    </div>
+  </div>
+  <div class="card">
     <h2>Вирівнювання часу запису</h2>
     <div class="sub">Якщо запис вносите із запізненням (жовта/червона зона), час запису округлюється до найближчого проміжку протоколу (5 або 10 хв), а не фактичного часу внесення. Напр.: попередній запис 15:20, внесли о 15:27 — збережеться 15:25</div>
     <div class="segmented">
@@ -905,6 +919,8 @@ if(!DB.settings.surgeons) DB.settings.surgeons = [];
 if(DB.settings.saveColorEnabled === undefined) DB.settings.saveColorEnabled = true;
 if(DB.settings.autoStartTimer === undefined) DB.settings.autoStartTimer = true;
 if(DB.settings.alarmsEnabled === undefined) DB.settings.alarmsEnabled = true;
+if(DB.settings.autoPauseNoRecordEnabled === undefined) DB.settings.autoPauseNoRecordEnabled = true;
+if(!DB.settings.autoPauseNoRecordInterval) DB.settings.autoPauseNoRecordInterval = 20;
 if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
 if(!DB.settings.alarmRanges) DB.settings.alarmRanges = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES));
 Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp]) DB.settings.alarmRanges[sp] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[sp])); });
@@ -915,7 +931,7 @@ function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
 function newPatientObj(name){
   return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'',
     date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
-    sessionStart:null, sessionEnd:null, extraTimers:[], lastVitalSaveAt:null, labs:{},
+    sessionStart:null, sessionEnd:null, sessionAutoStopped:false, extraTimers:[], lastVitalSaveAt:null, labs:{},
     drugConc: {}, vitals: [], drugLog: [], customDrugs: [], eyeLubeCount:0, eyeLubeLastPressAt:null, eyeLubeLocked:false, pendingEyeLube:0 };
 }
 
@@ -1113,6 +1129,35 @@ function toggleSaveColorSetting(on){
   renderSettingsUI(); updateSaveBarTimer();
 }
 
+function autoPauseNoRecordEnabled(){ return DB.settings ? DB.settings.autoPauseNoRecordEnabled !== false : true; }
+function toggleAutoPauseNoRecordSetting(on){
+  DB.settings.autoPauseNoRecordEnabled = on; save();
+  renderSettingsUI(); checkAutoPauseNoRecord();
+}
+function autoPauseNoRecordMinutes(){ return (DB.settings && DB.settings.autoPauseNoRecordInterval) || 20; }
+function setAutoPauseNoRecordInterval(min){
+  DB.settings.autoPauseNoRecordInterval = min; save();
+  renderSettingsUI(); checkAutoPauseNoRecord();
+}
+
+/* Автопауза таймера анестезії без запису: якщо з моменту останнього збереженого
+   запису вітальних (або старту сесії, якщо записів ще не було) минув обраний
+   інтервал без нового запису — сесія завершується так само, як натискання «End»,
+   але sessionEnd виставляється саме в момент останнього запису (ref), а не в
+   поточний момент — тобто «мертвий» час без записів не входить у тривалість. */
+function checkAutoPauseNoRecord(){
+  if(!autoPauseNoRecordEnabled()) return;
+  const p = currentPatient();
+  if(!p || !p.sessionStart || p.sessionEnd) return;
+  const ref = p.lastVitalSaveAt || p.sessionStart;
+  const limitMs = autoPauseNoRecordMinutes() * 60000;
+  if(Date.now() - ref >= limitMs){
+    p.sessionEnd = ref;
+    p.sessionAutoStopped = true;
+    save(); renderSession(); updateSaveBarTimer();
+  }
+}
+
 function autoStartTimerEnabled(){ return DB.settings ? DB.settings.autoStartTimer !== false : true; }
 function toggleAutoStartTimerSetting(on){
   DB.settings.autoStartTimer = on; save(); renderSettingsUI();
@@ -1163,6 +1208,13 @@ function renderSettingsUI(){
   document.getElementById('eyeLubeInterval15Btn').classList.toggle('active', eyeInterval===15);
   document.getElementById('eyeLubeInterval30Btn').classList.toggle('active', eyeInterval===30);
   document.getElementById('eyeLubeInterval60Btn').classList.toggle('active', eyeInterval===60);
+  const onAutoPause = autoPauseNoRecordEnabled();
+  document.getElementById('autoPauseNoRecordOnBtn').classList.toggle('active', onAutoPause);
+  document.getElementById('autoPauseNoRecordOffBtn').classList.toggle('active', !onAutoPause);
+  const autoPauseInterval = autoPauseNoRecordMinutes();
+  document.getElementById('autoPauseNoRecordInterval15Btn').classList.toggle('active', autoPauseInterval===2);
+  document.getElementById('autoPauseNoRecordInterval20Btn').classList.toggle('active', autoPauseInterval===20);
+  document.getElementById('autoPauseNoRecordInterval30Btn').classList.toggle('active', autoPauseInterval===30);
   const onAutoStart = autoStartTimerEnabled();
   document.getElementById('autoStartOnBtn').classList.toggle('active', onAutoStart);
   document.getElementById('autoStartOffBtn').classList.toggle('active', !onAutoStart);
@@ -1662,6 +1714,7 @@ function loadVitalsEntryDefaults(){
   const statusEl = document.getElementById('vitalsSaveStatus');
   if(statusEl){ statusEl.textContent = 'Не збережено'; statusEl.className = 'save-status'; }
   updateVitalAlarms();
+  updateVitalsSaveLock();
 }
 
 const PLANE_PRESETS = {
@@ -1694,6 +1747,19 @@ function updateVitalsPlaneUI(){
   });
 }
 
+function updateVitalsSaveLock(){
+  const p = currentPatient();
+  const btn = document.getElementById('vitalsSaveBtn');
+  const statusEl = document.getElementById('vitalsSaveStatus');
+  if(!btn) return;
+  const sessionRunning = !!(p && p.sessionStart && !p.sessionEnd);
+  btn.disabled = !sessionRunning;
+  if(!sessionRunning && statusEl){
+    statusEl.textContent = 'Запустіть таймер хірургії, щоб зберігати записи';
+    statusEl.className = 'save-status';
+  }
+}
+
 function markVitalsDirty(){
   const statusEl = document.getElementById('vitalsSaveStatus'); if(!statusEl) return;
   statusEl.textContent = 'Незбережені зміни'; statusEl.className = 'save-status dirty';
@@ -1701,6 +1767,10 @@ function markVitalsDirty(){
 
 function addVital(){
   const p = currentPatient(); if(!p) return;
+  if(!p.sessionStart || p.sessionEnd){
+    alert('Спочатку запустіть таймер хірургії («Почати» на вкладці «Пацієнт»), щоб зберігати вітальні показники.');
+    return;
+  }
   let timeVal = nowTime();
   if(snapToGridEnabled()) timeVal = snapTimeToGrid(timeVal, p);
   const rec = {
@@ -1862,9 +1932,9 @@ function renderChart(){
 function toggleSession(){
   const p = currentPatient(); if(!p) return;
   if(!p.sessionStart || p.sessionEnd){
-    p.sessionStart = Date.now(); p.sessionEnd = null; p.lastVitalSaveAt = null;
+    p.sessionStart = Date.now(); p.sessionEnd = null; p.sessionAutoStopped = false; p.lastVitalSaveAt = null;
   } else {
-    p.sessionEnd = Date.now();
+    p.sessionEnd = Date.now(); p.sessionAutoStopped = false;
   }
   save(); renderSession(); updateSaveBarTimer();
 }
@@ -1889,7 +1959,7 @@ function renderSession(){
   const statusEl = document.getElementById('sess_status');
   document.getElementById('sess_name').textContent = p ? (p.name || '—') : '—';
   document.getElementById('sess_meta').textContent = p ? [p.species, p.weight?p.weight+' кг':''].filter(Boolean).join(' · ') : '—';
-  if(!p){ document.getElementById('sess_timer').textContent = '00:00:00'; statusEl.textContent=''; dot.classList.remove('live'); return; }
+  if(!p){ document.getElementById('sess_timer').textContent = '00:00:00'; statusEl.textContent=''; dot.classList.remove('live'); updateVitalsSaveLock(); return; }
   const startLabel = (ts)=>{ const d=new Date(ts); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
   if(p.sessionStart && !p.sessionEnd){
     btn.textContent = 'End'; btn.className = 'btn btn-danger pill-btn no-print'; dot.classList.add('live');
@@ -1897,13 +1967,14 @@ function renderSession(){
     updateTimerDisplay(p);
   } else if(p.sessionStart && p.sessionEnd){
     btn.textContent = 'Почати знову'; btn.className = 'btn pill-btn no-print'; dot.classList.remove('live');
-    statusEl.textContent = 'Завершено о ' + startLabel(p.sessionEnd) + ' · тривалість збережена';
+    statusEl.textContent = p.sessionAutoStopped ? 'таймер зупинено автоматично' : ('Завершено о ' + startLabel(p.sessionEnd) + ' · тривалість збережена');
     updateTimerDisplay(p);
   } else {
     btn.textContent = 'Почати'; btn.className = 'btn btn-primary pill-btn no-print'; dot.classList.remove('live');
     document.getElementById('sess_timer').textContent = '00:00:00';
     statusEl.textContent = 'Дані пацієнта зберігаються локально автоматично';
   }
+  updateVitalsSaveLock();
 }
 
 /* ---- extra (lap) timers ---- */
@@ -1979,7 +2050,7 @@ function showView(name){
   document.getElementById('labsSaveBar').classList.toggle('active', name==='labs');
   if(name==='chart') renderChart();
   if(name==='calc') initCalcTab();
-  if(name==='vitals') renderAudioList();
+  if(name==='vitals'){ renderAudioList(); updateVitalsSaveLock(); }
   if(name==='settings'){ syncAlarmSettingsSpeciesToPatient(); renderAlarmRangesUI(); }
 }
 
@@ -2615,7 +2686,7 @@ function exportDataFile(){
 
 if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patients.push(p); DB.current = p.id; }
 if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
-DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.extraTimers) p.extraTimers = []; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.eyeLubeCount === undefined) p.eyeLubeCount = 0; if(p.eyeLubeLastPressAt === undefined) p.eyeLubeLastPressAt = null; if(p.eyeLubeLocked === undefined) p.eyeLubeLocked = false; if(p.pendingEyeLube === undefined) p.pendingEyeLube = 0; });
+DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.extraTimers) p.extraTimers = []; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.eyeLubeCount === undefined) p.eyeLubeCount = 0; if(p.eyeLubeLastPressAt === undefined) p.eyeLubeLastPressAt = null; if(p.eyeLubeLocked === undefined) p.eyeLubeLocked = false; if(p.pendingEyeLube === undefined) p.pendingEyeLube = 0; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; });
 save();
 syncAlarmSettingsSpeciesToPatient();
 renderAll();
@@ -2625,6 +2696,7 @@ showHome();
 setInterval(()=>{
   const p = currentPatient();
   if(p && p.sessionStart && !p.sessionEnd) updateTimerDisplay(p);
+  checkAutoPauseNoRecord();
   tickExtraTimers();
   updateSaveBarTimer();
   updateEyeLubeUI();
