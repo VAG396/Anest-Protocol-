@@ -689,15 +689,10 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   </div>
   <div class="card">
     <h2>Автопауза таймера анестезії без запису</h2>
-    <div class="sub">Якщо з моменту старту таймера на вкладці «Вітальні» (або останнього збереженого запису) минув обраний інтервал без нового запису — таймер хірургічного втручання зупиняється автоматично (як натискання «End»)</div>
+    <div class="sub">Якщо з моменту старту таймера на вкладці «Вітальні» (або останнього збереженого запису) минуло 30 хв без нового запису — таймер хірургічного втручання зупиняється автоматично (як натискання «End»)</div>
     <div class="segmented">
       <button id="autoPauseNoRecordOnBtn" onclick="toggleAutoPauseNoRecordSetting(true)">Увімкнено</button>
       <button id="autoPauseNoRecordOffBtn" onclick="toggleAutoPauseNoRecordSetting(false)">Вимкнено</button>
-    </div>
-    <div class="segmented" style="margin-top:8px;">
-      <button id="autoPauseNoRecordInterval15Btn" onclick="setAutoPauseNoRecordInterval(2)">2 хв</button>
-      <button id="autoPauseNoRecordInterval20Btn" onclick="setAutoPauseNoRecordInterval(20)">20 хв</button>
-      <button id="autoPauseNoRecordInterval30Btn" onclick="setAutoPauseNoRecordInterval(30)">30 хв</button>
     </div>
   </div>
   <div class="card">
@@ -920,7 +915,6 @@ if(DB.settings.saveColorEnabled === undefined) DB.settings.saveColorEnabled = tr
 if(DB.settings.autoStartTimer === undefined) DB.settings.autoStartTimer = true;
 if(DB.settings.alarmsEnabled === undefined) DB.settings.alarmsEnabled = true;
 if(DB.settings.autoPauseNoRecordEnabled === undefined) DB.settings.autoPauseNoRecordEnabled = true;
-if(!DB.settings.autoPauseNoRecordInterval) DB.settings.autoPauseNoRecordInterval = 20;
 if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
 if(!DB.settings.alarmRanges) DB.settings.alarmRanges = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES));
 Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp]) DB.settings.alarmRanges[sp] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[sp])); });
@@ -1134,11 +1128,7 @@ function toggleAutoPauseNoRecordSetting(on){
   DB.settings.autoPauseNoRecordEnabled = on; save();
   renderSettingsUI(); checkAutoPauseNoRecord();
 }
-function autoPauseNoRecordMinutes(){ return (DB.settings && DB.settings.autoPauseNoRecordInterval) || 20; }
-function setAutoPauseNoRecordInterval(min){
-  DB.settings.autoPauseNoRecordInterval = min; save();
-  renderSettingsUI(); checkAutoPauseNoRecord();
-}
+function autoPauseNoRecordMinutes(){ return 30; }
 
 /* Автопауза таймера анестезії без запису: якщо з моменту останнього збереженого
    запису вітальних (або старту сесії, якщо записів ще не було) минув обраний
@@ -1211,10 +1201,6 @@ function renderSettingsUI(){
   const onAutoPause = autoPauseNoRecordEnabled();
   document.getElementById('autoPauseNoRecordOnBtn').classList.toggle('active', onAutoPause);
   document.getElementById('autoPauseNoRecordOffBtn').classList.toggle('active', !onAutoPause);
-  const autoPauseInterval = autoPauseNoRecordMinutes();
-  document.getElementById('autoPauseNoRecordInterval15Btn').classList.toggle('active', autoPauseInterval===2);
-  document.getElementById('autoPauseNoRecordInterval20Btn').classList.toggle('active', autoPauseInterval===20);
-  document.getElementById('autoPauseNoRecordInterval30Btn').classList.toggle('active', autoPauseInterval===30);
   const onAutoStart = autoStartTimerEnabled();
   document.getElementById('autoStartOnBtn').classList.toggle('active', onAutoStart);
   document.getElementById('autoStartOffBtn').classList.toggle('active', !onAutoStart);
