@@ -1917,7 +1917,8 @@ function renderChart(){
 /* ---- session timer ---- */
 function toggleSession(){
   const p = currentPatient(); if(!p) return;
-  if(!p.sessionStart || p.sessionEnd){
+  if(p.sessionEnd) return; // сесію завершено — повторний запуск заблоковано
+  if(!p.sessionStart){
     p.sessionStart = Date.now(); p.sessionEnd = null; p.sessionAutoStopped = false; p.lastVitalSaveAt = null;
   } else {
     p.sessionEnd = Date.now(); p.sessionAutoStopped = false;
@@ -1948,15 +1949,15 @@ function renderSession(){
   if(!p){ document.getElementById('sess_timer').textContent = '00:00:00'; statusEl.textContent=''; dot.classList.remove('live'); updateVitalsSaveLock(); return; }
   const startLabel = (ts)=>{ const d=new Date(ts); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
   if(p.sessionStart && !p.sessionEnd){
-    btn.textContent = 'End'; btn.className = 'btn btn-danger pill-btn no-print'; dot.classList.add('live');
+    btn.style.display = ''; btn.textContent = 'End'; btn.className = 'btn btn-danger pill-btn no-print'; dot.classList.add('live');
     statusEl.textContent = 'Триває з ' + startLabel(p.sessionStart) + ' · збережено на пристрої';
     updateTimerDisplay(p);
   } else if(p.sessionStart && p.sessionEnd){
-    btn.textContent = 'Почати знову'; btn.className = 'btn pill-btn no-print'; dot.classList.remove('live');
+    btn.style.display = 'none'; dot.classList.remove('live');
     statusEl.textContent = p.sessionAutoStopped ? 'таймер зупинено автоматично' : ('Завершено о ' + startLabel(p.sessionEnd) + ' · тривалість збережена');
     updateTimerDisplay(p);
   } else {
-    btn.textContent = 'Почати'; btn.className = 'btn btn-primary pill-btn no-print'; dot.classList.remove('live');
+    btn.style.display = ''; btn.textContent = 'Почати'; btn.className = 'btn btn-primary pill-btn no-print'; dot.classList.remove('live');
     document.getElementById('sess_timer').textContent = '00:00:00';
     statusEl.textContent = 'Дані пацієнта зберігаються локально автоматично';
   }
