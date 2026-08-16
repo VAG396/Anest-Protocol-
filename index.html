@@ -96,26 +96,13 @@ button{font-family:var(--font); cursor:pointer;}
 
 .segmented{display:flex; background:var(--field); border:1px solid var(--border-strong); border-radius:10px; padding:3px; gap:3px;}
 
-.voice-note-card{padding-bottom:6px;}
-.voice-note-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:6px; flex-wrap:wrap;}
-.voice-note-row{display:flex; align-items:center; justify-content:center; padding:0;}
-.rec-btn{border:none; border-radius:10px; background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; box-shadow:0 3px 10px rgba(255,59,48,.35); transition:background .15s, transform .1s;}
-.rec-btn:active{transform:scale(.96);}
-.rec-btn .rec-icon-stop{display:none;}
-.rec-btn.recording{background:var(--card2); animation:recPulse 1.4s ease-in-out infinite;}
-.rec-btn.recording .rec-icon-mic{display:none;}
-.rec-btn.recording .rec-icon-stop{display:block; color:var(--red);}
-.rec-btn.recording .rec-time{color:var(--text);}
-@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.45);} 50%{box-shadow:0 0 0 7px rgba(255,59,48,0);}}
-.rec-time{font-family:var(--mono); font-size:15px; font-weight:700; color:#fff; letter-spacing:.3px;}
-.rec-item{background:var(--field); border:1px solid var(--border-strong); border-radius:12px; padding:10px 12px; margin-bottom:10px;}
-.rec-item:last-child{margin-bottom:0;}
-.rec-item-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;}
-.rec-item-title{font-size:13px; font-weight:600; color:var(--text);}
-.rec-item-meta{font-size:11px; color:var(--text3); flex-shrink:0; font-family:var(--mono);}
-.rec-item audio{width:100%; height:34px; margin-bottom:8px;}
-.rec-item-actions{display:flex; gap:8px;}
-.rec-item-actions button{flex:1; font-size:12px; padding:7px; min-height:32px;}
+.quick-card .collapse-toggle{margin-top:0;}
+.asa-standalone{padding:12px 16px;}
+.asa-btn-row{display:grid; grid-template-columns:repeat(5,1fr); gap:8px;}
+.asa-btn{border-radius:14px; padding:12px 4px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); font-weight:700; font-size:14px; text-align:center; min-height:44px;}
+.asa-btn:active{opacity:.75;}
+.asa-btn.active{background:var(--purple); border-color:var(--purple); color:#1E1030;}
+
 
 .calc-result{display:flex; align-items:center; justify-content:space-between; background:var(--field); border:1px solid var(--border-strong); border-radius:12px; padding:14px 16px; margin-top:6px;}
 .calc-result-label{font-size:13px; color:var(--text2); font-weight:500;}
@@ -160,13 +147,6 @@ button{font-family:var(--font); cursor:pointer;}
 .timer-dot.live{background:var(--green); box-shadow:0 0 0 3px rgba(49,209,88,.2);}
 
 /* extra timers */
-.extra-timer{background:var(--field); border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
-.extra-timer-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
-.extra-timer-head b{font-size:14px;}
-.extra-timer-digits{font-family:var(--mono); font-size:30px; font-weight:700; text-align:center; margin:6px 0 10px;}
-.laps{margin-top:8px; max-height:120px; overflow-y:auto;}
-.lap-row{display:flex; justify-content:space-between; font-family:var(--mono); font-size:12px; color:var(--text2); padding:4px 2px; border-bottom:1px solid var(--border);}
-.lap-row:last-child{border-bottom:none;}
 
 /* drug calculator */
 .drug-row{display:grid; grid-template-columns:1fr 70px 74px; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border);}
@@ -465,35 +445,17 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
   </div>
 
-  <div class="card voice-note-card">
-    <div class="voice-note-head">
-      <h2>Голосова нотатка</h2>
-      <span class="sub" style="margin:0;">Записуйте нотатки під час анестезії</span>
-    </div>
-    <div class="voice-note-row">
-      <button type="button" class="rec-btn" id="recBtn" onclick="toggleRecording()" aria-label="Почати або зупинити запис">
-        <svg class="rec-icon-mic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        <svg class="rec-icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
-        <span class="rec-time" id="recTime">00:00</span>
-      </button>
-    </div>
-    <button type="button" class="collapse-toggle" id="audioListToggleBtn" onclick="toggleAudioListPanel()">
-      <span>Записи (<span id="audioListCount">0</span>)</span>
-      <span class="collapse-arrow" id="audioListArrow">›</span>
+  <div class="card no-print quick-card">
+    <button type="button" class="collapse-toggle" id="vitalsQuickToggleBtn" onclick="toggleVitalsQuickPanel()">
+      <span>Швидкі зміни</span>
+      <span class="collapse-arrow" id="vitalsQuickArrow">›</span>
     </button>
-    <div class="collapse-body" id="audioListBody">
-      <div id="audioList"></div>
-      <div class="empty" id="audioListEmpty" style="display:none;">Записів ще немає</div>
+    <div class="collapse-body" id="vitalsQuickBody">
     </div>
   </div>
 
-  <div class="card" id="extraTimersCard" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2>Додаткові таймери</h2>
-      <button class="btn drug-add-btn no-print" onclick="openModal('addTimerModal')">+ Таймер</button>
-    </div>
-    <div class="sub">Для фіксації часу окремих втручань чи подій під час операції</div>
-    <div id="extraTimersList"></div>
+  <div class="card no-print asa-standalone">
+    <div class="asa-btn-row" id="asaButtons"></div>
   </div>
 
   <div class="card no-print">
@@ -652,14 +614,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <button id="mapModeManualBtn" onclick="setMapMode('manual')">Вручну</button>
     </div>
     <div class="hint">Авто: MAP = ДАТ + (САТ − ДАТ) / 3. Вручну — вводите значення самі.</div>
-  </div>
-  <div class="card">
-    <h2>Додаткові таймери</h2>
-    <div class="sub">Окремі секундоміри з кнопкою «Зафіксувати час» на вкладці «Вітальні» — для декількох втручань чи подій за одну анестезію</div>
-    <div class="segmented">
-      <button id="extraTimersOnBtn" onclick="toggleExtraTimersSetting(true)">Увімкнено</button>
-      <button id="extraTimersOffBtn" onclick="toggleExtraTimersSetting(false)">Вимкнено</button>
-    </div>
   </div>
   <div class="card">
     <h2>Кольоровий індикатор на кнопці «Зберегти»</h2>
@@ -822,15 +776,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   </div>
 </div>
 
-<div class="modal-bg no-print" id="addTimerModal-bg" onclick="if(event.target===this) closeModal('addTimerModal')">
-  <div class="modal" style="position:relative;">
-    <button class="close-x" onclick="closeModal('addTimerModal')">✕</button>
-    <h3>Новий таймер</h3>
-    <div class="field"><label>Назва</label><input id="et_name" placeholder="напр. Джгут, Розтин, Гемостаз"></div>
-    <button class="btn btn-primary btn-block" onclick="addExtraTimer()">Почати таймер</button>
-  </div>
-</div>
-
 <div class="modal-bg no-print" id="addDrugModal-bg" onclick="if(event.target===this) closeModal('addDrugModal')">
   <div class="modal" style="position:relative;">
     <button class="close-x" onclick="closeModal('addDrugModal')">✕</button>
@@ -903,9 +848,9 @@ const DEFAULT_DRUGS = [
 
 const DEFAULT_PROCEDURES = ['Абдомінальна хірургія','Кастрація/стерилізація','COHAT (стоматологічна санація)','Пластика грижі','Ушивання рани','Видалення новоутворення','Остеосинтез перелому','Ортопедія — інше','TPLO','Кесарів розтин','Видалення стороннього тіла','Ендоскопія'];
 
-let DB = JSON.parse(localStorage.getItem('vetAnesthDB') || '{"patients":[],"current":null,"settings":{"extraTimersEnabled":false,"recordInterval":5}}');
+let DB = JSON.parse(localStorage.getItem('vetAnesthDB') || '{"patients":[],"current":null,"settings":{"recordInterval":5}}');
 if(!DB.patients) DB.patients = [];
-if(!DB.settings) DB.settings = {extraTimersEnabled:false, recordInterval:5, snapToGrid:true, defaultAnesthesiologist:'', surgeons:[], saveColorEnabled:true, autoStartTimer:true, eyeLubeInterval:30, alarmsEnabled:true};
+if(!DB.settings) DB.settings = {recordInterval:5, snapToGrid:true, defaultAnesthesiologist:'', surgeons:[], saveColorEnabled:true, autoStartTimer:true, eyeLubeInterval:30, alarmsEnabled:true};
 if(!DB.settings.recordInterval) DB.settings.recordInterval = 5;
 if(!DB.settings.eyeLubeInterval) DB.settings.eyeLubeInterval = 30;
 if(DB.settings.snapToGrid === undefined) DB.settings.snapToGrid = true;
@@ -925,8 +870,54 @@ function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
 function newPatientObj(name){
   return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'',
     date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
-    sessionStart:null, sessionEnd:null, sessionAutoStopped:false, extraTimers:[], lastVitalSaveAt:null, labs:{},
+    sessionStart:null, sessionEnd:null, sessionAutoStopped:false, lastVitalSaveAt:null, labs:{},
+    asaClass:null, asaEmergency:false,
     drugConc: {}, vitals: [], drugLog: [], customDrugs: [], eyeLubeCount:0, eyeLubeLastPressAt:null, eyeLubeLocked:false, pendingEyeLube:0 };
+}
+
+/* ---- vitals tab: collapsible "quick changes" panel ---- */
+function toggleVitalsQuickPanel(){
+  const body = document.getElementById('vitalsQuickBody');
+  const arrow = document.getElementById('vitalsQuickArrow');
+  if(!body || !arrow) return;
+  const open = !body.classList.contains('open');
+  body.classList.toggle('open', open);
+  arrow.classList.toggle('open', open);
+}
+
+/* ---- ASA physical status quick-picker ----
+   Click on an unselected class -> selects it.
+   Click again on the already-selected class -> appends "-E" (emergency modifier) — only for classes III, IV, V.
+   Classes I and II have no emergency modifier: a second click simply clears the selection.
+   Click again once "-E" is shown -> clears the selection entirely. */
+const ASA_CLASSES = ['I','II','III','IV','V'];
+const ASA_EMERGENCY_ELIGIBLE = ['III','IV','V'];
+function setAsaClass(cls){
+  const p = currentPatient(); if(!p) return;
+  const canEmergency = ASA_EMERGENCY_ELIGIBLE.includes(cls);
+  if(p.asaClass !== cls){
+    p.asaClass = cls;
+    p.asaEmergency = false;
+  } else if(canEmergency && !p.asaEmergency){
+    p.asaEmergency = true;
+  } else {
+    p.asaClass = null;
+    p.asaEmergency = false;
+  }
+  save();
+  renderAsaQuick();
+}
+function renderAsaQuick(){
+  const wrap = document.getElementById('asaButtons');
+  if(!wrap) return;
+  const p = currentPatient();
+  const cls = p ? p.asaClass : null;
+  const emergency = !!(p && p.asaEmergency);
+  wrap.innerHTML = ASA_CLASSES.map(c=>{
+    const active = cls === c;
+    const label = active && emergency ? c + '-E' : c;
+    return `<button type="button" class="asa-btn ${active?'active':''}" onclick="setAsaClass('${c}')">${escapeHtml(label)}</button>`;
+  }).join('');
 }
 
 /* ---- pre-anesthesia lab checklist buttons ---- */
@@ -1013,7 +1004,6 @@ function createPatient(){
 }
 
 function switchPatient(id){
-  if(mediaRecorder && mediaRecorder.state === 'recording') stopRecording();
   DB.current = id; save(); syncAlarmSettingsSpeciesToPatient(); renderAll();
 }
 
@@ -1074,7 +1064,6 @@ function deletePatient(){
     if(!DB.patients.length){ const np = newPatientObj('Пацієнт 1'); DB.patients.push(np); DB.current = np.id; }
     else { DB.current = DB.patients[0].id; }
     save(); syncAlarmSettingsSpeciesToPatient(); renderAll();
-    audioDbDeleteByPatient(removedId);
   });
 }
 
@@ -1103,12 +1092,6 @@ function setMapMode(mode){
   if(mapTagEl) mapTagEl.textContent = mode === 'auto' ? 'авто' : 'вручну';
   recalcMap();
   updateVitalAlarms();
-}
-
-function extraTimersEnabled(){ return !!(DB.settings && DB.settings.extraTimersEnabled); }
-function toggleExtraTimersSetting(on){
-  DB.settings.extraTimersEnabled = on; save();
-  renderSettingsUI(); renderExtraTimersSection();
 }
 
 function recordIntervalMinutes(){ return (DB.settings && DB.settings.recordInterval) || 5; }
@@ -1185,9 +1168,6 @@ function renderSettingsUI(){
   document.getElementById('mapModeAutoBtn').classList.toggle('active', mode==='auto');
   document.getElementById('mapModeManualBtn').classList.toggle('active', mode==='manual');
   document.getElementById('set_patient_name').textContent = p ? p.name : '—';
-  const on = extraTimersEnabled();
-  document.getElementById('extraTimersOnBtn').classList.toggle('active', on);
-  document.getElementById('extraTimersOffBtn').classList.toggle('active', !on);
   const onColor = saveColorEnabled();
   document.getElementById('saveColorOnBtn').classList.toggle('active', onColor);
   document.getElementById('saveColorOffBtn').classList.toggle('active', !onColor);
@@ -1964,69 +1944,8 @@ function renderSession(){
   updateVitalsSaveLock();
 }
 
-/* ---- extra (lap) timers ---- */
-function addExtraTimer(){
-  const p = currentPatient(); if(!p) return;
-  if(!p.extraTimers) p.extraTimers = [];
-  const name = document.getElementById('et_name').value.trim() || ('Таймер ' + (p.extraTimers.length+1));
-  p.extraTimers.push({id:'t'+Date.now(), name, start:Date.now(), running:true, stoppedAt:null, laps:[]});
-  save(); document.getElementById('et_name').value=''; closeModal('addTimerModal');
-  renderExtraTimersSection();
-}
-function lapExtraTimer(id){
-  const p = currentPatient(); if(!p) return;
-  const t = p.extraTimers.find(x=>x.id===id); if(!t) return;
-  const elapsedMs = (t.running ? Date.now() : t.stoppedAt) - t.start;
-  t.laps.push({ elapsedLabel: formatElapsed(elapsedMs), wallClock: nowTime() });
-  save(); renderExtraTimersSection();
-}
-function stopExtraTimer(id){
-  const p = currentPatient(); if(!p) return;
-  const t = p.extraTimers.find(x=>x.id===id); if(!t) return;
-  t.running = false; t.stoppedAt = Date.now();
-  save(); renderExtraTimersSection();
-}
-function removeExtraTimer(id){
-  const p = currentPatient(); if(!p) return;
-  p.extraTimers = p.extraTimers.filter(x=>x.id!==id);
-  save(); renderExtraTimersSection();
-}
-function renderExtraTimersSection(){
-  const wrap = document.getElementById('extraTimersCard');
-  if(!extraTimersEnabled()){ wrap.style.display='none'; return; }
-  wrap.style.display='block';
-  const p = currentPatient();
-  const list = document.getElementById('extraTimersList');
-  if(!p || !p.extraTimers || !p.extraTimers.length){ list.innerHTML='<div class="empty">Немає активних таймерів</div>'; return; }
-  list.innerHTML = p.extraTimers.map(t=>{
-    const elapsedMs = (t.running ? Date.now() : t.stoppedAt) - t.start;
-    const lapsHtml = t.laps.length ? t.laps.map((l,i)=>`<div class="lap-row"><span>#${i+1}</span><span>${l.elapsedLabel}</span><span>${l.wallClock}</span></div>`).join('') : '<div class="hint" style="margin:2px 0 0;">Записів ще немає</div>';
-    return `<div class="extra-timer">
-      <div class="extra-timer-head">
-        <b>${escapeHtml(t.name)}</b>
-        <button class="btn" style="min-height:26px; padding:2px 8px; font-size:11px;" onclick="removeExtraTimer('${t.id}')">✕</button>
-      </div>
-      <div class="extra-timer-digits" id="etd_${t.id}">${formatElapsed(elapsedMs)}</div>
-      <div class="btn-row">
-        <button class="btn btn-primary" style="flex:1" onclick="lapExtraTimer('${t.id}')">Зафіксувати час</button>
-        ${t.running ? `<button class="btn" onclick="stopExtraTimer('${t.id}')">Стоп</button>` : ''}
-      </div>
-      <div class="laps">${lapsHtml}</div>
-    </div>`;
-  }).join('');
-}
-function tickExtraTimers(){
-  if(!extraTimersEnabled()) return;
-  const p = currentPatient(); if(!p || !p.extraTimers) return;
-  p.extraTimers.forEach(t=>{
-    if(!t.running) return;
-    const el = document.getElementById('etd_'+t.id);
-    if(el) el.textContent = formatElapsed(Date.now()-t.start);
-  });
-}
-
 function renderAll(){
-  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); renderExtraTimersSection(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); calcFluid(); calcBag(); renderAudioList();
+  renderHeader(); fillPatientForm(); renderSurgeonOptions(); renderDrugs(); renderDrugLog(); renderVitals(); renderChart(); renderSession(); renderSettingsUI(); loadVitalsEntryDefaults(); updateSaveBarTimer(); updateEyeLubeUI(); calcFluid(); calcBag(); renderAsaQuick();
 }
 
 function showView(name){
@@ -2037,315 +1956,13 @@ function showView(name){
   document.getElementById('labsSaveBar').classList.toggle('active', name==='labs');
   if(name==='chart') renderChart();
   if(name==='calc') initCalcTab();
-  if(name==='vitals'){ renderAudioList(); updateVitalsSaveLock(); }
+  if(name==='vitals'){ updateVitalsSaveLock(); }
   if(name==='settings'){ syncAlarmSettingsSpeciesToPatient(); renderAlarmRangesUI(); }
 }
 
-/* ---- Диктофон: запис голосу через мікрофон і збереження записів у IndexedDB ----
-   IndexedDB використовується замість localStorage, бо аудіо-файли можуть бути
-   завеликі для localStorage (ліміт ~5-10МБ на весь застосунок). */
-const AUDIO_DB_NAME = 'vetAnesthAudioDB';
-const AUDIO_STORE = 'recordings';
-let audioDbPromise = null;
-function openAudioDB(){
-  if(audioDbPromise) return audioDbPromise;
-  audioDbPromise = new Promise((resolve, reject)=>{
-    if(!('indexedDB' in window)){ reject(new Error('IndexedDB недоступний')); return; }
-    const req = indexedDB.open(AUDIO_DB_NAME, 1);
-    req.onupgradeneeded = ()=>{
-      const db = req.result;
-      if(!db.objectStoreNames.contains(AUDIO_STORE)){
-        const store = db.createObjectStore(AUDIO_STORE, {keyPath:'id'});
-        store.createIndex('patientId', 'patientId', {unique:false});
-      }
-    };
-    req.onsuccess = ()=> resolve(req.result);
-    req.onerror = ()=> reject(req.error);
-  });
-  return audioDbPromise;
-}
-function audioDbAdd(record){
-  return openAudioDB().then(db => new Promise((resolve, reject)=>{
-    const tx = db.transaction(AUDIO_STORE, 'readwrite');
-    tx.objectStore(AUDIO_STORE).add(record);
-    tx.oncomplete = ()=>resolve();
-    tx.onerror = ()=>reject(tx.error);
-  }));
-}
-function audioDbDelete(id){
-  return openAudioDB().then(db => new Promise((resolve, reject)=>{
-    const tx = db.transaction(AUDIO_STORE, 'readwrite');
-    tx.objectStore(AUDIO_STORE).delete(id);
-    tx.oncomplete = ()=>resolve();
-    tx.onerror = ()=>reject(tx.error);
-  }));
-}
-function audioDbGetByPatient(patientId){
-  return openAudioDB().then(db => new Promise((resolve, reject)=>{
-    const tx = db.transaction(AUDIO_STORE, 'readonly');
-    const idx = tx.objectStore(AUDIO_STORE).index('patientId');
-    const req = idx.getAll(patientId);
-    req.onsuccess = ()=> resolve(req.result || []);
-    req.onerror = ()=> reject(req.error);
-  }));
-}
-async function audioDbDeleteByPatient(patientId){
-  let list = [];
-  try{ list = await audioDbGetByPatient(patientId); }catch(err){ return; }
-  for(const r of list){ try{ await audioDbDelete(r.id); }catch(err){} }
-}
-
-let mediaRecorder = null;
-let mediaStream = null;
-let recChunks = [];
-let recStartTs = 0;
-let recTimerInt = null;
-
-function toggleRecording(){
-  if(mediaRecorder && mediaRecorder.state === 'recording'){ stopRecording(); }
-  else{ startRecording(); }
-}
-
-async function startRecording(){
-  if(!currentPatient()){ alert('Спочатку оберіть або створіть пацієнта.'); return; }
-  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)){
-    alert('Запис звуку не підтримується цим браузером, або сторінка відкрита не через https/localhost (мікрофон вимагає безпечного з’єднання).');
-    return;
-  }
-  try{
-    mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
-  }catch(err){
-    alert('Не вдалося отримати доступ до мікрофона. Перевірте дозволи для цього сайту в налаштуваннях браузера/пристрою.');
-    return;
-  }
-  recChunks = [];
-  let mimeType = '';
-  const candidates = ['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'];
-  for(const c of candidates){ if(MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)){ mimeType = c; break; } }
-  try{
-    mediaRecorder = mimeType ? new MediaRecorder(mediaStream, {mimeType}) : new MediaRecorder(mediaStream);
-  }catch(err){
-    mediaRecorder = new MediaRecorder(mediaStream);
-  }
-  mediaRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) recChunks.push(e.data); };
-  mediaRecorder.onstop = onRecordingStop;
-  mediaRecorder.start();
-  recStartTs = Date.now();
-  document.getElementById('recBtn').classList.add('recording');
-  recTimerInt = setInterval(updateRecTimer, 250);
-  updateRecTimer();
-}
-
-function updateRecTimer(){
-  const el = document.getElementById('recTime');
-  if(el) el.textContent = formatElapsed(Date.now() - recStartTs);
-}
-
-function stopRecording(){
-  if(!mediaRecorder) return;
-  if(mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-  if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
-  if(recTimerInt){ clearInterval(recTimerInt); recTimerInt = null; }
-  document.getElementById('recBtn').classList.remove('recording');
-  document.getElementById('recTime').textContent = '00:00';
-}
-
-async function onRecordingStop(){
-  const p = currentPatient();
-  const chunks = recChunks; recChunks = [];
-  if(!p || !chunks.length) return;
-  const blob = new Blob(chunks, {type: (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm'});
-  const record = {
-    id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
-    patientId: p.id,
-    createdAt: Date.now(),
-    durationMs: Date.now() - recStartTs,
-    mimeType: blob.type,
-    blob: blob
-  };
-  try{
-    await audioDbAdd(record);
-  }catch(err){
-    alert('Не вдалося зберегти запис (можливо, недостатньо вільного місця на пристрої).');
-  }
-  renderAudioList();
-}
-
-async function renderAudioList(){
-  const wrap = document.getElementById('audioList');
-  const empty = document.getElementById('audioListEmpty');
-  const countEl = document.getElementById('audioListCount');
-  if(!wrap || !empty) return;
-  const p = currentPatient();
-  if(!p){ wrap.innerHTML=''; empty.style.display='block'; if(countEl) countEl.textContent='0'; return; }
-  let list = [];
-  try{ list = await audioDbGetByPatient(p.id); }catch(err){ list = []; }
-  list.sort((a,b)=> b.createdAt - a.createdAt);
-  if(countEl) countEl.textContent = String(list.length);
-  if(!list.length){ wrap.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  wrap.innerHTML = list.map(r=>{
-    const url = URL.createObjectURL(r.blob);
-    return '<div class="rec-item">'
-      + '<div class="rec-item-head"><span class="rec-item-title">🎙 ' + formatDateShort(r.createdAt) + '</span>'
-      + '<span class="rec-item-meta">' + formatElapsed(r.durationMs) + '</span></div>'
-      + '<audio controls src="' + url + '"></audio>'
-      + '<div class="rec-item-actions">'
-      + '<button type="button" class="btn" onclick="downloadAudioRec(\'' + r.id + '\')">Завантажити</button>'
-      + '<button type="button" class="btn btn-outline-danger" onclick="deleteAudioRec(\'' + r.id + '\')">Видалити</button>'
-      + '</div></div>';
-  }).join('');
-}
-
-function toggleAudioListPanel(){
-  const body = document.getElementById('audioListBody');
-  const arrow = document.getElementById('audioListArrow');
-  if(!body || !arrow) return;
-  const open = !body.classList.contains('open');
-  body.classList.toggle('open', open);
-  arrow.classList.toggle('open', open);
-}
-
-async function downloadAudioRec(id){
-  const p = currentPatient(); if(!p) return;
-  let list = [];
-  try{ list = await audioDbGetByPatient(p.id); }catch(err){ return; }
-  const r = list.find(x=>x.id===id);
-  if(!r) return;
-  const ext = (r.mimeType||'').includes('mp4') ? 'm4a' : ((r.mimeType||'').includes('ogg') ? 'ogg' : 'webm');
-  const url = URL.createObjectURL(r.blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const d = new Date(r.createdAt);
-  const pad = n => String(n).padStart(2,'0');
-  const stamp = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes());
-  a.download = 'Запис_' + (p.name||'пацієнт') + '_' + stamp + '.' + ext;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 5000);
-}
-
-function deleteAudioRec(id){
-  showConfirm('Видалити цей запис? Це незворотньо.', async ()=>{
-    try{ await audioDbDelete(id); }catch(err){}
-    renderAudioList();
-  });
-}
-
-/* ---- калькулятор: блок «Об'єм переливання крові» ---- */
-function transfusionK(p){ return p && p.species === 'Кіт' ? 60 : 90; }
-// середньостатистичний Ht з референсних норм: собака ~37–55% (сер. 45), кіт ~24–45% (сер. 35)
-function defaultTargetHct(p){
-  if(p && p.species === 'Кіт') return 35;
-  if(p && p.species === 'Собака') return 45;
-  return 40;
-}
 function initCalcTab(){
   calcFluid();
   calcBag();
-}
-function updateCalcPatientInfo(){
-  const p = currentPatient();
-  const infoEl = document.getElementById('calc_tr_patient_info');
-  if(!infoEl) return;
-  if(!p){ infoEl.textContent = '—'; return; }
-  const weightTxt = p.weight ? p.weight+' кг' : '—';
-  const hctTxt = p.hct ? p.hct+'%' : '—';
-  infoEl.innerHTML = `Пацієнт: <b>${escapeHtml(p.species||'—')}</b> · Вага <b>${weightTxt}</b> · Ht <b>${hctTxt}</b> · К=${transfusionK(p)}`;
-}
-function calcTransfusion(){
-  const p = currentPatient();
-  updateCalcPatientInfo();
-  const valueEl = document.getElementById('calc_tr_value');
-  const hintEl = document.getElementById('calc_tr_hint');
-  if(!valueEl) return;
-
-  const weight = p ? Number(p.weight) : 0;
-  const pcvPat = p ? Number(p.hct) : 0;
-  const k = transfusionK(p);
-  const pcvTargetStr = document.getElementById('calc_tr_pcv_target').value;
-  const pcvDonorStr = document.getElementById('calc_tr_pcv_donor').value;
-  const pcvTarget = Number(pcvTargetStr);
-  const pcvDonor = Number(pcvDonorStr);
-
-  if(!p || !weight || !pcvPat){
-    valueEl.textContent = '— мл';
-    valueEl.classList.add('invalid');
-    hintEl.style.display = 'block';
-    hintEl.textContent = 'Вкажіть вагу та поточний гематокрит пацієнта на вкладці «Пацієнт».';
-    return;
-  }
-  if(pcvTargetStr==='' || pcvDonorStr==='' || pcvDonor<=0){
-    valueEl.textContent = '— мл';
-    valueEl.classList.add('invalid');
-    hintEl.style.display = 'none';
-    return;
-  }
-  if(pcvTarget <= pcvPat){
-    valueEl.textContent = '0 мл';
-    valueEl.classList.add('invalid');
-    hintEl.style.display = 'block';
-    hintEl.textContent = 'Бажаний Ht не перевищує поточний — переливання за цією формулою не потрібне.';
-    return;
-  }
-  const volume = weight * k * (pcvTarget - pcvPat) / pcvDonor;
-  valueEl.classList.remove('invalid');
-  valueEl.textContent = Math.round(volume) + ' мл';
-  hintEl.style.display = 'none';
-}
-
-/* ---- калькулятор: блок «Бікарбонат натрію» ---- */
-function setBicarbConc(val){
-  document.getElementById('calc_hco3_conc').value = val;
-  updateBicarbConcButtons();
-  calcBicarb();
-}
-function updateBicarbConcButtons(){
-  const c = Number(document.getElementById('calc_hco3_conc').value);
-  document.getElementById('calc_hco3_conc_84').classList.toggle('active', c===1);
-  document.getElementById('calc_hco3_conc_42').classList.toggle('active', c===0.5);
-}
-function calcBicarb(){
-  const p = currentPatient();
-  const infoEl = document.getElementById('calc_hco3_patient_info');
-  const valueEl = document.getElementById('calc_hco3_value');
-  const hintEl = document.getElementById('calc_hco3_hint');
-  if(!valueEl) return;
-  if(infoEl) infoEl.innerHTML = p && p.weight ? `Пацієнт: Вага <b>${p.weight} кг</b>` : '—';
-  updateBicarbConcButtons();
-
-  const weight = p ? Number(p.weight) : 0;
-  const beStr = document.getElementById('calc_hco3_be').value;
-  const be = Number(beStr);
-  const conc = Number(document.getElementById('calc_hco3_conc').value) || 1;
-
-  if(!p || !weight){
-    valueEl.textContent = '— мл';
-    valueEl.classList.add('invalid');
-    hintEl.style.display = 'block';
-    hintEl.textContent = 'Вкажіть вагу пацієнта на вкладці «Пацієнт».';
-    return;
-  }
-  if(beStr===''){
-    valueEl.textContent = '— мл';
-    valueEl.classList.add('invalid');
-    hintEl.style.display = 'none';
-    return;
-  }
-  if(be >= 0){
-    valueEl.textContent = '0 мл';
-    valueEl.classList.add('invalid');
-    hintEl.style.display = 'block';
-    hintEl.textContent = 'Дефіциту основ немає (BE ≥ 0) — корекція бікарбонатом за цією формулою не потрібна.';
-    return;
-  }
-  const meq = weight * 0.3 * Math.abs(be);
-  const volume = meq / conc;
-  valueEl.classList.remove('invalid');
-  valueEl.textContent = Math.round(volume) + ' мл (' + meq.toFixed(1) + ' мЕкв)';
-  hintEl.style.display = 'block';
-  hintEl.textContent = 'Зазвичай вводять половину розрахованої дози повільно в/в, потім переоцінюють гази крові перед повторним введенням.';
 }
 
 /* ---- калькулятор: блок «Добова інфузія» ---- */
@@ -2673,18 +2290,17 @@ function exportDataFile(){
 
 if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patients.push(p); DB.current = p.id; }
 if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
-DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.extraTimers) p.extraTimers = []; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.eyeLubeCount === undefined) p.eyeLubeCount = 0; if(p.eyeLubeLastPressAt === undefined) p.eyeLubeLastPressAt = null; if(p.eyeLubeLocked === undefined) p.eyeLubeLocked = false; if(p.pendingEyeLube === undefined) p.pendingEyeLube = 0; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; });
+DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.eyeLubeCount === undefined) p.eyeLubeCount = 0; if(p.eyeLubeLastPressAt === undefined) p.eyeLubeLastPressAt = null; if(p.eyeLubeLocked === undefined) p.eyeLubeLocked = false; if(p.pendingEyeLube === undefined) p.pendingEyeLube = 0; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false; });
 save();
 syncAlarmSettingsSpeciesToPatient();
 renderAll();
 showHome();
 
-/* single global ticker drives both the main session timer and any running extra timers every second */
+/* single global ticker drives the main session timer every second */
 setInterval(()=>{
   const p = currentPatient();
   if(p && p.sessionStart && !p.sessionEnd) updateTimerDisplay(p);
   checkAutoPauseNoRecord();
-  tickExtraTimers();
   updateSaveBarTimer();
   updateEyeLubeUI();
 }, 1000);
