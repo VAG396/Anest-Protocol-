@@ -491,7 +491,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <div class="vfield"><label>ЧДР<button type="button" class="alarm-dots-btn" id="alarmDots_rr" ondblclick="openAlarmFieldModal('rr')" aria-label="Налаштування аларму ЧДР (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_rr" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div>
         <div class="rrmode-seg" role="group" aria-label="Тип дихання">
           <button type="button" id="rrModeSpontBtn" onclick="setRRMode('spont')" aria-label="Самостійне дихання">С</button>
-          <button type="button" id="rrModeMechBtn" onclick="setRRMode('mech')" ondblclick="showVentParamsPanel()" aria-label="Механічна вентиляція (ШВЛ)">М</button>
+          <button type="button" id="rrModeMechBtn" onclick="setRRMode('mech')" aria-label="Механічна вентиляція (ШВЛ)">М</button>
         </div>
       </div>
       <div class="vfield"><label>SpO₂<button type="button" class="alarm-dots-btn" id="alarmDots_spo2" ondblclick="openAlarmFieldModal('spo2')" aria-label="Налаштування аларму SpO₂ (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_spo2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">%</span></div></div>
@@ -1649,7 +1649,7 @@ let currentRRMode = 'spont'; // 'spont' | 'mech' — тип дихання дл�
 function setRRMode(mode){
   currentRRMode = mode;
   updateRRModeUI();
-  if(mode === 'spont') hideVentParamsPanel();
+  if(mode === 'mech') showVentParamsPanel(); else hideVentParamsPanel();
   markVitalsDirty();
 }
 function updateRRModeUI(){
@@ -1678,14 +1678,21 @@ function updateVentVPModeUI(){
   if(labelEl) labelEl.textContent = VENT_VP_LABEL[currentVentVPMode];
   if(unitEl) unitEl.textContent = VENT_VP_UNIT[currentVentVPMode];
 }
-function showVentParamsPanel(){
+function setVentParamsPanelVisible(show){
   const card = document.getElementById('ventParamsCard');
-  if(card) card.style.display = '';
+  if(!card) return;
+  const isVisible = card.style.display !== 'none';
+  if(isVisible === show) return; // вже у потрібному стані — нема чого компенсувати
+  // якір — кнопка «М», щоб вона (і все вище) лишалась на тому ж місці екрана
+  const anchor = document.getElementById('rrModeMechBtn') || card;
+  const beforeTop = anchor.getBoundingClientRect().top;
+  card.style.display = show ? '' : 'none';
+  const afterTop = anchor.getBoundingClientRect().top;
+  const delta = afterTop - beforeTop;
+  if(delta){ window.scrollBy(0, delta); }
 }
-function hideVentParamsPanel(){
-  const card = document.getElementById('ventParamsCard');
-  if(card) card.style.display = 'none';
-}
+function showVentParamsPanel(){ setVentParamsPanelVisible(true); }
+function hideVentParamsPanel(){ setVentParamsPanelVisible(false); }
 
 /* вибір анестетика для поточного запису: 'iso' (Ізофлуран) АБО 'sevo' (Севофлуран) — взаємовиключно */
 let currentAgent = 'iso';
