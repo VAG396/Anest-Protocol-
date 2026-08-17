@@ -96,7 +96,6 @@ button{font-family:var(--font); cursor:pointer;}
 
 .segmented{display:flex; background:var(--field); border:1px solid var(--border-strong); border-radius:10px; padding:3px; gap:3px;}
 
-.quick-card .collapse-toggle{margin-top:0;}
 .asa-standalone{padding:12px 16px;}
 .asa-btn-row{display:grid; grid-template-columns:repeat(5,1fr); gap:8px;}
 .asa-btn{border-radius:14px; padding:12px 4px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); font-weight:700; font-size:14px; text-align:center; min-height:44px;}
@@ -445,15 +444,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
   </div>
 
-  <div class="card no-print quick-card">
-    <button type="button" class="collapse-toggle" id="vitalsQuickToggleBtn" onclick="toggleVitalsQuickPanel()">
-      <span>Швидкі зміни</span>
-      <span class="collapse-arrow" id="vitalsQuickArrow">›</span>
-    </button>
-    <div class="collapse-body" id="vitalsQuickBody">
-    </div>
-  </div>
-
   <div class="card no-print asa-standalone">
     <div class="asa-btn-row" id="asaButtons"></div>
   </div>
@@ -481,7 +471,12 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <div class="vfield"><label>EtCO₂</label><div class="vfield-row"><input id="v_etco2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
       <div class="vfield"><label>САТ</label><div class="vfield-row"><input id="v_sys" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
       <div class="vfield"><label>ДАТ</label><div class="vfield-row"><input id="v_dia" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
-      <div class="vfield"><label>MAP <span class="maptag" id="mapTag">авто</span></label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>MAP</label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div>
+        <div class="rrmode-seg" role="group" aria-label="Розрахунок MAP">
+          <button type="button" id="mapModeAutoBtn" onclick="setMapMode('auto')" aria-label="Автоматичний розрахунок">А</button>
+          <button type="button" id="mapModeManualBtn" onclick="setMapMode('manual')" aria-label="Ручне введення">Р</button>
+        </div>
+      </div>
       <div class="vfield"><label>Температура</label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
       <div class="vfield"><label id="isoSevoLabel">Ізо/Sevo</label><div class="vfield-row"><input id="v_isosevo" class="isosevo-input" type="number" step="0.1" inputmode="decimal" placeholder="--" readonly onclick="openIsoSevoWheel()" oninput="markVitalsDirty()"><span class="unit">%</span></div>
         <div class="agent-seg" role="group" aria-label="Анестетик">
@@ -605,15 +600,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <div class="field"><label>Температура, °C</label><div class="range-row"><input id="alarm_temp_min" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_temp_max" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"></div></div>
       <button type="button" class="btn" onclick="resetAlarmRangesToDefault()">Скинути до стандартних значень</button>
     </div>
-  </div>
-  <div class="card">
-    <h2>Розрахунок МАТ (MAP)</h2>
-    <div class="sub">Стосується поточного пацієнта — <span id="set_patient_name">—</span></div>
-    <div class="segmented">
-      <button id="mapModeAutoBtn" onclick="setMapMode('auto')">Автоматично</button>
-      <button id="mapModeManualBtn" onclick="setMapMode('manual')">Вручну</button>
-    </div>
-    <div class="hint">Авто: MAP = ДАТ + (САТ − ДАТ) / 3. Вручну — вводите значення самі.</div>
   </div>
   <div class="card">
     <h2>Кольоровий індикатор на кнопці «Зберегти»</h2>
@@ -875,16 +861,6 @@ function newPatientObj(name){
     drugConc: {}, vitals: [], drugLog: [], customDrugs: [], eyeLubeCount:0, eyeLubeLastPressAt:null, eyeLubeLocked:false, pendingEyeLube:0 };
 }
 
-/* ---- vitals tab: collapsible "quick changes" panel ---- */
-function toggleVitalsQuickPanel(){
-  const body = document.getElementById('vitalsQuickBody');
-  const arrow = document.getElementById('vitalsQuickArrow');
-  if(!body || !arrow) return;
-  const open = !body.classList.contains('open');
-  body.classList.toggle('open', open);
-  arrow.classList.toggle('open', open);
-}
-
 /* ---- ASA physical status quick-picker ----
    Click on an unselected class -> selects it.
    Click again on the already-selected class -> appends "-E" (emergency modifier) — only for classes III, IV, V.
@@ -1087,11 +1063,18 @@ function saveField(field, value){
 
 function setMapMode(mode){
   const p = currentPatient(); if(!p) return;
-  p.mapMode = mode; save(); renderSettingsUI();
-  const mapTagEl = document.getElementById('mapTag');
-  if(mapTagEl) mapTagEl.textContent = mode === 'auto' ? 'авто' : 'вручну';
+  p.mapMode = mode; save();
+  updateMapModeUI();
   recalcMap();
   updateVitalAlarms();
+}
+function updateMapModeUI(){
+  const p = currentPatient();
+  const mode = p ? p.mapMode : 'auto';
+  const autoBtn = document.getElementById('mapModeAutoBtn');
+  const manualBtn = document.getElementById('mapModeManualBtn');
+  if(autoBtn) autoBtn.classList.toggle('active', mode !== 'manual');
+  if(manualBtn){ manualBtn.classList.toggle('active', mode === 'manual'); manualBtn.classList.toggle('mech', mode === 'manual'); }
 }
 
 function recordIntervalMinutes(){ return (DB.settings && DB.settings.recordInterval) || 5; }
@@ -1163,11 +1146,6 @@ function snapTimeToGrid(rawTimeStr, p){
 }
 
 function renderSettingsUI(){
-  const p = currentPatient();
-  const mode = p ? p.mapMode : 'auto';
-  document.getElementById('mapModeAutoBtn').classList.toggle('active', mode==='auto');
-  document.getElementById('mapModeManualBtn').classList.toggle('active', mode==='manual');
-  document.getElementById('set_patient_name').textContent = p ? p.name : '—';
   const onColor = saveColorEnabled();
   document.getElementById('saveColorOnBtn').classList.toggle('active', onColor);
   document.getElementById('saveColorOffBtn').classList.toggle('active', !onColor);
@@ -1657,9 +1635,7 @@ function updateAgentUI(){
 
 function loadVitalsEntryDefaults(){
   const p = currentPatient();
-  const mode = p ? p.mapMode : 'auto';
-  const mapTagEl = document.getElementById('mapTag');
-  if(mapTagEl) mapTagEl.textContent = mode === 'auto' ? 'авто' : 'вручну';
+  updateMapModeUI();
   const last = getLastVital();
   const sticky = ['hr','rr','spo2','etco2','sys','dia','temp','isosevo','o2','cri'];
   const idMap = {isosevo:'v_isosevo', o2:'v_o2'};
@@ -1676,7 +1652,7 @@ function loadVitalsEntryDefaults(){
   currentAgent = (last && last.agent) ? last.agent : 'iso';
   updateAgentUI();
   recalcMap();
-  if(mode === 'manual' && last && last.map){ const mapEl = document.getElementById('v_map'); if(mapEl) mapEl.value = last.map; }
+  if(p && p.mapMode === 'manual' && last && last.map){ const mapEl = document.getElementById('v_map'); if(mapEl) mapEl.value = last.map; }
   const statusEl = document.getElementById('vitalsSaveStatus');
   if(statusEl){ statusEl.textContent = 'Не збережено'; statusEl.className = 'save-status'; }
   updateVitalAlarms();
@@ -2227,7 +2203,8 @@ function renderPrintSheet(){
   html += '</table>';
 
   html += '<div class="ps-bar">ASA / Примітки перед анестезією</div>';
-  html += '<div class="ps-notes-box" style="margin-bottom:6px;">' + escapeHtml(p.preNotes||'—') + '</div>';
+  const asaText = p.asaClass ? ('ASA ' + p.asaClass + (p.asaEmergency ? '-E' : '')) : 'ASA — не вказано';
+  html += '<div class="ps-notes-box" style="margin-bottom:6px;"><b>' + escapeHtml(asaText) + '</b>' + (p.preNotes ? '<br>' + escapeHtml(p.preNotes) : '') + '</div>';
 
   html += '<div class="ps-bar">Передопераційні дослідження</div>';
   html += '<div style="border:1px solid #16407a; padding:5px 8px; margin-bottom:6px;">' + (labs || '—') + '</div>';
