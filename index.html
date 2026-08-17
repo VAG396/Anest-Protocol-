@@ -163,6 +163,8 @@ button{font-family:var(--font); cursor:pointer;}
 .vfield.alarm-bad input, .vfield.alarm-bad input:disabled{color:var(--red);}
 .vfield label{font-size:13px; color:var(--text2); font-weight:500; display:flex; justify-content:space-between; align-items:center;}
 .vfield .maptag{font-size:10px; color:var(--green); border:1px solid var(--green-dim); padding:1px 6px; border-radius:8px;}
+.alarm-dots-btn{background:none; border:none; color:var(--text3); font-size:14px; letter-spacing:1.5px; padding:2px 6px; margin:-2px -6px -2px 0; line-height:1; border-radius:8px; flex-shrink:0; -webkit-user-select:none; user-select:none;}
+.alarm-dots-btn:active{background:var(--card2); color:var(--text2);}
 .vfield-row{display:flex; align-items:baseline; gap:6px; margin-top:8px;}
 .vfield input{background:none; border:none; outline:none; color:var(--text); font-family:var(--mono); font-size:26px; font-weight:700; width:100%; padding:0;}
 .vfield input::placeholder{color:var(--text3);}
@@ -186,6 +188,12 @@ button{font-family:var(--font); cursor:pointer;}
 .agent-tag{font-size:9px; font-weight:700; padding:1px 5px; border-radius:6px; margin-left:4px; vertical-align:1px; white-space:nowrap;}
 .agent-tag.iso{color:var(--purple); border:1px solid #5a3f8a; background:rgba(185,140,255,.12);}
 .agent-tag.sevo{color:var(--amber); border:1px solid #7a5a1e; background:rgba(242,169,59,.12);}
+
+/* блок «Параметри ШВЛ» */
+.vpmode-seg{display:flex; background:var(--bg); border:1px solid var(--border-strong); border-radius:8px; padding:2px; gap:2px; margin-top:8px;}
+.vpmode-seg button{flex:1; background:none; border:none; border-radius:6px; padding:5px 0; font-size:11px; font-weight:700; color:var(--text2); font-family:var(--font); letter-spacing:.2px;}
+.vpmode-seg button.active{background:var(--card2); color:var(--purple); box-shadow:0 0 0 1px var(--purple);}
+.vent-params-box{border:1.5px solid var(--purple); border-radius:14px; padding:12px; background:rgba(185,140,255,.04); box-shadow:0 0 18px rgba(185,140,255,.10);}
 .isosevo-input{cursor:pointer;}
 
 /* ---- горизонтальний колесо-пікер концентрації (стиль випарника) ---- */
@@ -448,6 +456,25 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     <div class="asa-btn-row" id="asaButtons"></div>
   </div>
 
+  <div class="card no-print" id="ventParamsCard" style="display:none;">
+    <h2>Параметри ШВЛ</h2>
+    <div class="sub">Записуються разом із поточним виміром, поки активний режим «М» (механічна вентиляція)</div>
+    <div class="vent-params-box">
+      <div class="vgrid">
+        <div class="vfield">
+          <label id="ventVPLabel">Об'єм</label>
+          <div class="vfield-row"><input id="v_vent_vp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty()"><span class="unit" id="ventVPUnit">мл/кг</span></div>
+          <div class="vpmode-seg" role="group" aria-label="Об'єм чи тиск">
+            <button type="button" id="ventModeVolBtn" onclick="setVentVPMode('volume')" aria-label="Об'єм">V</button>
+            <button type="button" id="ventModePresBtn" onclick="setVentVPMode('pressure')" aria-label="Тиск">P</button>
+          </div>
+        </div>
+        <div class="vfield"><label>PEEP</label><div class="vfield-row"><input id="v_peep" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty()"><span class="unit">cmH₂O</span></div></div>
+        <div class="vfield"><label>FiO₂</label><div class="vfield-row"><input id="v_fio2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty()"><span class="unit">%</span></div></div>
+      </div>
+    </div>
+  </div>
+
   <div class="card no-print">
     <h2>Вітальні показники</h2>
     <div class="sub">Поля заповнюються останніми введеними — міняйте лише те, що змінилось</div>
@@ -460,24 +487,24 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <input type="hidden" id="v_plane" value="">
     </div>
     <div class="vgrid">
-      <div class="vfield"><label>ЧСС</label><div class="vfield-row"><input id="v_hr" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div></div>
-      <div class="vfield"><label>ЧДР</label><div class="vfield-row"><input id="v_rr" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div>
+      <div class="vfield"><label>ЧСС<button type="button" class="alarm-dots-btn" id="alarmDots_hr" ondblclick="openAlarmFieldModal('hr')" aria-label="Налаштування аларму ЧСС (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_hr" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div></div>
+      <div class="vfield"><label>ЧДР<button type="button" class="alarm-dots-btn" id="alarmDots_rr" ondblclick="openAlarmFieldModal('rr')" aria-label="Налаштування аларму ЧДР (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_rr" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div>
         <div class="rrmode-seg" role="group" aria-label="Тип дихання">
           <button type="button" id="rrModeSpontBtn" onclick="setRRMode('spont')" aria-label="Самостійне дихання">С</button>
-          <button type="button" id="rrModeMechBtn" onclick="setRRMode('mech')" aria-label="Механічна вентиляція (ШВЛ)">М</button>
+          <button type="button" id="rrModeMechBtn" onclick="setRRMode('mech')" ondblclick="showVentParamsPanel()" aria-label="Механічна вентиляція (ШВЛ)">М</button>
         </div>
       </div>
-      <div class="vfield"><label>SpO₂</label><div class="vfield-row"><input id="v_spo2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">%</span></div></div>
-      <div class="vfield"><label>EtCO₂</label><div class="vfield-row"><input id="v_etco2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>SpO₂<button type="button" class="alarm-dots-btn" id="alarmDots_spo2" ondblclick="openAlarmFieldModal('spo2')" aria-label="Налаштування аларму SpO₂ (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_spo2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">%</span></div></div>
+      <div class="vfield"><label>EtCO₂<button type="button" class="alarm-dots-btn" id="alarmDots_etco2" ondblclick="openAlarmFieldModal('etco2')" aria-label="Налаштування аларму EtCO₂ (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_etco2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
       <div class="vfield"><label>САТ</label><div class="vfield-row"><input id="v_sys" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
       <div class="vfield"><label>ДАТ</label><div class="vfield-row"><input id="v_dia" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
-      <div class="vfield"><label>MAP</label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div>
+      <div class="vfield"><label>MAP<button type="button" class="alarm-dots-btn" id="alarmDots_map" ondblclick="openAlarmFieldModal('map')" aria-label="Налаштування аларму MAP (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div>
         <div class="rrmode-seg" role="group" aria-label="Розрахунок MAP">
           <button type="button" id="mapModeAutoBtn" onclick="setMapMode('auto')" aria-label="Автоматичний розрахунок">А</button>
           <button type="button" id="mapModeManualBtn" onclick="setMapMode('manual')" aria-label="Ручне введення">Р</button>
         </div>
       </div>
-      <div class="vfield"><label>Температура</label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
+      <div class="vfield"><label>Температура<button type="button" class="alarm-dots-btn" id="alarmDots_temp" ondblclick="openAlarmFieldModal('temp')" aria-label="Налаштування аларму температури (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
       <div class="vfield"><label id="isoSevoLabel">Ізо/Sevo</label><div class="vfield-row"><input id="v_isosevo" class="isosevo-input" type="number" step="0.1" inputmode="decimal" placeholder="--" readonly onclick="openIsoSevoWheel()" oninput="markVitalsDirty()"><span class="unit">%</span></div>
         <div class="agent-seg" role="group" aria-label="Анестетик">
           <button type="button" id="agentIsoBtn" onclick="setAgent('iso')" aria-label="Ізофлуран">І</button>
@@ -581,24 +608,10 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 <div class="view" id="view-settings">
   <div class="card">
     <h2>Пороги алармів (вітальні показники)</h2>
-    <div class="sub">Межі норми для ЧСС, ЧДР, SpO₂, EtCO₂, MAP і температури — за їх межами показник на вкладці «Вітальні» підсвічується червоним. Окремо для собак і котів. Значення спільні для всіх пацієнтів відповідного виду.</div>
+    <div class="sub">Якщо увімкнено — показники ЧСС, ЧДР, SpO₂, EtCO₂, MAP і температура на вкладці «Вітальні» підсвічуються червоним при виході за межі норми (окремо для собак і котів). Самі пороги редагуються подвійним натисканням на «•••» біля відповідного показника на вкладці «Вітальні».</div>
     <div class="segmented">
       <button id="alarmsEnabledOnBtn" onclick="toggleAlarmsEnabled(true)">Увімкнено</button>
       <button id="alarmsEnabledOffBtn" onclick="toggleAlarmsEnabled(false)">Вимкнено</button>
-    </div>
-    <div class="sub" id="alarmSpeciesLabel" style="margin-top:8px;">—</div>
-    <button type="button" class="collapse-toggle" id="alarmThresholdsToggleBtn" onclick="toggleAlarmThresholdsPanel()">
-      <span>Налаштувати пороги</span>
-      <span class="collapse-arrow" id="alarmThresholdsArrow">›</span>
-    </button>
-    <div class="collapse-body" id="alarmThresholdsBody">
-      <div class="field"><label>ЧСС, bpm</label><div class="range-row"><input id="alarm_hr_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_hr_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
-      <div class="field"><label>ЧДР, bpm</label><div class="range-row"><input id="alarm_rr_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_rr_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
-      <div class="field"><label>SpO₂, %</label><div class="range-row"><input id="alarm_spo2_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_spo2_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
-      <div class="field"><label>EtCO₂, mmHg</label><div class="range-row"><input id="alarm_etco2_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_etco2_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
-      <div class="field"><label>MAP, mmHg</label><div class="range-row"><input id="alarm_map_min" type="number" inputmode="numeric" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_map_max" type="number" inputmode="numeric" oninput="saveAlarmRange()"></div></div>
-      <div class="field"><label>Температура, °C</label><div class="range-row"><input id="alarm_temp_min" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"><span class="dash">–</span><input id="alarm_temp_max" type="number" step="0.1" inputmode="decimal" oninput="saveAlarmRange()"></div></div>
-      <button type="button" class="btn" onclick="resetAlarmRangesToDefault()">Скинути до стандартних значень</button>
     </div>
   </div>
   <div class="card">
@@ -788,6 +801,23 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
     <div class="field"><label>Доза (з калькулятора)</label><input id="ld_dose" readonly style="background:var(--field); color:var(--text2);"></div>
     <button class="btn btn-primary btn-block" onclick="confirmLogDrug()">Зберегти в журнал</button>
+  </div>
+</div>
+
+<div class="modal-bg no-print" id="alarmFieldModal-bg" onclick="if(event.target===this) closeModal('alarmFieldModal')">
+  <div class="modal" style="position:relative;">
+    <button class="close-x" onclick="closeModal('alarmFieldModal')">✕</button>
+    <h3 id="alarmFieldModalTitle">Пороги аларму</h3>
+    <div class="sub" id="alarmFieldModalSpecies" style="margin-top:-8px;">—</div>
+    <div class="range-row" style="margin-top:10px;">
+      <input id="alarmFieldModalMin" type="number" step="0.1" inputmode="decimal">
+      <span class="dash">–</span>
+      <input id="alarmFieldModalMax" type="number" step="0.1" inputmode="decimal">
+    </div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button type="button" class="btn" style="flex:1;" onclick="resetAlarmFieldModal()">Скинути до стандартних</button>
+    </div>
+    <button type="button" class="btn btn-primary btn-block" style="margin-top:10px;" onclick="saveAlarmFieldModal()">Зберегти</button>
   </div>
 </div>
 
@@ -1187,52 +1217,57 @@ function toggleAlarmsEnabled(on){
   renderAlarmRangesUI();
   updateVitalAlarms();
 }
-function toggleAlarmThresholdsPanel(){
-  const body = document.getElementById('alarmThresholdsBody');
-  const arrow = document.getElementById('alarmThresholdsArrow');
-  if(!body || !arrow) return;
-  const open = !body.classList.contains('open');
-  body.classList.toggle('open', open);
-  arrow.classList.toggle('open', open);
-}
 function syncAlarmSettingsSpeciesToPatient(){
   const p = currentPatient();
   if(p && (p.species === 'Собака' || p.species === 'Кіт')) alarmSettingsSpecies = p.species;
 }
 function renderAlarmRangesUI(){
-  const labelEl = document.getElementById('alarmSpeciesLabel');
-  if(!labelEl) return;
   const onBtn = document.getElementById('alarmsEnabledOnBtn');
   const offBtn = document.getElementById('alarmsEnabledOffBtn');
+  if(!onBtn || !offBtn) return;
   const on = alarmsEnabled();
-  if(onBtn) onBtn.classList.toggle('active', on);
-  if(offBtn) offBtn.classList.toggle('active', !on);
-  labelEl.innerHTML = `Показано пороги для: <b>${alarmSettingsSpecies}</b> (вид поточного пацієнта)`;
-  const r = DB.settings.alarmRanges[alarmSettingsSpecies] || DEFAULT_ALARM_RANGES[alarmSettingsSpecies];
-  ALARM_FIELD_KEYS.forEach(k=>{
-    const minEl = document.getElementById('alarm_'+k+'_min');
-    const maxEl = document.getElementById('alarm_'+k+'_max');
-    if(minEl) minEl.value = r[k][0];
-    if(maxEl) maxEl.value = r[k][1];
-  });
+  onBtn.classList.toggle('active', on);
+  offBtn.classList.toggle('active', !on);
 }
-function saveAlarmRange(){
-  if(!DB.settings.alarmRanges[alarmSettingsSpecies]) DB.settings.alarmRanges[alarmSettingsSpecies] = {};
-  ALARM_FIELD_KEYS.forEach(k=>{
-    const minEl = document.getElementById('alarm_'+k+'_min');
-    const maxEl = document.getElementById('alarm_'+k+'_max');
-    const minV = parseFloat(minEl.value);
-    const maxV = parseFloat(maxEl.value);
-    if(!isNaN(minV) && !isNaN(maxV)) DB.settings.alarmRanges[alarmSettingsSpecies][k] = [minV, maxV];
-  });
-  save();
-  updateVitalAlarms();
+
+const ALARM_FIELD_LABELS = { hr:'ЧСС, bpm', rr:'ЧДР, bpm', spo2:'SpO₂, %', etco2:'EtCO₂, mmHg', map:'MAP, mmHg', temp:'Температура, °C' };
+let alarmFieldModalKey = null;
+function openAlarmFieldModal(key){
+  if(!alarmsEnabled()) return;
+  alarmFieldModalKey = key;
+  syncAlarmSettingsSpeciesToPatient();
+  const r = alarmRangesForSpecies(alarmSettingsSpecies)[key] || DEFAULT_ALARM_RANGES[alarmSettingsSpecies][key];
+  const titleEl = document.getElementById('alarmFieldModalTitle');
+  const speciesEl = document.getElementById('alarmFieldModalSpecies');
+  const minEl = document.getElementById('alarmFieldModalMin');
+  const maxEl = document.getElementById('alarmFieldModalMax');
+  if(titleEl) titleEl.textContent = ALARM_FIELD_LABELS[key] || 'Пороги аларму';
+  if(speciesEl) speciesEl.innerHTML = `Вид: <b>${alarmSettingsSpecies}</b>`;
+  if(minEl) minEl.value = r[0];
+  if(maxEl) maxEl.value = r[1];
+  openModal('alarmFieldModal');
 }
-function resetAlarmRangesToDefault(){
-  DB.settings.alarmRanges[alarmSettingsSpecies] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[alarmSettingsSpecies]));
-  save();
-  renderAlarmRangesUI();
-  updateVitalAlarms();
+function saveAlarmFieldModal(){
+  if(!alarmFieldModalKey) return;
+  const minEl = document.getElementById('alarmFieldModalMin');
+  const maxEl = document.getElementById('alarmFieldModalMax');
+  const minV = parseFloat(minEl.value);
+  const maxV = parseFloat(maxEl.value);
+  if(!isNaN(minV) && !isNaN(maxV)){
+    if(!DB.settings.alarmRanges[alarmSettingsSpecies]) DB.settings.alarmRanges[alarmSettingsSpecies] = {};
+    DB.settings.alarmRanges[alarmSettingsSpecies][alarmFieldModalKey] = [minV, maxV];
+    save();
+    updateVitalAlarms();
+  }
+  closeModal('alarmFieldModal');
+}
+function resetAlarmFieldModal(){
+  if(!alarmFieldModalKey) return;
+  const d = DEFAULT_ALARM_RANGES[alarmSettingsSpecies][alarmFieldModalKey];
+  const minEl = document.getElementById('alarmFieldModalMin');
+  const maxEl = document.getElementById('alarmFieldModalMax');
+  if(minEl) minEl.value = d[0];
+  if(maxEl) maxEl.value = d[1];
 }
 
 function addSurgeon(){
@@ -1574,7 +1609,15 @@ function setVfieldAlarm(inputId, key){
   if(input.value === '' || input.value === undefined || input.value === null) return;
   if(oob(input.value, key)) vfield.classList.add('alarm-bad');
 }
+function updateAlarmDotsVisibility(){
+  const on = alarmsEnabled();
+  ALARM_FIELD_KEYS.forEach(k=>{
+    const el = document.getElementById('alarmDots_'+k);
+    if(el) el.style.display = on ? '' : 'none';
+  });
+}
 function updateVitalAlarms(){
+  updateAlarmDotsVisibility();
   setVfieldAlarm('v_hr','hr');
   setVfieldAlarm('v_rr','rr');
   setVfieldAlarm('v_spo2','spo2');
@@ -1606,6 +1649,7 @@ let currentRRMode = 'spont'; // 'spont' | 'mech' — тип дихання дл�
 function setRRMode(mode){
   currentRRMode = mode;
   updateRRModeUI();
+  if(mode === 'spont') hideVentParamsPanel();
   markVitalsDirty();
 }
 function updateRRModeUI(){
@@ -1613,6 +1657,34 @@ function updateRRModeUI(){
   const mechBtn = document.getElementById('rrModeMechBtn');
   if(spontBtn) spontBtn.classList.toggle('active', currentRRMode !== 'mech');
   if(mechBtn){ mechBtn.classList.toggle('active', currentRRMode === 'mech'); mechBtn.classList.toggle('mech', currentRRMode === 'mech'); }
+}
+
+/* панель «Параметри ШВЛ»: розкривається подвійним натисканням на «М» у блоці ЧДР */
+let currentVentVPMode = 'volume'; // 'volume' | 'pressure' — тип параметра для поточного запису
+const VENT_VP_LABEL = {volume:"Об'єм", pressure:'Тиск'};
+const VENT_VP_UNIT = {volume:'мл/кг', pressure:'cmH₂O'};
+function setVentVPMode(mode){
+  currentVentVPMode = mode;
+  updateVentVPModeUI();
+  markVitalsDirty();
+}
+function updateVentVPModeUI(){
+  const volBtn = document.getElementById('ventModeVolBtn');
+  const presBtn = document.getElementById('ventModePresBtn');
+  if(volBtn) volBtn.classList.toggle('active', currentVentVPMode === 'volume');
+  if(presBtn) presBtn.classList.toggle('active', currentVentVPMode === 'pressure');
+  const labelEl = document.getElementById('ventVPLabel');
+  const unitEl = document.getElementById('ventVPUnit');
+  if(labelEl) labelEl.textContent = VENT_VP_LABEL[currentVentVPMode];
+  if(unitEl) unitEl.textContent = VENT_VP_UNIT[currentVentVPMode];
+}
+function showVentParamsPanel(){
+  const card = document.getElementById('ventParamsCard');
+  if(card) card.style.display = '';
+}
+function hideVentParamsPanel(){
+  const card = document.getElementById('ventParamsCard');
+  if(card) card.style.display = 'none';
 }
 
 /* вибір анестетика для поточного запису: 'iso' (Ізофлуран) АБО 'sevo' (Севофлуран) — взаємовиключно */
@@ -1637,8 +1709,8 @@ function loadVitalsEntryDefaults(){
   const p = currentPatient();
   updateMapModeUI();
   const last = getLastVital();
-  const sticky = ['hr','rr','spo2','etco2','sys','dia','temp','isosevo','o2','cri'];
-  const idMap = {isosevo:'v_isosevo', o2:'v_o2'};
+  const sticky = ['hr','rr','spo2','etco2','sys','dia','temp','isosevo','o2','cri','peep','fio2','ventValue'];
+  const idMap = {isosevo:'v_isosevo', o2:'v_o2', ventValue:'v_vent_vp'};
   sticky.forEach(k=>{
     const elId = idMap[k] || ('v_'+k);
     const el = document.getElementById(elId);
@@ -1649,6 +1721,9 @@ function loadVitalsEntryDefaults(){
   const notesEl = document.getElementById('v_notes'); if(notesEl) notesEl.value = '';
   currentRRMode = (last && last.rrMode) ? last.rrMode : 'spont';
   updateRRModeUI();
+  currentVentVPMode = (last && last.ventVPMode) ? last.ventVPMode : 'volume';
+  updateVentVPModeUI();
+  if(currentRRMode === 'mech' && last && (last.ventValue || last.peep || last.fio2)){ showVentParamsPanel(); } else { hideVentParamsPanel(); }
   currentAgent = (last && last.agent) ? last.agent : 'iso';
   updateAgentUI();
   recalcMap();
@@ -1721,6 +1796,10 @@ function addVital(){
     hr: document.getElementById('v_hr').value,
     rr: document.getElementById('v_rr').value,
     rrMode: currentRRMode,
+    peep: document.getElementById('v_peep').value,
+    fio2: document.getElementById('v_fio2').value,
+    ventValue: document.getElementById('v_vent_vp').value,
+    ventVPMode: currentVentVPMode,
     spo2: document.getElementById('v_spo2').value,
     etco2: document.getElementById('v_etco2').value,
     sys: document.getElementById('v_sys').value,
