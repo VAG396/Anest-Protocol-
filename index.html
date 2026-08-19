@@ -101,6 +101,15 @@ button{font-family:var(--font); cursor:pointer;}
 .asa-btn{border-radius:14px; padding:12px 4px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); font-weight:700; font-size:14px; text-align:center; min-height:44px;}
 .asa-btn:active{opacity:.75;}
 .asa-btn.active{background:var(--purple); border-color:var(--purple); color:#1E1030;}
+.proc-row{padding:10px 0; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:6px;}
+.proc-row:last-child{border-bottom:none;}
+.proc-row-top{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+.proc-row-top>span{font-size:14px; word-break:break-word;}
+.proc-asa-row{display:flex; align-items:center; gap:6px;}
+.proc-asa-btns{display:flex; gap:4px;}
+.proc-asa-btn{border-radius:8px; padding:5px 0; width:28px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); font-weight:700; font-size:11px; text-align:center; min-height:26px;}
+.proc-asa-btn.active{background:var(--purple); border-color:var(--purple); color:#1E1030;}
+.proc-asa-clear{border:none; background:none; color:var(--text3); font-size:11px; padding:0 4px;}
 
 
 .calc-result{display:flex; align-items:center; justify-content:space-between; background:var(--field); border:1px solid var(--border-strong); border-radius:12px; padding:14px 16px; margin-top:6px;}
@@ -369,7 +378,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
     <div class="field"><label>Порода</label><input id="p_breed" oninput="saveField('breed', this.value)"></div>
     <div class="field"><label>Вага, кг</label><input id="p_weight" type="number" step="0.1" inputmode="decimal" oninput="saveField('weight', this.value); renderDrugs();"></div>
-    <div class="field"><label>Вік</label><input id="p_age" oninput="saveField('age', this.value)"></div>
+    <div class="field"><label>Вік</label><input id="p_age" oninput="saveField('age', this.value); applySeniorAsaAdjustment();"></div>
     <div class="field"><label>Стать</label>
       <select id="p_sex" onchange="saveField('sex', this.value)">
         <option value="">—</option><option>Самець</option><option>Самка</option><option>Кастрат/стерилізована</option>
@@ -680,7 +689,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   </div>
   <div class="card">
     <h2>Оперативні втручання</h2>
-    <div class="sub">Список процедур для вибору на вкладці «Пацієнт» та при створенні нового пацієнта</div>
+    <div class="sub">Список процедур для вибору на вкладці «Пацієнт» та при створенні нового пацієнта. Для кожної процедури можна задати категорію ризику ASA — вона підставиться автоматично на вкладці «Вітальні» після вибору цієї процедури.</div>
     <div class="field-row" style="display:flex; gap:8px; margin-bottom:6px;">
       <input id="new_procedure_name" placeholder="Назва процедури" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:10px; background:var(--field); color:var(--text); min-height:40px;">
       <button class="btn drug-add-btn" style="min-height:40px;" onclick="addProcedureType()">+ Додати</button>
@@ -862,7 +871,43 @@ const DEFAULT_DRUGS = [
   {id:'meloxicam', name:'Мелоксикам', min:0.1, max:0.2, conc:5},
 ];
 
-const DEFAULT_PROCEDURES = ['Абдомінальна хірургія','Кастрація/стерилізація','COHAT (стоматологічна санація)','Пластика грижі','Ушивання рани','Видалення новоутворення','Остеосинтез перелому','Ортопедія — інше','TPLO','Кесарів розтин','Видалення стороннього тіла','Ендоскопія'];
+const DEFAULT_PROCEDURES = ['Абдомінальна хірургія','Кастрація/стерилізація','COHAT (стоматологічна санація)','Пластика грижі','Ушивання рани','Видалення новоутворення','Остеосинтез перелому','Ортопедія — інше','TPLO','Кесарів розтин','Видалення стороннього тіла','Ендоскопія'].map(name=>({name, asaClass:null, asaEmergency:false}));
+
+/* нормалізує список процедур: старі записи-рядки перетворює на об'єкти {name, asaClass, asaEmergency} */
+function normalizeProcedures(list){
+  return (list || []).map(item => (typeof item === 'string') ? {name:item, asaClass:null, asaEmergency:false} : {name:item.name, asaClass:item.asaClass || null, asaEmergency:!!item.asaEmergency});
+}
+function findProcedure(name){
+  return (DB.settings.procedures || []).find(pr => pr.name === name);
+}
+
+/* «Вікова» тварина — вік від 6 років. Поле «Вік» текстове (напр. «7», «7 років»), тож беремо перше число з рядка. */
+const SENIOR_AGE_YEARS = 6;
+function isSeniorAge(ageStr){
+  if(!ageStr) return false;
+  const m = String(ageStr).match(/[\d.,]+/);
+  if(!m) return false;
+  const age = parseFloat(m[0].replace(',', '.'));
+  return !isNaN(age) && age >= SENIOR_AGE_YEARS;
+}
+/* якщо для процедури задана перша категорія ризику ASA (I), а тварина вікова — автоматично підвищуємо до другої (II) */
+function effectiveAsaForRisk(risk, ageStr){
+  if(!risk || !risk.asaClass) return risk;
+  if(risk.asaClass === 'I' && isSeniorAge(ageStr)){
+    return {asaClass:'II', asaEmergency:false};
+  }
+  return risk;
+}
+/* перевіряє поточну ASA-категорію пацієнта на вкладці «Вітальні» й підвищує I→II, якщо вік вже вказано як вікова тварина */
+function applySeniorAsaAdjustment(){
+  const p = currentPatient(); if(!p) return;
+  if(p.asaClass === 'I' && isSeniorAge(p.age)){
+    p.asaClass = 'II';
+    p.asaEmergency = false;
+    save();
+    renderAsaQuick();
+  }
+}
 
 let DB = JSON.parse(localStorage.getItem('vetAnesthDB') || '{"patients":[],"current":null,"settings":{"recordInterval":5}}');
 if(!DB.patients) DB.patients = [];
@@ -877,6 +922,7 @@ if(DB.settings.autoStartTimer === undefined) DB.settings.autoStartTimer = true;
 if(DB.settings.alarmsEnabled === undefined) DB.settings.alarmsEnabled = true;
 if(DB.settings.autoPauseNoRecordEnabled === undefined) DB.settings.autoPauseNoRecordEnabled = true;
 if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
+DB.settings.procedures = normalizeProcedures(DB.settings.procedures);
 if(!DB.settings.alarmRanges) DB.settings.alarmRanges = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES));
 Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp]) DB.settings.alarmRanges[sp] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[sp])); });
 
@@ -992,6 +1038,7 @@ function createPatient(){
   p.species = species;
   p.weight = weight;
   p.procedure = procedure;
+  if(npSelectedAsaClass){ p.asaClass = npSelectedAsaClass; p.asaEmergency = npSelectedAsaEmergency; } // категорія ризику ASA, прив'язана до обраної процедури
   p.doctor = DB.settings.defaultAnesthesiologist || '';
   if(autoStartTimerEnabled()){
     p.sessionStart = Date.now();
@@ -1001,6 +1048,8 @@ function createPatient(){
 
   nameEl.value=''; speciesEl.value=''; weightEl.value='';
   npSelectedProcedure = '';
+  npSelectedAsaClass = null;
+  npSelectedAsaEmergency = false;
   document.getElementById('np_procedure_label').textContent = 'Пошук та вибір процедури';
   document.getElementById('np_procedure_label').classList.add('ph');
   closeModal('newPatientModal');
@@ -1338,12 +1387,35 @@ function renderSurgeonOptions(){
 }
 
 /* ---- Procedures: settings management (Налаштування → Оперативні втручання) ---- */
+function setProcedureAsaClass(idx, cls){
+  const list = DB.settings.procedures || [];
+  const proc = list[idx]; if(!proc) return;
+  const canEmergency = ASA_EMERGENCY_ELIGIBLE.includes(cls);
+  if(proc.asaClass !== cls){
+    proc.asaClass = cls;
+    proc.asaEmergency = false;
+  } else if(canEmergency && !proc.asaEmergency){
+    proc.asaEmergency = true;
+  } else {
+    proc.asaClass = null;
+    proc.asaEmergency = false;
+  }
+  save();
+  renderProceduresSettings();
+}
+function clearProcedureAsaClass(idx){
+  const list = DB.settings.procedures || [];
+  const proc = list[idx]; if(!proc) return;
+  proc.asaClass = null; proc.asaEmergency = false;
+  save();
+  renderProceduresSettings();
+}
 function addProcedureType(){
   const input = document.getElementById('new_procedure_name');
   const name = (input.value || '').trim();
   if(!name) return;
   if(!DB.settings.procedures) DB.settings.procedures = [];
-  if(!DB.settings.procedures.includes(name)) DB.settings.procedures.push(name);
+  if(!DB.settings.procedures.some(pr=>pr.name === name)) DB.settings.procedures.push({name, asaClass:null, asaEmergency:false});
   save();
   input.value = '';
   renderProceduresSettings();
@@ -1362,8 +1434,8 @@ function saveEditProcedure(idx){
   const input = document.getElementById('edit_procedure_input_'+idx);
   const newName = (input.value || '').trim();
   if(!newName) return;
-  const oldName = DB.settings.procedures[idx];
-  DB.settings.procedures[idx] = newName;
+  const oldName = DB.settings.procedures[idx].name;
+  DB.settings.procedures[idx].name = newName;
   DB.patients.forEach(p=>{ if(p.procedure === oldName) p.procedure = newName; });
   save();
   editingProcedureIdx = null;
@@ -1375,20 +1447,36 @@ function renderProceduresSettings(){
   if(!wrap) return;
   const list = DB.settings.procedures || [];
   if(!list.length){ wrap.innerHTML = '<div class="hint">Список порожній — додайте процедуру вище</div>'; return; }
-  wrap.innerHTML = list.map((name,i)=>{
+  wrap.innerHTML = list.map((proc,i)=>{
     if(editingProcedureIdx === i){
-      return `<div class="list-row" style="gap:8px;">
-        <input id="edit_procedure_input_${i}" value="${escapeHtml(name)}" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:8px; background:var(--field); color:var(--text); min-height:36px;">
-        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="saveEditProcedure(${i})">✓</button>
-        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="cancelEditProcedure()">✕</button>
+      return `<div class="proc-row">
+        <div class="proc-row-top" style="gap:8px;">
+          <input id="edit_procedure_input_${i}" value="${escapeHtml(proc.name)}" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:8px; background:var(--field); color:var(--text); min-height:36px;">
+          <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="saveEditProcedure(${i})">✓</button>
+          <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="cancelEditProcedure()">✕</button>
+        </div>
       </div>`;
     }
-    return `<div class="list-row">
-      <span class="name">${escapeHtml(name)}</span>
-      <span style="display:flex; gap:6px;">
-        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="startEditProcedure(${i})">✎</button>
-        <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="removeProcedureType(${i})">✕</button>
-      </span>
+    const cls = proc.asaClass;
+    const emergency = !!proc.asaEmergency;
+    const asaBtns = ASA_CLASSES.map(c=>{
+      const active = cls === c;
+      const label = active && emergency ? c+'-E' : c;
+      return `<button type="button" class="proc-asa-btn ${active?'active':''}" onclick="setProcedureAsaClass(${i},'${c}')">${escapeHtml(label)}</button>`;
+    }).join('');
+    return `<div class="proc-row">
+      <div class="proc-row-top">
+        <span class="name">${escapeHtml(proc.name)}</span>
+        <span style="display:flex; gap:6px;">
+          <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="startEditProcedure(${i})">✎</button>
+          <button class="btn" style="min-height:28px; padding:3px 10px; font-size:11px;" onclick="removeProcedureType(${i})">✕</button>
+        </span>
+      </div>
+      <div class="proc-asa-row">
+        <span class="hint" style="margin:0;">ASA ризик:</span>
+        <div class="proc-asa-btns">${asaBtns}</div>
+        ${cls ? `<button type="button" class="proc-asa-clear" onclick="clearProcedureAsaClass(${i})">✕ скинути</button>` : ''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -1396,6 +1484,8 @@ function renderProceduresSettings(){
 /* ---- Procedures: picker modal (used on Пацієнт page and in New Patient modal) ---- */
 let procedurePickerTarget = 'patient'; // 'patient' | 'newPatient'
 let npSelectedProcedure = '';
+let npSelectedAsaClass = null;
+let npSelectedAsaEmergency = false;
 
 function openProcedurePicker(target){
   procedurePickerTarget = target;
@@ -1412,14 +1502,24 @@ function currentProcedureValue(){
 }
 
 function selectProcedure(name){
+  const risk = findProcedure(name); // застосовуємо категорію ризику ASA, прив'язану до процедури в налаштуваннях
   if(procedurePickerTarget === 'newPatient'){
     npSelectedProcedure = name;
     const lbl = document.getElementById('np_procedure_label');
     lbl.textContent = name; lbl.classList.remove('ph');
+    npSelectedAsaClass = risk ? risk.asaClass : null;
+    npSelectedAsaEmergency = risk ? !!risk.asaEmergency : false;
   } else {
     saveField('procedure', name);
     const lbl = document.getElementById('p_procedure_label');
     lbl.textContent = name; lbl.classList.remove('ph');
+    if(risk && risk.asaClass){
+      const p = currentPatient();
+      if(p){
+        const eff = effectiveAsaForRisk(risk, p.age);
+        p.asaClass = eff.asaClass; p.asaEmergency = !!eff.asaEmergency; save(); renderAsaQuick();
+      }
+    }
   }
   closeModal('procedureModal');
 }
@@ -1428,7 +1528,7 @@ function addProcedureFromSearch(){
   const q = (document.getElementById('procedureSearch').value || '').trim();
   if(!q) return;
   if(!DB.settings.procedures) DB.settings.procedures = [];
-  if(!DB.settings.procedures.includes(q)) DB.settings.procedures.push(q);
+  if(!DB.settings.procedures.some(pr=>pr.name === q)) DB.settings.procedures.push({name:q, asaClass:null, asaEmergency:false});
   save();
   renderProceduresSettings();
   selectProcedure(q);
@@ -1438,7 +1538,7 @@ function renderProcedurePicker(){
   const q = (document.getElementById('procedureSearch').value || '').trim().toLowerCase();
   const clrBtn = document.getElementById('procedureSearchClr');
   if(clrBtn) clrBtn.style.display = q ? 'block' : 'none';
-  const list = (DB.settings.procedures || []).filter(name => name.toLowerCase().includes(q));
+  const list = (DB.settings.procedures || []).filter(pr => pr.name.toLowerCase().includes(q)).map(pr=>pr.name);
   const current = currentProcedureValue();
   const wrap = document.getElementById('procedurePickerList');
   let html = '';
@@ -1450,7 +1550,7 @@ function renderProcedurePicker(){
   } else {
     html += `<div class="picker-empty">Немає збігів</div>`;
   }
-  if(q && !(DB.settings.procedures||[]).some(name=>name.toLowerCase()===q)){
+  if(q && !(DB.settings.procedures||[]).some(pr=>pr.name.toLowerCase()===q)){
     html += `<div style="padding:6px 10px;"><button type="button" class="picker-add-row" onclick="addProcedureFromSearch()"><span class="plus">+</span><span>Додати «${escapeHtml(q)}»</span></button></div>`;
   }
   wrap.innerHTML = html;
