@@ -560,6 +560,15 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     <div class="hint" id="recordIntervalHint">Зелений — до 3 хв, помаранчевий — 3–5 хв, червоний — понад 5 хв з моменту останнього запису.</div>
   </div>
   <div class="card">
+    <h2>Пуш-сповіщення про запис</h2>
+    <div class="sub">Сповіщає, коли з моменту останнього збереженого запису вітальних показників на вкладці «Вітальні» минув інтервал протоколу запису (див. вище, за замовчуванням 5 хв) — той самий відлік, що й у кольоровому індикаторі на кнопці «Зберегти». У Safari на iPhone/iPad працює лише якщо застосунок додано на Екран Домівки (кнопка «Поділитися» → «На екран Домівка»).</div>
+    <div class="segmented">
+      <button id="pushNotifOnBtn" onclick="togglePushNotificationsSetting(true)">Увімкнено</button>
+      <button id="pushNotifOffBtn" onclick="togglePushNotificationsSetting(false)">Вимкнено</button>
+    </div>
+    <div class="hint" id="pushNotifHint"></div>
+  </div>
+  <div class="card">
     <h2>Автопауза таймера анестезії без запису</h2>
     <div class="sub">Якщо з моменту старту таймера на вкладці «Вітальні» (або останнього збереженого запису) минуло 30 хв без нового запису — таймер хірургічного втручання зупиняється автоматично (як натискання «End»)</div>
     <div class="segmented">
@@ -848,6 +857,7 @@ if(DB.settings.saveColorEnabled === undefined) DB.settings.saveColorEnabled = tr
 if(DB.settings.autoStartTimer === undefined) DB.settings.autoStartTimer = true;
 if(DB.settings.alarmsEnabled === undefined) DB.settings.alarmsEnabled = true;
 if(DB.settings.autoPauseNoRecordEnabled === undefined) DB.settings.autoPauseNoRecordEnabled = true;
+if(DB.settings.pushNotificationsEnabled === undefined) DB.settings.pushNotificationsEnabled = true;
 if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
 DB.settings.procedures = normalizeProcedures(DB.settings.procedures);
 if(!DB.settings.breeds) DB.settings.breeds = {};
@@ -861,7 +871,7 @@ function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
 function newPatientObj(name){
   return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'',
     date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
-    sessionStart:null, sessionEnd:null, sessionAutoStopped:false, lastVitalSaveAt:null, labs:{},
+    sessionStart:null, sessionEnd:null, sessionAutoStopped:false, lastVitalSaveAt:null, vitalReminderSent:false, labs:{},
     asaClass:null, asaEmergency:false,
     drugConc: {}, vitals: [], drugLog: [], customDrugs: [] };
 }
@@ -1125,6 +1135,60 @@ function toggleSaveColorSetting(on){
   renderSettingsUI(); updateSaveBarTimer();
 }
 
+/* ---- пуш-сповіщення: нагадування про запис вітальних показників ----
+   Використовує ту саму точку відліку, що й кольоровий індикатор на кнопці
+   «Зберегти» (lastVitalSaveAt || sessionStart), і той самий інтервал
+   протоколу запису (recordIntervalMinutes). Сповіщення показується один раз
+   за кожен «прострочений» період — прапорець p.vitalReminderSent скидається,
+   щойно з'являється новий запис або оновлюється ref (elapsedMin < interval). */
+function pushNotificationsEnabled(){ return !!(DB.settings && DB.settings.pushNotificationsEnabled); }
+function togglePushNotificationsSetting(on){
+  DB.settings.pushNotificationsEnabled = on; save();
+  if(on) requestNotificationPermission();
+  renderSettingsUI();
+}
+function requestNotificationPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'default'){
+    Notification.requestPermission().then(()=>{ renderSettingsUI(); }).catch(()=>{});
+  }
+}
+function sendVitalReminderNotification(){
+  const interval = recordIntervalMinutes();
+  const title = 'Анестезія — час внести показники';
+  const body = 'Минуло ' + interval + ' хв з останнього запису вітальних показників';
+  const opts = { body: body, tag: 'vital-reminder', renotify: true, icon: 'apple-touch-icon-180.png' };
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.ready.then(function(reg){
+      if(reg && reg.showNotification){ reg.showNotification(title, opts); }
+      else if('Notification' in window && Notification.permission === 'granted'){ new Notification(title, opts); }
+    }).catch(function(){
+      if('Notification' in window && Notification.permission === 'granted'){ new Notification(title, opts); }
+    });
+  } else if('Notification' in window && Notification.permission === 'granted'){
+    new Notification(title, opts);
+  }
+}
+function checkVitalReminderNotification(){
+  const p = currentPatient();
+  if(!p || !p.sessionStart || p.sessionEnd) return;
+  const ref = p.lastVitalSaveAt || p.sessionStart;
+  const elapsedMin = Math.floor((Date.now() - ref) / 60000);
+  const interval = recordIntervalMinutes();
+  if(!pushNotificationsEnabled() || !('Notification' in window) || Notification.permission !== 'granted'){
+    if(p.vitalReminderSent){ p.vitalReminderSent = false; save(); }
+    return;
+  }
+  if(elapsedMin >= interval){
+    if(!p.vitalReminderSent){
+      p.vitalReminderSent = true; save();
+      sendVitalReminderNotification();
+    }
+  } else if(p.vitalReminderSent){
+    p.vitalReminderSent = false; save();
+  }
+}
+
 function autoPauseNoRecordEnabled(){ return DB.settings ? DB.settings.autoPauseNoRecordEnabled !== false : true; }
 function toggleAutoPauseNoRecordSetting(on){
   DB.settings.autoPauseNoRecordEnabled = on; save();
@@ -1188,6 +1252,21 @@ function renderSettingsUI(){
   const interval = recordIntervalMinutes();
   document.getElementById('recordInterval5Btn').classList.toggle('active', interval===5);
   document.getElementById('recordInterval10Btn').classList.toggle('active', interval===10);
+  const onPush = pushNotificationsEnabled();
+  document.getElementById('pushNotifOnBtn').classList.toggle('active', onPush);
+  document.getElementById('pushNotifOffBtn').classList.toggle('active', !onPush);
+  const pushHintEl = document.getElementById('pushNotifHint');
+  if(pushHintEl){
+    if(!('Notification' in window)){
+      pushHintEl.textContent = 'Цей браузер не підтримує сповіщення.';
+    } else if(Notification.permission === 'denied'){
+      pushHintEl.textContent = 'Сповіщення заблоковано в налаштуваннях системи/браузера — дозвольте їх вручну, щоб отримувати нагадування.';
+    } else if(Notification.permission === 'default'){
+      pushHintEl.textContent = onPush ? 'Дозвіл ще не надано — торкніться «Увімкнено», щоб дозволити сповіщення.' : '';
+    } else {
+      pushHintEl.textContent = onPush ? 'Дозвіл надано — нагадування активні.' : '';
+    }
+  }
   const onAutoPause = autoPauseNoRecordEnabled();
   document.getElementById('autoPauseNoRecordOnBtn').classList.toggle('active', onAutoPause);
   document.getElementById('autoPauseNoRecordOffBtn').classList.toggle('active', !onAutoPause);
@@ -2412,7 +2491,7 @@ window.addEventListener('beforeprint', renderPrintSheet);
 
 if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patients.push(p); DB.current = p.id; }
 if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
-DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false; });
+DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false; if(p.vitalReminderSent === undefined) p.vitalReminderSent = false; });
 save();
 syncAlarmSettingsSpeciesToPatient();
 syncBreedSettingsSpeciesToPatient();
@@ -2424,6 +2503,7 @@ setInterval(()=>{
   const p = currentPatient();
   if(p && p.sessionStart && !p.sessionEnd) updateTimerDisplay(p);
   checkAutoPauseNoRecord();
+  checkVitalReminderNotification();
   updateSaveBarTimer();
 }, 1000);
 
