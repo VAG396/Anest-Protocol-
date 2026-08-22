@@ -2060,6 +2060,11 @@ function initVitalsSaveSlider(){
   let dragging=false, moved=false, saving=false, startX=0, startY=0, curX=0;
   let pressTimer=null, holdStart=0, ringRAF=null, lastTapTime=0;
 
+  const COMMIT_RATIO = 0.5;   // з якої точки (частка ширини) інерція/відпускання завершує свайп до кінця
+  const FRICTION = 0.94;      // згасання швидкості інерції за кадр
+  const MIN_VELOCITY = 0.02;  // px/мс — нижче цього інерція вважається вичерпаною
+  let velX = 0, lastMoveX = 0, lastMoveT = 0, inertiaRAF = null;
+
   function setPos(x){
     x = Math.max(0, Math.min(maxX, x));
     thumb.style.left = (2+x)+'px';
@@ -2102,36 +2107,74 @@ function initVitalsSaveSlider(){
     ring.style.opacity = '.7';
   }
 
+  function settleToEnd(){
+    cancelAnimationFrame(inertiaRAF);
+    saving = true;
+    thumb.style.transition = 'left .16s ease-out';
+    setPos(maxX); fill.style.width = trackW+'px';
+    icon.innerHTML = ICON_CHECK;
+    addVital();
+    setTimeout(()=>{
+      saving = false;
+      icon.innerHTML = ICON_RIGHT;
+      thumb.style.transition = 'left .25s ease';
+      setPos(0); fill.style.width = (thumbW+6)+'px'; timeEl.style.opacity = '1';
+    }, 900);
+  }
+  function settleToStart(){
+    cancelAnimationFrame(inertiaRAF);
+    thumb.style.transition = 'left .3s cubic-bezier(.22,.9,.3,1.2)';
+    setPos(0);
+  }
+  function runInertia(){
+    cancelAnimationFrame(inertiaRAF);
+    thumb.style.transition = 'none';
+    function frame(){
+      velX *= FRICTION;
+      curX += velX*16;
+      if(curX >= maxX*COMMIT_RATIO){ settleToEnd(); return; }
+      if(curX <= 0 || Math.abs(velX) < MIN_VELOCITY){ settleToStart(); return; }
+      setPos(curX);
+      inertiaRAF = requestAnimationFrame(frame);
+    }
+    frame();
+  }
+
   function onDown(x,y){
     if(vitalsSliderLocked || saving) return;
     measure();
+    cancelAnimationFrame(inertiaRAF);
     dragging=true; moved=false; startX=x; startY=y; curX=0;
+    velX = 0; lastMoveX = x; lastMoveT = performance.now();
     thumb.style.transition = 'none';
     startRing();
   }
   function onMove(x,y){
     if(!dragging) return;
     const dx = x-startX, dy = y-startY;
-    if(!moved && (Math.abs(dx)>8 || Math.abs(dy)>8)){ moved = true; resetRing(); }
-    if(moved){ curX = dx; setPos(curX); }
+    if(!moved && (Math.abs(dx)>14 || Math.abs(dy)>14)){ moved = true; resetRing(); }
+    if(moved){
+      curX = dx; setPos(curX);
+      const now = performance.now();
+      const dt = now - lastMoveT;
+      if(dt > 0){
+        const instV = (x - lastMoveX) / dt;
+        velX = velX*0.7 + instV*0.3; // згладжена швидкість, px/мс
+      }
+      lastMoveX = x; lastMoveT = now;
+    }
   }
   function onUp(){
     if(!dragging) return;
     dragging = false;
-    thumb.style.transition = 'left .25s ease';
     resetRing();
     if(moved){
-      if(curX > maxX*0.7){
-        setPos(maxX); fill.style.width = trackW+'px'; saving = true;
-        icon.innerHTML = ICON_CHECK;
-        addVital();
-        setTimeout(()=>{
-          saving = false;
-          icon.innerHTML = ICON_RIGHT;
-          setPos(0); fill.style.width = (thumbW+6)+'px'; timeEl.style.opacity = '1';
-        }, 900);
+      if(curX > maxX*COMMIT_RATIO){
+        settleToEnd();
+      } else if(Math.abs(velX) > MIN_VELOCITY){
+        runInertia();               // доскролює по інерції; сам доїде до кінця, якщо перетне середину
       } else {
-        setPos(0);
+        settleToStart();
       }
     } else {
       const now = Date.now();
@@ -2140,12 +2183,20 @@ function initVitalsSaveSlider(){
     }
   }
 
-  thumb.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); });
-  window.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
-  window.addEventListener('mouseup', onUp);
-  thumb.addEventListener('touchstart', function(e){ const t = e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:true});
-  thumb.addEventListener('touchmove', function(e){ const t = e.touches[0]; onMove(t.clientX, t.clientY); if(moved) e.preventDefault(); }, {passive:false});
-  thumb.addEventListener('touchend', onUp);
+  let usingTouch = false, touchClearTimer = null;
+  function markTouch(){
+    usingTouch = true;
+    clearTimeout(touchClearTimer);
+    touchClearTimer = setTimeout(()=>{ usingTouch = false; }, 700);
+  }
+
+  thumb.addEventListener('mousedown', function(e){ if(usingTouch) return; onDown(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function(e){ if(usingTouch) return; onMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', function(e){ if(usingTouch) return; onUp(); });
+  thumb.addEventListener('touchstart', function(e){ markTouch(); const t = e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:true});
+  thumb.addEventListener('touchmove', function(e){ markTouch(); const t = e.touches[0]; onMove(t.clientX, t.clientY); if(moved) e.preventDefault(); }, {passive:false});
+  thumb.addEventListener('touchend', function(e){ markTouch(); e.preventDefault(); onUp(); }, {passive:false});
+  thumb.addEventListener('touchcancel', function(e){ markTouch(); dragging=false; resetRing(); cancelAnimationFrame(inertiaRAF); settleToStart(); }, {passive:true});
 
   setPos(0);
 }
