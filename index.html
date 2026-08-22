@@ -310,7 +310,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 #printSheet tr.ps-vital-notes-row td{background:#eaf0fa; border-top:none; font-style:italic; font-size:9px; padding:2px 6px 3px; color:#16407a; text-align:left;}
 #printSheet .ps-asa-box{display:inline-block; border:1px solid #16407a; width:16px; height:16px; text-align:center; line-height:16px; margin-right:4px; font-weight:700;}
 #printSheet .ps-asa-box.ps-on{background:#16407a; color:#fff;}
-#printSheet .ps-two-col{display:grid; grid-template-columns:1fr 1fr; gap:6mm;}
 #printSheet .ps-small{font-size:8.5px; color:#444;}
 #printSheet tr{page-break-inside:avoid;}
 #print-header{display:none;}
@@ -470,7 +469,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 
   <div class="card no-print">
     <h2>Вітальні показники</h2>
-    <div class="field" style="margin-bottom:4px;"><label>Стадія</label>
+    <div class="field" style="margin-bottom:4px;"><label>Фаза наркозу</label>
       <div class="segmented" id="v_plane_btns">
         <button type="button" data-value="Індукція" onclick="setVitalsPlane(this)">І</button>
         <button type="button" data-value="Хірургічна" onclick="setVitalsPlane(this)">Х</button>
@@ -514,7 +513,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     <div class="table-wrap">
       <table id="vitalsTable">
         <thead><tr>
-          <th>Час</th><th>HR</th><th>RR</th><th>SpO₂</th><th>EtCO₂</th><th>SAP</th><th>DAP</th><th>MAP</th><th>Т°</th><th>Iso/Sevo</th><th>O₂</th><th>CRI</th><th>Стадія</th><th class="no-print">✕</th>
+          <th>Time</th><th>HR</th><th>RR</th><th>SpO₂</th><th>EtCO₂</th><th>SAP</th><th>DAP</th><th>MAP</th><th>Т°</th><th>Iso/Sevo</th><th>O₂</th><th>CRI</th><th>Phase</th><th class="no-print">✕</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -545,35 +544,10 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
   </div>
   <div class="card">
-    <h2>Кольоровий індикатор на кнопці «Зберегти»</h2>
-    <div class="segmented">
-      <button id="saveColorOnBtn" onclick="toggleSaveColorSetting(true)">Увімкнено</button>
-      <button id="saveColorOffBtn" onclick="toggleSaveColorSetting(false)">Вимкнено</button>
-    </div>
-  </div>
-  <div class="card">
     <h2>Інтервал протоколу запису</h2>
     <div class="segmented">
       <button id="recordInterval5Btn" onclick="setRecordInterval(5)">5 хв</button>
       <button id="recordInterval10Btn" onclick="setRecordInterval(10)">10 хв</button>
-    </div>
-    <div class="hint" id="recordIntervalHint">Зелений — до 3 хв, помаранчевий — 3–5 хв, червоний — понад 5 хв з моменту останнього запису.</div>
-  </div>
-  <div class="card">
-    <h2>Пуш-сповіщення про запис</h2>
-    <div class="sub">Сповіщає, коли з моменту останнього збереженого запису вітальних показників на вкладці «Вітальні» минув інтервал протоколу запису (див. вище, за замовчуванням 5 хв) — той самий відлік, що й у кольоровому індикаторі на кнопці «Зберегти». У Safari на iPhone/iPad працює лише якщо застосунок додано на Екран Домівки (кнопка «Поділитися» → «На екран Домівка»).</div>
-    <div class="segmented">
-      <button id="pushNotifOnBtn" onclick="togglePushNotificationsSetting(true)">Увімкнено</button>
-      <button id="pushNotifOffBtn" onclick="togglePushNotificationsSetting(false)">Вимкнено</button>
-    </div>
-    <div class="hint" id="pushNotifHint"></div>
-  </div>
-  <div class="card">
-    <h2>Автопауза таймера анестезії без запису</h2>
-    <div class="sub">Якщо з моменту старту таймера на вкладці «Вітальні» (або останнього збереженого запису) минуло 30 хв без нового запису — таймер хірургічного втручання зупиняється автоматично (як натискання «End»)</div>
-    <div class="segmented">
-      <button id="autoPauseNoRecordOnBtn" onclick="toggleAutoPauseNoRecordSetting(true)">Увімкнено</button>
-      <button id="autoPauseNoRecordOffBtn" onclick="toggleAutoPauseNoRecordSetting(false)">Вимкнено</button>
     </div>
   </div>
   <div class="card">
@@ -582,14 +556,6 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     <div class="segmented">
       <button id="snapGridOnBtn" onclick="toggleSnapGridSetting(true)">Увімкнено</button>
       <button id="snapGridOffBtn" onclick="toggleSnapGridSetting(false)">Вимкнено</button>
-    </div>
-  </div>
-  <div class="card">
-    <h2>Автозапуск таймера</h2>
-    <div class="sub">Запускати таймер анестезії одразу при створенні нового пацієнта, чи запускати його вручну пізніше на вкладці «Вітальні»</div>
-    <div class="segmented">
-      <button id="autoStartOnBtn" onclick="toggleAutoStartTimerSetting(true)">Увімкнено</button>
-      <button id="autoStartOffBtn" onclick="toggleAutoStartTimerSetting(false)">Вимкнено</button>
     </div>
   </div>
   <div class="card">
@@ -848,16 +814,12 @@ function applySeniorAsaAdjustment(){
 
 let DB = JSON.parse(localStorage.getItem('vetAnesthDB') || '{"patients":[],"current":null,"settings":{"recordInterval":5}}');
 if(!DB.patients) DB.patients = [];
-if(!DB.settings) DB.settings = {recordInterval:5, snapToGrid:true, defaultAnesthesiologist:'', surgeons:[], saveColorEnabled:true, autoStartTimer:true, alarmsEnabled:true};
+if(!DB.settings) DB.settings = {recordInterval:5, snapToGrid:true, defaultAnesthesiologist:'', surgeons:[], alarmsEnabled:true};
 if(!DB.settings.recordInterval) DB.settings.recordInterval = 5;
 if(DB.settings.snapToGrid === undefined) DB.settings.snapToGrid = true;
 if(DB.settings.defaultAnesthesiologist === undefined) DB.settings.defaultAnesthesiologist = '';
 if(!DB.settings.surgeons) DB.settings.surgeons = [];
-if(DB.settings.saveColorEnabled === undefined) DB.settings.saveColorEnabled = true;
-if(DB.settings.autoStartTimer === undefined) DB.settings.autoStartTimer = true;
 if(DB.settings.alarmsEnabled === undefined) DB.settings.alarmsEnabled = true;
-if(DB.settings.autoPauseNoRecordEnabled === undefined) DB.settings.autoPauseNoRecordEnabled = true;
-if(DB.settings.pushNotificationsEnabled === undefined) DB.settings.pushNotificationsEnabled = true;
 if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
 DB.settings.procedures = normalizeProcedures(DB.settings.procedures);
 if(!DB.settings.breeds) DB.settings.breeds = {};
@@ -869,9 +831,9 @@ function save(){ localStorage.setItem('vetAnesthDB', JSON.stringify(DB)); }
 function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
 
 function newPatientObj(name){
-  return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'',
+  return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'Самка',
     date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
-    sessionStart:null, sessionEnd:null, sessionAutoStopped:false, lastVitalSaveAt:null, vitalReminderSent:false, labs:{},
+    sessionStart:null, sessionEnd:null, sessionAutoStopped:false, lastVitalSaveAt:null, labs:{},
     asaClass:null, asaEmergency:false,
     drugConc: {}, vitals: [], drugLog: [], customDrugs: [] };
 }
@@ -979,10 +941,6 @@ function createPatient(){
   p.procedure = procedure;
   if(npSelectedAsaClass){ p.asaClass = npSelectedAsaClass; p.asaEmergency = npSelectedAsaEmergency; } // категорія ризику ASA, прив'язана до обраної процедури
   p.doctor = DB.settings.defaultAnesthesiologist || '';
-  if(autoStartTimerEnabled()){
-    p.sessionStart = Date.now();
-    p.sessionEnd = null;
-  }
   DB.patients.push(p); DB.current = p.id; save(); syncAlarmSettingsSpeciesToPatient();
 
   nameEl.value=''; speciesEl.value=''; weightEl.value='';
@@ -1129,80 +1087,15 @@ function setRecordInterval(min){
   renderSettingsUI(); updateSaveBarTimer();
 }
 
-function saveColorEnabled(){ return !!(DB.settings && DB.settings.saveColorEnabled); }
-function toggleSaveColorSetting(on){
-  DB.settings.saveColorEnabled = on; save();
-  renderSettingsUI(); updateSaveBarTimer();
-}
-
-/* ---- пуш-сповіщення: нагадування про запис вітальних показників ----
-   Використовує ту саму точку відліку, що й кольоровий індикатор на кнопці
-   «Зберегти» (lastVitalSaveAt || sessionStart), і той самий інтервал
-   протоколу запису (recordIntervalMinutes). Сповіщення показується один раз
-   за кожен «прострочений» період — прапорець p.vitalReminderSent скидається,
-   щойно з'являється новий запис або оновлюється ref (elapsedMin < interval). */
-function pushNotificationsEnabled(){ return !!(DB.settings && DB.settings.pushNotificationsEnabled); }
-function togglePushNotificationsSetting(on){
-  DB.settings.pushNotificationsEnabled = on; save();
-  if(on) requestNotificationPermission();
-  renderSettingsUI();
-}
-function requestNotificationPermission(){
-  if(!('Notification' in window)) return;
-  if(Notification.permission === 'default'){
-    Notification.requestPermission().then(()=>{ renderSettingsUI(); }).catch(()=>{});
-  }
-}
-function sendVitalReminderNotification(){
-  const interval = recordIntervalMinutes();
-  const title = 'Анестезія — час внести показники';
-  const body = 'Минуло ' + interval + ' хв з останнього запису вітальних показників';
-  const opts = { body: body, tag: 'vital-reminder', renotify: true, icon: 'apple-touch-icon-180.png' };
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.ready.then(function(reg){
-      if(reg && reg.showNotification){ reg.showNotification(title, opts); }
-      else if('Notification' in window && Notification.permission === 'granted'){ new Notification(title, opts); }
-    }).catch(function(){
-      if('Notification' in window && Notification.permission === 'granted'){ new Notification(title, opts); }
-    });
-  } else if('Notification' in window && Notification.permission === 'granted'){
-    new Notification(title, opts);
-  }
-}
-function checkVitalReminderNotification(){
-  const p = currentPatient();
-  if(!p || !p.sessionStart || p.sessionEnd) return;
-  const ref = p.lastVitalSaveAt || p.sessionStart;
-  const elapsedMin = Math.floor((Date.now() - ref) / 60000);
-  const interval = recordIntervalMinutes();
-  if(!pushNotificationsEnabled() || !('Notification' in window) || Notification.permission !== 'granted'){
-    if(p.vitalReminderSent){ p.vitalReminderSent = false; save(); }
-    return;
-  }
-  if(elapsedMin >= interval){
-    if(!p.vitalReminderSent){
-      p.vitalReminderSent = true; save();
-      sendVitalReminderNotification();
-    }
-  } else if(p.vitalReminderSent){
-    p.vitalReminderSent = false; save();
-  }
-}
-
-function autoPauseNoRecordEnabled(){ return DB.settings ? DB.settings.autoPauseNoRecordEnabled !== false : true; }
-function toggleAutoPauseNoRecordSetting(on){
-  DB.settings.autoPauseNoRecordEnabled = on; save();
-  renderSettingsUI(); checkAutoPauseNoRecord();
-}
 function autoPauseNoRecordMinutes(){ return 30; }
 
 /* Автопауза таймера анестезії без запису: якщо з моменту останнього збереженого
    запису вітальних (або старту сесії, якщо записів ще не було) минув обраний
    інтервал без нового запису — сесія завершується так само, як натискання «End»,
    але sessionEnd виставляється саме в момент останнього запису (ref), а не в
-   поточний момент — тобто «мертвий» час без записів не входить у тривалість. */
+   поточний момент — тобто «мертвий» час без записів не входить у тривалість.
+   Завжди активно, налаштування вимкнено прибрано. */
 function checkAutoPauseNoRecord(){
-  if(!autoPauseNoRecordEnabled()) return;
   const p = currentPatient();
   if(!p || !p.sessionStart || p.sessionEnd) return;
   const ref = p.lastVitalSaveAt || p.sessionStart;
@@ -1214,10 +1107,6 @@ function checkAutoPauseNoRecord(){
   }
 }
 
-function autoStartTimerEnabled(){ return DB.settings ? DB.settings.autoStartTimer !== false : true; }
-function toggleAutoStartTimerSetting(on){
-  DB.settings.autoStartTimer = on; save(); renderSettingsUI();
-}
 function snapToGridEnabled(){ return !!(DB.settings && DB.settings.snapToGrid); }
 function toggleSnapGridSetting(on){
   DB.settings.snapToGrid = on; save(); renderSettingsUI();
@@ -1246,39 +1135,12 @@ function snapTimeToGrid(rawTimeStr, p){
 }
 
 function renderSettingsUI(){
-  const onColor = saveColorEnabled();
-  document.getElementById('saveColorOnBtn').classList.toggle('active', onColor);
-  document.getElementById('saveColorOffBtn').classList.toggle('active', !onColor);
   const interval = recordIntervalMinutes();
   document.getElementById('recordInterval5Btn').classList.toggle('active', interval===5);
   document.getElementById('recordInterval10Btn').classList.toggle('active', interval===10);
-  const onPush = pushNotificationsEnabled();
-  document.getElementById('pushNotifOnBtn').classList.toggle('active', onPush);
-  document.getElementById('pushNotifOffBtn').classList.toggle('active', !onPush);
-  const pushHintEl = document.getElementById('pushNotifHint');
-  if(pushHintEl){
-    if(!('Notification' in window)){
-      pushHintEl.textContent = 'Цей браузер не підтримує сповіщення.';
-    } else if(Notification.permission === 'denied'){
-      pushHintEl.textContent = 'Сповіщення заблоковано в налаштуваннях системи/браузера — дозвольте їх вручну, щоб отримувати нагадування.';
-    } else if(Notification.permission === 'default'){
-      pushHintEl.textContent = onPush ? 'Дозвіл ще не надано — торкніться «Увімкнено», щоб дозволити сповіщення.' : '';
-    } else {
-      pushHintEl.textContent = onPush ? 'Дозвіл надано — нагадування активні.' : '';
-    }
-  }
-  const onAutoPause = autoPauseNoRecordEnabled();
-  document.getElementById('autoPauseNoRecordOnBtn').classList.toggle('active', onAutoPause);
-  document.getElementById('autoPauseNoRecordOffBtn').classList.toggle('active', !onAutoPause);
-  const onAutoStart = autoStartTimerEnabled();
-  document.getElementById('autoStartOnBtn').classList.toggle('active', onAutoStart);
-  document.getElementById('autoStartOffBtn').classList.toggle('active', !onAutoStart);
   const on2 = snapToGridEnabled();
   document.getElementById('snapGridOnBtn').classList.toggle('active', on2);
   document.getElementById('snapGridOffBtn').classList.toggle('active', !on2);
-  const amberStart = Math.round(interval*0.6*10)/10, redStart = interval;
-  document.getElementById('recordIntervalHint').textContent =
-    `Зелений — до ${amberStart} хв, помаранчевий — ${amberStart}–${redStart} хв, червоний — понад ${redStart} хв з моменту останнього запису.`;
   const defDoctorEl = document.getElementById('set_default_doctor');
   if(defDoctorEl && document.activeElement !== defDoctorEl) defDoctorEl.value = DB.settings.defaultAnesthesiologist || '';
   renderSurgeonsSettings();
@@ -1786,10 +1648,6 @@ function updateSaveBarTimer(){
   }
   const ref = p.lastVitalSaveAt || p.sessionStart;
   const elapsedMin = Math.floor((Date.now() - ref) / 60000);
-  if(!saveColorEnabled()){
-    timeEl.textContent = ''; timeEl.style.display = 'none';
-    return;
-  }
   timeEl.style.display = 'inline-block';
   timeEl.textContent = elapsedMin + ' хв';
   const interval = recordIntervalMinutes();
@@ -2263,7 +2121,7 @@ function openModal(id){
   document.getElementById(id+'-bg').classList.add('open');
   if(id === 'newPatientModal'){
     const btn = document.getElementById('np_submit_btn');
-    if(btn) btn.textContent = autoStartTimerEnabled() ? 'Почати анестезію' : 'Створити пацієнта';
+    if(btn) btn.textContent = 'Створити пацієнта';
   }
   const fab = document.querySelector('.fab');
   if(fab) fab.style.display = 'none';
@@ -2416,7 +2274,6 @@ function renderPrintSheet(){
     const rrLabel = psVal(v.rr) + (v.rrMode==='mech' ? ' (ШВЛ)' : v.rrMode==='spont' ? ' (сам.)' : '');
     let row = '<tr>'
       + '<td>' + psVal(v.time) + '</td>'
-      + '<td>' + psVal(v.plane) + '</td>'
       + '<td>' + psVal(v.hr) + '</td>'
       + '<td>' + rrLabel + '</td>'
       + '<td>' + psVal(v.spo2) + '</td>'
@@ -2428,6 +2285,7 @@ function renderPrintSheet(){
       + '<td>' + psVal(v.isosevo) + (v.isosevo && v.agent ? ' <small>(' + (v.agent==='sevo'?'Sevo':'Ізо') + ')</small>' : '') + '</td>'
       + '<td>' + psVal(v.o2) + '</td>'
       + '<td>' + psVal(v.cri) + '</td>'
+      + '<td>' + psVal(v.plane) + '</td>'
       + '</tr>';
     if(v.notes && String(v.notes).trim() !== ''){
       row += '<tr class="ps-vital-notes-row"><td colspan="13">Примітки: ' + escapeHtml(v.notes) + '</td></tr>';
@@ -2472,17 +2330,11 @@ function renderPrintSheet(){
 
   html += '<div class="ps-bar">Вітальні показники за часом</div>';
   html += '<table class="ps-section"><thead><tr>'
-    + '<th>Час</th><th>План</th><th>ЧСС</th><th>ЧДР</th><th>SpO₂</th><th>EtCO₂</th>'
-    + '<th>САТ</th><th>ДАТ</th><th>MAP</th><th>T°C</th><th>Ізо/Sevo%</th><th>O₂ л/хв</th><th>CRI</th>'
+    + '<th>Time</th><th>HR</th><th>RR</th><th>SpO₂</th><th>EtCO₂</th>'
+    + '<th>SAP</th><th>DAP</th><th>MAP</th><th>Т°</th><th>Iso/Sevo</th><th>O₂</th><th>CRI</th><th>Phase</th>'
     + '</tr></thead><tbody>' + vitalsRows + '</tbody></table>';
 
-  html += '<div class="ps-two-col">';
-  html += '<div><div class="ps-bar">Нотатки</div><div class="ps-notes-box"></div></div>';
-  html += '<div><div class="ps-bar">Післяопераційний період</div><table>'
-    + '<tr><td class="ps-label">T °C</td><td></td><td class="ps-label">P/хв</td><td></td></tr>'
-    + '<tr><td class="ps-label">R/хв</td><td></td><td class="ps-label">Реверсія</td><td></td></tr>'
-    + '</table></div>';
-  html += '</div>';
+  html += '<div class="ps-bar">Нотатки</div><div class="ps-notes-box"></div>';
   html += '<div class="ps-small">Згенеровано автоматично · Ветеринарний протокол анестезії</div>';
 
   container.innerHTML = html;
@@ -2491,7 +2343,7 @@ window.addEventListener('beforeprint', renderPrintSheet);
 
 if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patients.push(p); DB.current = p.id; }
 if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
-DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false; if(p.vitalReminderSent === undefined) p.vitalReminderSent = false; });
+DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false; });
 save();
 syncAlarmSettingsSpeciesToPatient();
 syncBreedSettingsSpeciesToPatient();
@@ -2503,7 +2355,6 @@ setInterval(()=>{
   const p = currentPatient();
   if(p && p.sessionStart && !p.sessionEnd) updateTimerDisplay(p);
   checkAutoPauseNoRecord();
-  checkVitalReminderNotification();
   updateSaveBarTimer();
 }, 1000);
 
