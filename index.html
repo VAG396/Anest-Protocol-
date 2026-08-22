@@ -248,6 +248,25 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 .save-btn-timed.st-amber .save-btn-time{background:rgba(36,24,0,.18);}
 .save-btn-timed.st-red .save-btn-time{background:rgba(255,255,255,.2);}
 
+.save-slider{position:relative; height:44px; border-radius:12px; background:var(--card2); border:1px solid var(--border-strong); overflow:hidden; touch-action:pan-y; -webkit-user-select:none; user-select:none;}
+.save-slider.disabled{opacity:.5;}
+.save-slider-fill{position:absolute; inset:0; width:44px; background:rgba(49,209,88,.22); transition:background .2s ease;}
+.save-slider.st-amber .save-slider-fill{background:rgba(242,169,59,.24);}
+.save-slider.st-red .save-slider-fill{background:rgba(255,59,48,.26);}
+.save-slider-time{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:800; font-size:14px; color:var(--text2); pointer-events:none;}
+.save-slider.st-amber .save-slider-time{color:var(--amber);}
+.save-slider.st-red .save-slider-time{color:var(--red);}
+.save-slider-thumb{position:absolute; top:2px; left:2px; width:40px; height:40px; border-radius:10px; background:var(--card); border:1px solid var(--border-strong); cursor:grab; display:flex; align-items:center; justify-content:center;}
+.save-slider-ring-svg{position:absolute; top:0; left:0; transform:rotate(-90deg);}
+.save-slider-thumb .save-slider-icon{position:relative; color:var(--green); transition:transform .15s ease;}
+.save-slider.st-amber .save-slider-icon{color:var(--amber);}
+.save-slider.st-red .save-slider-icon{color:var(--red);}
+.save-slider.st-amber .save-slider-ring{stroke:var(--amber) !important;}
+.save-slider.st-red .save-slider-ring{stroke:var(--red) !important;}
+.save-scroll-toast{position:absolute; top:-34px; right:0; background:var(--card2); border:1px solid var(--border-strong); color:var(--text); font-size:12px; font-weight:500; padding:5px 10px; border-radius:8px; opacity:0; transition:opacity .2s ease; display:flex; align-items:center; gap:5px; pointer-events:none; white-space:nowrap;}
+.save-scroll-toast i{font-size:14px; color:var(--green);}
+.vitals-notes-row td{background:rgba(242,169,59,.08); border-top:1.5px dashed var(--amber); border-bottom:1.5px dashed var(--amber); color:var(--amber); font-size:11px; font-weight:600; text-align:left; padding:5px 8px;}
+
 .tabbar{position:fixed; bottom:0; left:0; right:0; z-index:30; background:rgba(21,21,23,0.95); backdrop-filter:blur(10px); border-top:1px solid var(--border); display:flex; padding-bottom:env(safe-area-inset-bottom);}
 .tabbar button{flex:1; background:none; border:none; padding:8px 1px 7px; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--text3); font-size:9.5px; font-weight:500;}
 .tabbar button.active{color:var(--green);}
@@ -524,11 +543,15 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 
 <div class="save-bar no-print" id="vitalsSaveBar">
   <div class="save-bar-inner">
-    <button class="btn btn-primary btn-block save-btn-timed" id="vitalsSaveBtn" onclick="addVital()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      <span>Зберегти запис</span>
-      <span class="save-btn-time" id="vitalsSaveTimer"></span>
-    </button>
+    <div class="save-slider" id="vitalsSaveSlider">
+      <div class="save-scroll-toast" id="vitalsScrollToast"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" id="vitalsScrollToastIcon"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg><span id="vitalsScrollToastText">Нагору сторінки</span></div>
+      <div class="save-slider-fill" id="vitalsSaveFill"></div>
+      <div class="save-slider-time" id="vitalsSaveTimer">--</div>
+      <div class="save-slider-thumb" id="vitalsSaveThumb" role="button" tabindex="0" aria-label="Потягни вправо — зберегти запис. Подвійний тап — нагору сторінки. Утримай — вниз сторінки.">
+        <svg width="40" height="40" class="save-slider-ring-svg"><circle cx="20" cy="20" r="18" fill="none"></circle><circle class="save-slider-ring" id="vitalsSaveRing" cx="20" cy="20" r="18" fill="none" stroke="var(--green)" stroke-width="3" stroke-dasharray="113" stroke-dashoffset="113" opacity=".7"></circle></svg>
+        <svg class="save-slider-icon" id="vitalsSaveIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </div>
     <div class="save-status" id="vitalsSaveStatus">Не збережено</div>
   </div>
 </div>
@@ -1637,25 +1660,24 @@ function renderProcedurePicker(){
 
 
 function updateSaveBarTimer(){
-  const btn = document.getElementById('vitalsSaveBtn');
+  const slider = document.getElementById('vitalsSaveSlider');
   const timeEl = document.getElementById('vitalsSaveTimer');
-  if(!btn || !timeEl) return;
+  if(!slider || !timeEl) return;
   const p = currentPatient();
-  btn.classList.remove('st-green','st-amber','st-red');
+  slider.classList.remove('st-green','st-amber','st-red');
   if(!p || !p.sessionStart || p.sessionEnd){
-    timeEl.textContent = ''; timeEl.style.display = 'none';
+    timeEl.textContent = '--';
     return;
   }
   const ref = p.lastVitalSaveAt || p.sessionStart;
   const elapsedMin = Math.floor((Date.now() - ref) / 60000);
-  timeEl.style.display = 'inline-block';
   timeEl.textContent = elapsedMin + ' хв';
   const interval = recordIntervalMinutes();
   const amberStart = interval*0.6, redStart = interval;
   let cls = 'st-green';
   if(elapsedMin >= redStart) cls = 'st-red';
   else if(elapsedMin >= amberStart) cls = 'st-amber';
-  btn.classList.add(cls);
+  slider.classList.add(cls);
 }
 
 function renderHeader(){
@@ -1952,11 +1974,12 @@ function updateVitalsPlaneUI(){
 
 function updateVitalsSaveLock(){
   const p = currentPatient();
-  const btn = document.getElementById('vitalsSaveBtn');
+  const slider = document.getElementById('vitalsSaveSlider');
   const statusEl = document.getElementById('vitalsSaveStatus');
-  if(!btn) return;
+  if(!slider) return;
   const sessionRunning = !!(p && p.sessionStart && !p.sessionEnd);
-  btn.disabled = !sessionRunning;
+  slider.classList.toggle('disabled', !sessionRunning);
+  vitalsSliderLocked = !sessionRunning;
   if(!sessionRunning && statusEl){
     statusEl.textContent = 'Запустіть таймер хірургії, щоб зберігати записи';
     statusEl.className = 'save-status';
@@ -2008,6 +2031,125 @@ function addVital(){
   if(statusEl){ statusEl.textContent = 'Збережено о ' + nowTime(); statusEl.className = 'save-status saved'; }
 }
 
+/* ---- слайдер "Зберегти запис": свайп вправо = зберегти, подвійний тап = нагору, утримання = вниз ---- */
+let vitalsSliderLocked = false;
+
+function initVitalsSaveSlider(){
+  const track = document.getElementById('vitalsSaveSlider');
+  const thumb = document.getElementById('vitalsSaveThumb');
+  const fill = document.getElementById('vitalsSaveFill');
+  const timeEl = document.getElementById('vitalsSaveTimer');
+  const ring = document.getElementById('vitalsSaveRing');
+  const icon = document.getElementById('vitalsSaveIcon');
+  const toast = document.getElementById('vitalsScrollToast');
+  const toastIcon = document.getElementById('vitalsScrollToastIcon');
+  const toastText = document.getElementById('vitalsScrollToastText');
+  if(!track || !thumb) return;
+
+  const ICON_RIGHT = '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>';
+  const ICON_UP = '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>';
+  const ICON_DOWN = '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>';
+  const ICON_CHECK = '<polyline points="20 6 9 17 4 12"/>';
+
+  const thumbW = 40, RING_LEN = 113, HOLD_MS = 480, DOUBLE_MS = 320;
+  let trackW = 0, maxX = 0;
+  function measure(){ trackW = track.clientWidth; maxX = trackW - thumbW - 4; }
+  measure();
+  window.addEventListener('resize', measure);
+
+  let dragging=false, moved=false, saving=false, startX=0, startY=0, curX=0;
+  let pressTimer=null, holdStart=0, ringRAF=null, lastTapTime=0;
+
+  function setPos(x){
+    x = Math.max(0, Math.min(maxX, x));
+    thumb.style.left = (2+x)+'px';
+    fill.style.width = (x+thumbW+4)+'px';
+    timeEl.style.opacity = String(Math.max(0, 1 - x/(maxX*0.6 || 1)));
+  }
+
+  function showToast(dir){
+    toastIcon.innerHTML = dir==='up' ? ICON_UP : ICON_DOWN;
+    toastText.textContent = dir==='up' ? 'Нагору сторінки' : 'Вниз сторінки';
+    toast.style.opacity = '1';
+    setTimeout(()=>{ toast.style.opacity = '0'; }, 1100);
+  }
+
+  function doScroll(dir){
+    icon.innerHTML = dir==='up' ? ICON_UP : ICON_DOWN;
+    icon.style.transform = 'scale(1.15)';
+    showToast(dir);
+    window.scrollTo({top: dir==='up' ? 0 : document.body.scrollHeight, behavior:'smooth'});
+    if(navigator.vibrate) navigator.vibrate(12);
+    setTimeout(()=>{ icon.innerHTML = ICON_RIGHT; icon.style.transform = 'scale(1)'; }, 260);
+  }
+
+  function startRing(){
+    holdStart = Date.now();
+    cancelAnimationFrame(ringRAF);
+    function step(){
+      const p = Math.min(1, (Date.now()-holdStart)/HOLD_MS);
+      ring.setAttribute('stroke-dashoffset', String(RING_LEN*(1-p)));
+      ring.style.opacity = String(.4 + p*.6);
+      if(p<1) ringRAF = requestAnimationFrame(step);
+    }
+    step();
+    pressTimer = setTimeout(()=>{ doScroll('down'); resetRing(); dragging=false; }, HOLD_MS);
+  }
+  function resetRing(){
+    clearTimeout(pressTimer); pressTimer=null;
+    cancelAnimationFrame(ringRAF);
+    ring.setAttribute('stroke-dashoffset', String(RING_LEN));
+    ring.style.opacity = '.7';
+  }
+
+  function onDown(x,y){
+    if(vitalsSliderLocked || saving) return;
+    measure();
+    dragging=true; moved=false; startX=x; startY=y; curX=0;
+    thumb.style.transition = 'none';
+    startRing();
+  }
+  function onMove(x,y){
+    if(!dragging) return;
+    const dx = x-startX, dy = y-startY;
+    if(!moved && (Math.abs(dx)>8 || Math.abs(dy)>8)){ moved = true; resetRing(); }
+    if(moved){ curX = dx; setPos(curX); }
+  }
+  function onUp(){
+    if(!dragging) return;
+    dragging = false;
+    thumb.style.transition = 'left .25s ease';
+    resetRing();
+    if(moved){
+      if(curX > maxX*0.7){
+        setPos(maxX); fill.style.width = trackW+'px'; saving = true;
+        icon.innerHTML = ICON_CHECK;
+        addVital();
+        setTimeout(()=>{
+          saving = false;
+          icon.innerHTML = ICON_RIGHT;
+          setPos(0); fill.style.width = (thumbW+6)+'px'; timeEl.style.opacity = '1';
+        }, 900);
+      } else {
+        setPos(0);
+      }
+    } else {
+      const now = Date.now();
+      if(now - lastTapTime < DOUBLE_MS){ doScroll('up'); lastTapTime = 0; }
+      else { lastTapTime = now; }
+    }
+  }
+
+  thumb.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', onUp);
+  thumb.addEventListener('touchstart', function(e){ const t = e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:true});
+  thumb.addEventListener('touchmove', function(e){ const t = e.touches[0]; onMove(t.clientX, t.clientY); if(moved) e.preventDefault(); }, {passive:false});
+  thumb.addEventListener('touchend', onUp);
+
+  setPos(0);
+}
+
 function removeVital(idx){
   const p = currentPatient(); if(!p) return;
   p.vitals.splice(idx,1); save(); renderVitals();
@@ -2034,7 +2176,8 @@ function renderVitals(){
   const empty = document.getElementById('vitalsEmpty');
   if(!p || !p.vitals.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
-  tbody.innerHTML = p.vitals.map((v,i)=>`<tr>
+  tbody.innerHTML = p.vitals.map((v,i)=>{
+    let row = `<tr>
     <td>${v.time}</td>
     <td class="${oob(v.hr,'hr')?'oob':''}">${v.hr||'—'}</td>
     <td class="${oob(v.rr,'rr')?'oob':''}">${v.rr||'—'}${v.rr ? `<span class="rr-tag ${v.rrMode==='mech'?'mech':'spont'}">${v.rrMode==='mech'?'М':'С'}</span>` : ''}</td>
@@ -2049,7 +2192,12 @@ function renderVitals(){
     <td>${v.cri||'—'}</td>
     <td>${v.plane||'—'}</td>
     <td class="no-print"><button class="btn" style="min-height:26px; padding:2px 8px; font-size:11px;" onclick="removeVital(${i})">✕</button></td>
-  </tr>`).join('');
+  </tr>`;
+    if(v.notes && String(v.notes).trim() !== ''){
+      row += `<tr class="vitals-notes-row"><td colspan="14">Примітки: ${escapeHtml(v.notes)}</td></tr>`;
+    }
+    return row;
+  }).join('');
 }
 
 
@@ -2349,6 +2497,7 @@ syncAlarmSettingsSpeciesToPatient();
 syncBreedSettingsSpeciesToPatient();
 renderAll();
 showHome();
+initVitalsSaveSlider();
 
 /* single global ticker drives the main session timer every second */
 setInterval(()=>{
