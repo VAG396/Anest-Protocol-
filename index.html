@@ -257,6 +257,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 .save-slider.st-amber .save-slider-time{color:var(--amber);}
 .save-slider.st-red .save-slider-time{color:var(--red);}
 .save-slider-thumb{position:absolute; top:2px; left:2px; width:48px; height:48px; border-radius:12px; background:var(--card); border:1px solid var(--border-strong); cursor:grab; display:flex; align-items:center; justify-content:center;}
+.save-slider-thumb::before{content:''; position:absolute; top:-12px; left:-12px; right:-12px; bottom:-4px;}
 .save-slider-ring-svg{position:absolute; top:0; left:0; transform:rotate(-90deg);}
 .save-slider-thumb .save-slider-icon{position:relative; color:var(--green); transition:transform .15s ease;}
 .save-slider.st-amber .save-slider-icon{color:var(--amber);}
@@ -2123,12 +2124,113 @@ function initVitalsSaveSlider(){
 
   let dragging=false, moved=false, saving=false, startX=0, startY=0, curX=0;
   let pressTimer=null, holdStart=0, ringRAF=null;
+  let posHistory=[];
 
-  function setPos(x){
+  function trackVel(x){
+    const t = Date.now();
+    posHistory.push({x:x, t:t});
+    if(posHistory.length>6) posHistory.shift();
+  }
+  function computeVelocity(){
+    if(posHistory.length<2) return 0;
+    const last = posHistory[posHistory.length-1];
+    let ref = posHistory[0];
+    for(let i=posHistory.length-2;i>=0;i--){
+      ref = posHistory[i];
+      if(last.t - ref.t >= 25) break;
+    }
+    const dt = last.t - ref.t;
+    if(dt<=0) return 0;
+    return (last.x - ref.x)/dt; // px/ms, positive = праворуч
+  }
+
+  function applyVisual(x){
     x = Math.max(0, Math.min(maxX, x));
     thumb.style.left = (2+x)+'px';
     fill.style.width = (x+thumbW+4)+'px';
     timeEl.style.opacity = String(Math.max(0, 1 - x/(maxX*0.6 || 1)));
+  }
+
+  // ---- фізична модель: під час тяги стрілочка слідує за пальцем через пружину (з інерцією),
+  // а після відпускання — вільно КОВЗАЄ зі своєю швидкістю і гальмує тертям (реальний поштовх),
+  // і лише коли рух природньо вичерпався — доводиться до 0 або до кінця ----
+  const SPRING_K = 210, SPRING_D = 24;   // пружина: слідування за пальцем і фінальне доведення
+  const FRICTION = 6.5;                   // коефіцієнт гальмування під час вільного ковзання (1/с)
+  const COAST_SETTLE_V = 55;              // швидкість (px/с), нижче якої ковзання вважається вичерпаним
+  const SAVE_THRESHOLD = 0.35;
+  let physPos = 0, physVel = 0, physTargetEnd = false, springRAF = null, lastFrameT = 0;
+  let phase = 'idle'; // 'drag' | 'coast' | 'settle' | 'done'
+  let settleAction = null;
+
+  function commitSave(){
+    if(saving) return;
+    saving = true;
+    icon.innerHTML = ICON_CHECK;
+    addVital();
+    settleAction = ()=>{
+      setTimeout(()=>{
+        saving = false;
+        icon.innerHTML = ICON_RIGHT;
+        timeEl.style.opacity = '1';
+        physTargetEnd = false;
+        phase = 'settle';
+        ensureSpring();
+      }, 900);
+    };
+  }
+
+  function springLoop(t){
+    if(!lastFrameT) lastFrameT = t;
+    let dt = (t - lastFrameT)/1000; lastFrameT = t;
+    dt = Math.min(dt, 0.032);
+
+    if(phase === 'drag'){
+      const target = curX;
+      const acc = -SPRING_K*(physPos-target) - SPRING_D*physVel;
+      physVel += acc*dt;
+      physPos += physVel*dt;
+    } else if(phase === 'coast'){
+      // вільне ковзання за інерцією поштовху, що гальмує тертям — без прив'язки до цілі
+      physVel *= Math.exp(-FRICTION*dt);
+      physPos += physVel*dt;
+      if(physPos >= maxX){
+        physPos = maxX; physVel = 0;
+        commitSave();
+        phase = 'settle'; physTargetEnd = true;
+      } else if(physPos <= 0){
+        physPos = 0; physVel = 0;
+        phase = 'done';
+      } else if(physPos > maxX*SAVE_THRESHOLD){
+        // поріг перетнуто під час ковзання — більше не гальмуємо й не зупиняємось,
+        // одразу довершуємо рух до кінця (без окремої "зупинки" перед фінальним доведенням)
+        physTargetEnd = true;
+        commitSave();
+        phase = 'settle';
+      } else if(Math.abs(physVel) < COAST_SETTLE_V){
+        physTargetEnd = false;
+        phase = 'settle';
+      }
+    } else if(phase === 'settle'){
+      const target = physTargetEnd ? maxX : 0;
+      const acc = -SPRING_K*(physPos-target) - SPRING_D*physVel;
+      physVel += acc*dt;
+      physPos += physVel*dt;
+      if(Math.abs(target-physPos) < 0.4 && Math.abs(physVel) < 8){
+        physPos = target; physVel = 0;
+        phase = 'done';
+      }
+    }
+
+    applyVisual(physPos);
+    if(phase === 'done'){
+      springRAF = null; lastFrameT = 0;
+      if(settleAction){ const fn = settleAction; settleAction = null; fn(); }
+      return;
+    }
+    springRAF = requestAnimationFrame(springLoop);
+  }
+  function ensureSpring(){
+    if(!springRAF){ lastFrameT = 0; springRAF = requestAnimationFrame(springLoop); }
   }
 
   function showScrollTopToast(){
@@ -2166,38 +2268,32 @@ function initVitalsSaveSlider(){
     ring.style.opacity = '.7';
   }
 
+  let baseX = 0;
   function onDown(x,y){
     if(vitalsSliderLocked || saving) return;
     measure();
-    dragging=true; moved=false; startX=x; startY=y; curX=0;
-    thumb.style.transition = 'none';
+    dragging=true; moved=false; startX=x; startY=y;
+    baseX = physPos; curX = baseX; // підхоплюємо з поточної позиції, без стрибка
+    phase = 'drag';
+    posHistory=[]; trackVel(curX);
     startRing();
+    ensureSpring();
   }
   function onMove(x,y){
     if(!dragging) return;
     const dx = x-startX, dy = y-startY;
     if(!moved && (Math.abs(dx)>8 || Math.abs(dy)>8)){ moved = true; resetRing(); }
-    if(moved){ curX = dx; setPos(curX); }
+    curX = Math.max(0, Math.min(maxX, baseX+dx));
+    trackVel(curX);
   }
   function onUp(){
     if(!dragging) return;
     dragging = false;
-    thumb.style.transition = 'left .25s ease';
     resetRing();
-    if(moved){
-      if(curX > maxX*0.43){
-        setPos(maxX); fill.style.width = trackW+'px'; saving = true;
-        icon.innerHTML = ICON_CHECK;
-        addVital();
-        setTimeout(()=>{
-          saving = false;
-          icon.innerHTML = ICON_RIGHT;
-          setPos(0); fill.style.width = (thumbW+6)+'px'; timeEl.style.opacity = '1';
-        }, 900);
-      } else {
-        setPos(0);
-      }
-    }
+    const flickV = computeVelocity()*1000; // px/ms -> px/с — реальна швидкість поштовху пальцем
+    physVel = flickV;
+    phase = 'coast'; // завжди відпускаємо у вільне ковзання з тертям (навіть без руху — одразу осяде)
+    ensureSpring();
   }
 
   thumb.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); });
@@ -2207,7 +2303,7 @@ function initVitalsSaveSlider(){
   thumb.addEventListener('touchmove', function(e){ const t = e.touches[0]; onMove(t.clientX, t.clientY); if(moved) e.preventDefault(); }, {passive:false});
   thumb.addEventListener('touchend', onUp);
 
-  setPos(0);
+  applyVisual(0);
 }
 
 function removeVital(idx){
