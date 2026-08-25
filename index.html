@@ -62,6 +62,13 @@ button{font-family:var(--font); cursor:pointer;}
 .field input, .field select{border:1px solid var(--border-strong); border-radius:8px; padding:10px 10px; background:var(--field); color:var(--text); min-height:40px;}
 .field input:focus, .field select:focus{outline:2px solid var(--blue); background:#000;}
 
+.age-row{display:flex; gap:10px;}
+.age-sub{flex:1; min-width:0;}
+.age-input-wrap{position:relative;}
+.age-input-wrap input{border:1px solid var(--border-strong); border-radius:8px; padding:10px 42px 10px 10px; background:var(--field); color:var(--text); min-height:40px; width:100%;}
+.age-input-wrap input:focus{outline:2px solid var(--blue); background:#000;}
+.age-unit{position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:13px; font-weight:600; color:var(--text3); pointer-events:none;}
+
 .btn{border:1px solid var(--border-strong); background:var(--card2); border-radius:12px; padding:11px 16px; font-size:14px; font-weight:600; color:var(--text); min-height:44px;}
 .btn:disabled{opacity:.45; cursor:not-allowed;}
 .btn:active{background:var(--border);}
@@ -89,7 +96,7 @@ button{font-family:var(--font); cursor:pointer;}
 .lab-btn:active{opacity:.75;}
 
 #view-labs{padding-bottom:96px;}
-.labs-save-bar{position:fixed; left:0; right:0; bottom:calc(54px + env(safe-area-inset-bottom)); z-index:25; background:linear-gradient(180deg, rgba(11,11,12,0) 0%, var(--bg) 22%); padding:14px 16px 8px; display:none;}
+.labs-save-bar{position:fixed; left:0; right:0; bottom:var(--tabbar-h, calc(54px + env(safe-area-inset-bottom))); z-index:25; background:linear-gradient(180deg, rgba(11,11,12,0) 0%, var(--bg) 22%); padding:14px 16px 8px; display:none;}
 .labs-save-bar.active{display:block;}
 .labs-mark-btn{display:flex; align-items:center; justify-content:center; gap:8px; font-size:16px; padding:15px 16px; min-height:52px; border-radius:16px; box-shadow:0 6px 20px rgba(49,209,88,.25);}
 
@@ -233,30 +240,23 @@ td.oob{color:var(--red); font-weight:700;}
 tr td:first-child{font-weight:600; color:var(--text2);}
 
 #view-vitals{padding-bottom:96px;}
-.save-bar{position:fixed; left:0; right:0; bottom:calc(54px + env(safe-area-inset-bottom)); z-index:25; background:linear-gradient(180deg, rgba(11,11,12,0) 0%, var(--bg) 22%); padding:14px 16px 8px; display:none;}
+.save-bar{position:fixed; left:0; right:0; bottom:var(--tabbar-h, calc(54px + env(safe-area-inset-bottom))); z-index:25; background:linear-gradient(180deg, rgba(11,11,12,0) 0%, var(--bg) 22%); padding:20px 16px 10px; display:none;}
 .save-bar.active{display:block;}
 .save-bar-inner{max-width:640px; margin:0 auto;}
 .save-bar .btn-primary{display:flex; align-items:center; justify-content:center; gap:8px;}
-.save-status{text-align:center; font-size:12px; color:var(--text2); margin-top:6px;}
+.save-status{display:none; text-align:center; font-size:12px; color:var(--text2); margin-top:6px;}
 .save-status.dirty{color:var(--amber);}
 .save-status.saved{color:var(--green);}
-.save-btn-time{font-family:var(--mono); font-weight:800; font-size:13px; background:rgba(0,0,0,.16); padding:2px 8px; border-radius:8px; margin-left:2px;}
-.save-btn-timed.st-green{background:var(--green); border-color:var(--green); color:#04220D;}
-.save-btn-timed.st-amber{background:var(--amber); border-color:var(--amber); color:#241800;}
-.save-btn-timed.st-red{background:var(--red); border-color:var(--red); color:#fff;}
-.save-btn-timed.st-green .save-btn-time{background:rgba(4,34,13,.18);}
-.save-btn-timed.st-amber .save-btn-time{background:rgba(36,24,0,.18);}
-.save-btn-timed.st-red .save-btn-time{background:rgba(255,255,255,.2);}
 
-.save-slider{position:relative; height:44px; border-radius:12px; background:var(--card2); border:1px solid var(--border-strong); overflow:hidden; touch-action:pan-y; -webkit-user-select:none; user-select:none;}
+.save-slider{position:relative; height:52px; border-radius:14px; background:var(--card2); border:1px solid var(--border-strong); overflow:hidden; touch-action:pan-y; -webkit-user-select:none; user-select:none;}
 .save-slider.disabled{opacity:.5;}
-.save-slider-fill{position:absolute; inset:0; width:44px; background:rgba(49,209,88,.22); transition:background .2s ease;}
+.save-slider-fill{position:absolute; inset:0; width:52px; background:rgba(49,209,88,.22); transition:background .2s ease;}
 .save-slider.st-amber .save-slider-fill{background:rgba(242,169,59,.24);}
 .save-slider.st-red .save-slider-fill{background:rgba(255,59,48,.26);}
 .save-slider-time{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:800; font-size:14px; color:var(--text2); pointer-events:none;}
 .save-slider.st-amber .save-slider-time{color:var(--amber);}
 .save-slider.st-red .save-slider-time{color:var(--red);}
-.save-slider-thumb{position:absolute; top:2px; left:2px; width:40px; height:40px; border-radius:10px; background:var(--card); border:1px solid var(--border-strong); cursor:grab; display:flex; align-items:center; justify-content:center;}
+.save-slider-thumb{position:absolute; top:2px; left:2px; width:48px; height:48px; border-radius:12px; background:var(--card); border:1px solid var(--border-strong); cursor:grab; display:flex; align-items:center; justify-content:center;}
 .save-slider-ring-svg{position:absolute; top:0; left:0; transform:rotate(-90deg);}
 .save-slider-thumb .save-slider-icon{position:relative; color:var(--green); transition:transform .15s ease;}
 .save-slider.st-amber .save-slider-icon{color:var(--amber);}
@@ -377,7 +377,23 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       </button>
     </div>
     <div class="field"><label>Вага, кг</label><input id="p_weight" type="number" step="0.1" inputmode="decimal" oninput="saveField('weight', this.value); renderDrugs();"></div>
-    <div class="field"><label>Вік</label><input id="p_age" oninput="saveField('age', this.value); applySeniorAsaAdjustment();"></div>
+    <div class="field">
+      <label>Вік</label>
+      <div class="age-row">
+        <div class="age-sub">
+          <div class="age-input-wrap">
+            <input id="p_age_years" type="number" min="0" step="1" inputmode="numeric" placeholder="0" oninput="saveAgeField('ageYears', this.value)">
+            <span class="age-unit">р.</span>
+          </div>
+        </div>
+        <div class="age-sub">
+          <div class="age-input-wrap">
+            <input id="p_age_months" type="number" min="0" max="11" step="1" inputmode="numeric" placeholder="0" oninput="saveAgeField('ageMonths', this.value)">
+            <span class="age-unit">міс.</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="field"><label>Стать</label>
       <div class="segmented" id="p_sex_btns">
         <button type="button" id="p_sex_femaleBtn" onclick="setPatientSex('Самка')">Самка</button>
@@ -497,24 +513,24 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <input type="hidden" id="v_plane" value="">
     </div>
     <div class="vgrid">
-      <div class="vfield"><label>HR<button type="button" class="alarm-dots-btn" id="alarmDots_hr" ondblclick="openAlarmFieldModal('hr')" aria-label="Налаштування аларму HR (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_hr" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div></div>
-      <div class="vfield"><label>RR<button type="button" class="alarm-dots-btn" id="alarmDots_rr" ondblclick="openAlarmFieldModal('rr')" aria-label="Налаштування аларму RR (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_rr" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div>
+      <div class="vfield"><label>HR<button type="button" class="alarm-dots-btn" id="alarmDots_hr" ondblclick="openAlarmFieldModal('hr')" aria-label="Налаштування аларму HR (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_hr" type="number" inputmode="numeric" min="0" max="999" placeholder="--" oninput="clampVitalRange(this,0,999); recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div></div>
+      <div class="vfield"><label>RR<button type="button" class="alarm-dots-btn" id="alarmDots_rr" ondblclick="openAlarmFieldModal('rr')" aria-label="Налаштування аларму RR (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_rr" type="number" inputmode="numeric" min="0" max="999" placeholder="--" oninput="clampVitalRange(this,0,999); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">bpm</span></div>
         <div class="rrmode-seg" role="group" aria-label="Тип дихання">
           <button type="button" id="rrModeSpontBtn" onclick="setRRMode('spont')" aria-label="Самостійне дихання">С</button>
           <button type="button" id="rrModeMechBtn" onclick="setRRMode('mech')" aria-label="Механічна вентиляція (ШВЛ)">М</button>
         </div>
       </div>
-      <div class="vfield"><label>SpO₂<button type="button" class="alarm-dots-btn" id="alarmDots_spo2" ondblclick="openAlarmFieldModal('spo2')" aria-label="Налаштування аларму SpO₂ (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_spo2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">%</span></div></div>
-      <div class="vfield"><label>EtCO₂<button type="button" class="alarm-dots-btn" id="alarmDots_etco2" ondblclick="openAlarmFieldModal('etco2')" aria-label="Налаштування аларму EtCO₂ (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_etco2" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
-      <div class="vfield"><label>SAP<button type="button" class="alarm-dots-btn" id="alarmDots_sys" ondblclick="openAlarmFieldModal('sys')" aria-label="Налаштування аларму SAP (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_sys" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
-      <div class="vfield"><label>DAP<button type="button" class="alarm-dots-btn" id="alarmDots_dia" ondblclick="openAlarmFieldModal('dia')" aria-label="Налаштування аларму DAP (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_dia" type="number" inputmode="numeric" placeholder="--" oninput="recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
-      <div class="vfield"><label>MAP<button type="button" class="alarm-dots-btn" id="alarmDots_map" ondblclick="openAlarmFieldModal('map')" aria-label="Налаштування аларму MAP (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div>
+      <div class="vfield"><label>SpO₂<button type="button" class="alarm-dots-btn" id="alarmDots_spo2" ondblclick="openAlarmFieldModal('spo2')" aria-label="Налаштування аларму SpO₂ (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_spo2" type="number" inputmode="numeric" min="0" max="999" placeholder="--" oninput="clampVitalRange(this,0,999); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">%</span></div></div>
+      <div class="vfield"><label>EtCO₂<button type="button" class="alarm-dots-btn" id="alarmDots_etco2" ondblclick="openAlarmFieldModal('etco2')" aria-label="Налаштування аларму EtCO₂ (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_etco2" type="number" inputmode="numeric" min="0" max="999" placeholder="--" oninput="clampVitalRange(this,0,999); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>SAP<button type="button" class="alarm-dots-btn" id="alarmDots_sys" ondblclick="openAlarmFieldModal('sys')" aria-label="Налаштування аларму SAP (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_sys" type="number" inputmode="numeric" min="0" max="999" placeholder="--" oninput="clampVitalRange(this,0,999); recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>DAP<button type="button" class="alarm-dots-btn" id="alarmDots_dia" ondblclick="openAlarmFieldModal('dia')" aria-label="Налаштування аларму DAP (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_dia" type="number" inputmode="numeric" min="0" max="999" placeholder="--" oninput="clampVitalRange(this,0,999); recalcMap(); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div></div>
+      <div class="vfield"><label>MAP<button type="button" class="alarm-dots-btn" id="alarmDots_map" ondblclick="openAlarmFieldModal('map')" aria-label="Налаштування аларму MAP (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_map" type="number" inputmode="numeric" min="0" max="999" placeholder="--" oninput="clampVitalRange(this,0,999); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">mmHg</span></div>
         <div class="rrmode-seg" role="group" aria-label="Розрахунок MAP">
           <button type="button" id="mapModeAutoBtn" onclick="setMapMode('auto')" aria-label="Автоматичний розрахунок">А</button>
           <button type="button" id="mapModeManualBtn" onclick="setMapMode('manual')" aria-label="Ручне введення">Р</button>
         </div>
       </div>
-      <div class="vfield"><label>Temp<button type="button" class="alarm-dots-btn" id="alarmDots_temp" ondblclick="openAlarmFieldModal('temp')" aria-label="Налаштування аларму Temp (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" placeholder="--" oninput="markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
+      <div class="vfield"><label>Temp<button type="button" class="alarm-dots-btn" id="alarmDots_temp" ondblclick="openAlarmFieldModal('temp')" aria-label="Налаштування аларму Temp (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" min="0" placeholder="--" oninput="clampVitalRange(this,0); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
       <div class="vfield"><label id="isoSevoLabel">Iso/Sevo</label><div class="vfield-row"><input id="v_isosevo" class="isosevo-input" type="number" step="0.1" inputmode="decimal" placeholder="--" readonly onclick="openIsoSevoWheel()" oninput="markVitalsDirty()"><span class="unit">%</span></div>
         <div class="agent-seg" role="group" aria-label="Анестетик">
           <button type="button" id="agentIsoBtn" onclick="setAgent('iso')" aria-label="Isoflurane">І</button>
@@ -547,9 +563,9 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       <div class="save-scroll-toast" id="vitalsScrollToast"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" id="vitalsScrollToastIcon"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg><span id="vitalsScrollToastText">Нагору сторінки</span></div>
       <div class="save-slider-fill" id="vitalsSaveFill"></div>
       <div class="save-slider-time" id="vitalsSaveTimer">--</div>
-      <div class="save-slider-thumb" id="vitalsSaveThumb" role="button" tabindex="0" aria-label="Потягни вправо — зберегти запис. Подвійний тап — нагору сторінки. Утримай — вниз сторінки.">
-        <svg width="40" height="40" class="save-slider-ring-svg"><circle cx="20" cy="20" r="18" fill="none"></circle><circle class="save-slider-ring" id="vitalsSaveRing" cx="20" cy="20" r="18" fill="none" stroke="var(--green)" stroke-width="3" stroke-dasharray="113" stroke-dashoffset="113" opacity=".7"></circle></svg>
-        <svg class="save-slider-icon" id="vitalsSaveIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <div class="save-slider-thumb" id="vitalsSaveThumb" role="button" tabindex="0" aria-label="Потягни вправо — зберегти запис. Утримай — гортання нагору сторінки.">
+        <svg width="48" height="48" class="save-slider-ring-svg"><circle cx="24" cy="24" r="22" fill="none"></circle><circle class="save-slider-ring" id="vitalsSaveRing" cx="24" cy="24" r="22" fill="none" stroke="var(--green)" stroke-width="3" stroke-dasharray="138" stroke-dashoffset="138" opacity=".7"></circle></svg>
+        <svg class="save-slider-icon" id="vitalsSaveIcon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </div>
     </div>
     <div class="save-status" id="vitalsSaveStatus">Не збережено</div>
@@ -583,7 +599,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
   </div>
   <div class="card">
     <h2>Анестезіолог за замовчуванням</h2>
-    <div class="field"><input id="set_default_doctor" placeholder="напр. Іваненко О.В." oninput="setDefaultAnesthesiologist(this.value)"></div>
+    <div class="field"><input id="set_default_doctor" placeholder="Прізвище анестезіолога" oninput="setDefaultAnesthesiologist(this.value)"></div>
   </div>
   <div class="card">
     <h2>Хірурги</h2>
@@ -807,19 +823,35 @@ function findProcedure(name){
   return (DB.settings.procedures || []).find(pr => pr.name === name);
 }
 
-/* «Вікова» тварина — вік від 6 років. Поле «Вік» текстове (напр. «7», «7 років»), тож беремо перше число з рядка. */
+/* «Вікова» тварина — вік від 6 років. Вік зберігається як роки (p.ageYears) + місяці (p.ageMonths). */
 const SENIOR_AGE_YEARS = 6;
-function isSeniorAge(ageStr){
-  if(!ageStr) return false;
-  const m = String(ageStr).match(/[\d.,]+/);
-  if(!m) return false;
-  const age = parseFloat(m[0].replace(',', '.'));
-  return !isNaN(age) && age >= SENIOR_AGE_YEARS;
+/* сумарний вік пацієнта в роках (десятковий), напр. 5 р. 6 міс. => 5.5 */
+function ageInYears(p){
+  if(!p) return null;
+  const y = parseFloat(p.ageYears);
+  const m = parseFloat(p.ageMonths);
+  const hasY = !isNaN(y), hasM = !isNaN(m);
+  if(!hasY && !hasM) return null;
+  return (hasY?y:0) + (hasM?m:0)/12;
+}
+/* людський формат віку для заголовків і друку, напр. «5 р. 6 міс.» */
+function ageText(p){
+  if(!p) return '';
+  const y = (p.ageYears!==undefined && p.ageYears!==null && p.ageYears!=='') ? p.ageYears : null;
+  const m = (p.ageMonths!==undefined && p.ageMonths!==null && p.ageMonths!=='') ? p.ageMonths : null;
+  const parts = [];
+  if(y!==null) parts.push(y + ' р.');
+  if(m!==null) parts.push(m + ' міс.');
+  return parts.join(' ');
+}
+function isSeniorAge(p){
+  const age = ageInYears(p);
+  return age !== null && age >= SENIOR_AGE_YEARS;
 }
 /* якщо для процедури задана перша категорія ризику ASA (I), а тварина вікова — автоматично підвищуємо до другої (II) */
-function effectiveAsaForRisk(risk, ageStr){
+function effectiveAsaForRisk(risk, p){
   if(!risk || !risk.asaClass) return risk;
-  if(risk.asaClass === 'I' && isSeniorAge(ageStr)){
+  if(risk.asaClass === 'I' && isSeniorAge(p)){
     return {asaClass:'II', asaEmergency:false};
   }
   return risk;
@@ -827,7 +859,7 @@ function effectiveAsaForRisk(risk, ageStr){
 /* перевіряє поточну ASA-категорію пацієнта на вкладці «Вітальні» й підвищує I→II, якщо вік вже вказано як вікова тварина */
 function applySeniorAsaAdjustment(){
   const p = currentPatient(); if(!p) return;
-  if(p.asaClass === 'I' && isSeniorAge(p.age)){
+  if(p.asaClass === 'I' && isSeniorAge(p)){
     p.asaClass = 'II';
     p.asaEmergency = false;
     save();
@@ -846,7 +878,12 @@ if(DB.settings.alarmsEnabled === undefined) DB.settings.alarmsEnabled = true;
 if(!DB.settings.procedures) DB.settings.procedures = DEFAULT_PROCEDURES.slice();
 DB.settings.procedures = normalizeProcedures(DB.settings.procedures);
 if(!DB.settings.breeds) DB.settings.breeds = {};
-['Собака','Кіт'].forEach(sp=>{ if(!DB.settings.breeds[sp]) DB.settings.breeds[sp] = []; });
+if(!DB.settings.breeds['Собака']) DB.settings.breeds['Собака'] = [];
+if(!DB.settings.breeds['Кіт']) DB.settings.breeds['Кіт'] = [];
+(function(){
+  const DEFAULT_DOG_BREEDS = ['Лабрадор-ретривер','Німецька вівчарка','Золотистий ретривер','Французький бульдог','Пудель','Бігль','Йоркширський тер’єр','Ротвейлер','Такса','Сибірський хаскі','Чихуахуа','Померанський шпіц','Боксер','Доберман','Австралійська вівчарка','Бордер-колі','Кавалер-кінг-чарльз-спанієль','Ши-тцу','Мопс','Англійський кокер-спанієль','Бостон-тер’єр','Мальтіпу','Джек-рассел-тер’єр','Американський стаффордширський тер’єр','Бернський зенненхунд','Мальтійська болонка','Шнауцер','Далматин','Акіта-іну','Ньюфаундленд'];
+  DEFAULT_DOG_BREEDS.forEach(name=>{ if(!DB.settings.breeds['Собака'].includes(name)) DB.settings.breeds['Собака'].push(name); });
+})();
 if(!DB.settings.alarmRanges) DB.settings.alarmRanges = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES));
 Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp]) DB.settings.alarmRanges[sp] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[sp])); });
 
@@ -854,7 +891,7 @@ function save(){ localStorage.setItem('vetAnesthDB', JSON.stringify(DB)); }
 function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
 
 function newPatientObj(name){
-  return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', age:'', sex:'Самка',
+  return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', ageYears:'', ageMonths:'', sex:'Самка',
     date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
     sessionStart:null, sessionEnd:null, sessionAutoStopped:false, lastVitalSaveAt:null, labs:{},
     asaClass:null, asaEmergency:false,
@@ -1058,6 +1095,15 @@ function saveField(field, value){
   const p = currentPatient(); if(!p) return;
   p[field] = value; save(); renderHeader(); renderDrugs(); renderSession();
   if(field === 'species'){ renderLabButtons(); syncAlarmSettingsSpeciesToPatient(); renderAlarmRangesUI(); updateVitalAlarms(); }
+}
+
+/* окреме збереження підполів віку (роки/місяці) + ASA-коригування */
+function saveAgeField(field, value){
+  const p = currentPatient(); if(!p) return;
+  p[field] = value === '' ? '' : value;
+  save();
+  renderHeader();
+  applySeniorAsaAdjustment();
 }
 
 function setPatientSpecies(val){
@@ -1336,9 +1382,6 @@ function renderSurgeonPicker(){
   const list = (DB.settings.surgeons || []).filter(name => name.toLowerCase().includes(q));
   const wrap = document.getElementById('surgeonPickerList');
   let html = '';
-  if(!q){
-    html += `<button type="button" class="picker-row" onclick="selectSurgeon('')"><span>—</span>${!current?'<span class="ck">✓</span>':''}</button>`;
-  }
   if(list.length){
     html += list.map(name=>{
       const isSel = name === current;
@@ -1479,9 +1522,6 @@ function renderBreedPicker(){
   const list = (DB.settings.breeds[species] || []).filter(name => name.toLowerCase().includes(q));
   const wrap = document.getElementById('breedPickerList');
   let html = '';
-  if(!q){
-    html += `<button type="button" class="picker-row" onclick="selectBreed('')"><span>—</span>${!current?'<span class="ck">✓</span>':''}</button>`;
-  }
   if(list.length){
     html += list.map(name=>{
       const isSel = name === current;
@@ -1618,7 +1658,7 @@ function selectProcedure(name){
     if(risk && risk.asaClass){
       const p = currentPatient();
       if(p){
-        const eff = effectiveAsaForRisk(risk, p.age);
+        const eff = effectiveAsaForRisk(risk, p);
         p.asaClass = eff.asaClass; p.asaEmergency = !!eff.asaEmergency; save(); renderAsaQuick();
       }
     }
@@ -1690,11 +1730,13 @@ function renderHeader(){
 
 function fillPatientForm(){
   const p = currentPatient();
-  const map = {p_name:'name',p_owner:'owner',p_phone:'phone',p_weight:'weight',p_age:'age',p_date:'date',p_doctor:'doctor',p_notes:'preNotes'};
+  const map = {p_name:'name',p_owner:'owner',p_phone:'phone',p_weight:'weight',p_date:'date',p_doctor:'doctor',p_notes:'preNotes'};
   Object.entries(map).forEach(([elId, field])=>{
     const el = document.getElementById(elId);
     if(el) el.value = p ? (p[field] || '') : '';
   });
+  const yEl = document.getElementById('p_age_years'); if(yEl) yEl.value = p ? (p.ageYears || '') : '';
+  const mEl = document.getElementById('p_age_months'); if(mEl) mEl.value = p ? (p.ageMonths || '') : '';
   updatePatientToggleFieldsUI();
   const procLbl = document.getElementById('p_procedure_label');
   if(procLbl){
@@ -1991,6 +2033,17 @@ function markVitalsDirty(){
   statusEl.textContent = 'Незбережені зміни'; statusEl.className = 'save-status dirty';
 }
 
+/* Обмеження для полів вітальних показників: заборона від'ємних значень, і опційно максимум (макс. 3-значне число = 999) */
+function clampVitalRange(el, min, max){
+  if(el.value === '' || el.value === '-') return;
+  let n = parseFloat(el.value);
+  if(isNaN(n)) return;
+  let clamped = n;
+  if(min !== undefined && clamped < min) clamped = min;
+  if(max !== undefined && clamped > max) clamped = max;
+  if(clamped !== n) el.value = clamped;
+}
+
 function addVital(){
   const p = currentPatient(); if(!p) return;
   if(!p.sessionStart || p.sessionEnd){
@@ -2031,7 +2084,19 @@ function addVital(){
   if(statusEl){ statusEl.textContent = 'Збережено о ' + nowTime(); statusEl.className = 'save-status saved'; }
 }
 
-/* ---- слайдер "Зберегти запис": свайп вправо = зберегти, подвійний тап = нагору, утримання = вниз ---- */
+/* ---- слайдер "Зберегти запис": свайп вправо = зберегти, утримання = гортання нагору сторінки ---- */
+function syncTabbarHeight(){
+  const tb = document.querySelector('.tabbar');
+  if(!tb) return;
+  const h = tb.getBoundingClientRect().height;
+  if(h > 0) document.documentElement.style.setProperty('--tabbar-h', h + 'px');
+}
+if('ResizeObserver' in window){
+  const tbEl = document.querySelector('.tabbar');
+  if(tbEl){
+    new ResizeObserver(syncTabbarHeight).observe(tbEl);
+  }
+}
 let vitalsSliderLocked = false;
 
 function initVitalsSaveSlider(){
@@ -2048,22 +2113,16 @@ function initVitalsSaveSlider(){
 
   const ICON_RIGHT = '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>';
   const ICON_UP = '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>';
-  const ICON_DOWN = '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>';
   const ICON_CHECK = '<polyline points="20 6 9 17 4 12"/>';
 
-  const thumbW = 40, RING_LEN = 113, HOLD_MS = 480, DOUBLE_MS = 320;
+  const thumbW = 48, RING_LEN = 138, HOLD_MS = 480;
   let trackW = 0, maxX = 0;
   function measure(){ trackW = track.clientWidth; maxX = trackW - thumbW - 4; }
   measure();
   window.addEventListener('resize', measure);
 
   let dragging=false, moved=false, saving=false, startX=0, startY=0, curX=0;
-  let pressTimer=null, holdStart=0, ringRAF=null, lastTapTime=0;
-
-  const COMMIT_RATIO = 0.5;   // з якої точки (частка ширини) інерція/відпускання завершує свайп до кінця
-  const FRICTION = 0.94;      // згасання швидкості інерції за кадр
-  const MIN_VELOCITY = 0.02;  // px/мс — нижче цього інерція вважається вичерпаною
-  let velX = 0, lastMoveX = 0, lastMoveT = 0, inertiaRAF = null;
+  let pressTimer=null, holdStart=0, ringRAF=null;
 
   function setPos(x){
     x = Math.max(0, Math.min(maxX, x));
@@ -2072,18 +2131,18 @@ function initVitalsSaveSlider(){
     timeEl.style.opacity = String(Math.max(0, 1 - x/(maxX*0.6 || 1)));
   }
 
-  function showToast(dir){
-    toastIcon.innerHTML = dir==='up' ? ICON_UP : ICON_DOWN;
-    toastText.textContent = dir==='up' ? 'Нагору сторінки' : 'Вниз сторінки';
+  function showScrollTopToast(){
+    toastIcon.innerHTML = ICON_UP;
+    toastText.textContent = 'Нагору сторінки';
     toast.style.opacity = '1';
     setTimeout(()=>{ toast.style.opacity = '0'; }, 1100);
   }
 
-  function doScroll(dir){
-    icon.innerHTML = dir==='up' ? ICON_UP : ICON_DOWN;
+  function scrollToTop(){
+    icon.innerHTML = ICON_UP;
     icon.style.transform = 'scale(1.15)';
-    showToast(dir);
-    window.scrollTo({top: dir==='up' ? 0 : document.body.scrollHeight, behavior:'smooth'});
+    showScrollTopToast();
+    window.scrollTo({top:0, behavior:'smooth'});
     if(navigator.vibrate) navigator.vibrate(12);
     setTimeout(()=>{ icon.innerHTML = ICON_RIGHT; icon.style.transform = 'scale(1)'; }, 260);
   }
@@ -2098,7 +2157,7 @@ function initVitalsSaveSlider(){
       if(p<1) ringRAF = requestAnimationFrame(step);
     }
     step();
-    pressTimer = setTimeout(()=>{ doScroll('down'); resetRing(); dragging=false; }, HOLD_MS);
+    pressTimer = setTimeout(()=>{ scrollToTop(); resetRing(); dragging=false; }, HOLD_MS);
   }
   function resetRing(){
     clearTimeout(pressTimer); pressTimer=null;
@@ -2107,96 +2166,46 @@ function initVitalsSaveSlider(){
     ring.style.opacity = '.7';
   }
 
-  function settleToEnd(){
-    cancelAnimationFrame(inertiaRAF);
-    saving = true;
-    thumb.style.transition = 'left .16s ease-out';
-    setPos(maxX); fill.style.width = trackW+'px';
-    icon.innerHTML = ICON_CHECK;
-    addVital();
-    setTimeout(()=>{
-      saving = false;
-      icon.innerHTML = ICON_RIGHT;
-      thumb.style.transition = 'left .25s ease';
-      setPos(0); fill.style.width = (thumbW+6)+'px'; timeEl.style.opacity = '1';
-    }, 900);
-  }
-  function settleToStart(){
-    cancelAnimationFrame(inertiaRAF);
-    thumb.style.transition = 'left .3s cubic-bezier(.22,.9,.3,1.2)';
-    setPos(0);
-  }
-  function runInertia(){
-    cancelAnimationFrame(inertiaRAF);
-    thumb.style.transition = 'none';
-    function frame(){
-      velX *= FRICTION;
-      curX += velX*16;
-      if(curX >= maxX*COMMIT_RATIO){ settleToEnd(); return; }
-      if(curX <= 0 || Math.abs(velX) < MIN_VELOCITY){ settleToStart(); return; }
-      setPos(curX);
-      inertiaRAF = requestAnimationFrame(frame);
-    }
-    frame();
-  }
-
   function onDown(x,y){
     if(vitalsSliderLocked || saving) return;
     measure();
-    cancelAnimationFrame(inertiaRAF);
     dragging=true; moved=false; startX=x; startY=y; curX=0;
-    velX = 0; lastMoveX = x; lastMoveT = performance.now();
     thumb.style.transition = 'none';
     startRing();
   }
   function onMove(x,y){
     if(!dragging) return;
     const dx = x-startX, dy = y-startY;
-    if(!moved && (Math.abs(dx)>14 || Math.abs(dy)>14)){ moved = true; resetRing(); }
-    if(moved){
-      curX = dx; setPos(curX);
-      const now = performance.now();
-      const dt = now - lastMoveT;
-      if(dt > 0){
-        const instV = (x - lastMoveX) / dt;
-        velX = velX*0.7 + instV*0.3; // згладжена швидкість, px/мс
-      }
-      lastMoveX = x; lastMoveT = now;
-    }
+    if(!moved && (Math.abs(dx)>8 || Math.abs(dy)>8)){ moved = true; resetRing(); }
+    if(moved){ curX = dx; setPos(curX); }
   }
   function onUp(){
     if(!dragging) return;
     dragging = false;
+    thumb.style.transition = 'left .25s ease';
     resetRing();
     if(moved){
-      if(curX > maxX*COMMIT_RATIO){
-        settleToEnd();
-      } else if(Math.abs(velX) > MIN_VELOCITY){
-        runInertia();               // доскролює по інерції; сам доїде до кінця, якщо перетне середину
+      if(curX > maxX*0.7){
+        setPos(maxX); fill.style.width = trackW+'px'; saving = true;
+        icon.innerHTML = ICON_CHECK;
+        addVital();
+        setTimeout(()=>{
+          saving = false;
+          icon.innerHTML = ICON_RIGHT;
+          setPos(0); fill.style.width = (thumbW+6)+'px'; timeEl.style.opacity = '1';
+        }, 900);
       } else {
-        settleToStart();
+        setPos(0);
       }
-    } else {
-      const now = Date.now();
-      if(now - lastTapTime < DOUBLE_MS){ doScroll('up'); lastTapTime = 0; }
-      else { lastTapTime = now; }
     }
   }
 
-  let usingTouch = false, touchClearTimer = null;
-  function markTouch(){
-    usingTouch = true;
-    clearTimeout(touchClearTimer);
-    touchClearTimer = setTimeout(()=>{ usingTouch = false; }, 700);
-  }
-
-  thumb.addEventListener('mousedown', function(e){ if(usingTouch) return; onDown(e.clientX, e.clientY); });
-  window.addEventListener('mousemove', function(e){ if(usingTouch) return; onMove(e.clientX, e.clientY); });
-  window.addEventListener('mouseup', function(e){ if(usingTouch) return; onUp(); });
-  thumb.addEventListener('touchstart', function(e){ markTouch(); const t = e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:true});
-  thumb.addEventListener('touchmove', function(e){ markTouch(); const t = e.touches[0]; onMove(t.clientX, t.clientY); if(moved) e.preventDefault(); }, {passive:false});
-  thumb.addEventListener('touchend', function(e){ markTouch(); e.preventDefault(); onUp(); }, {passive:false});
-  thumb.addEventListener('touchcancel', function(e){ markTouch(); dragging=false; resetRing(); cancelAnimationFrame(inertiaRAF); settleToStart(); }, {passive:true});
+  thumb.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', onUp);
+  thumb.addEventListener('touchstart', function(e){ const t = e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:true});
+  thumb.addEventListener('touchmove', function(e){ const t = e.touches[0]; onMove(t.clientX, t.clientY); if(moved) e.preventDefault(); }, {passive:false});
+  thumb.addEventListener('touchend', onUp);
 
   setPos(0);
 }
@@ -2508,7 +2517,7 @@ function renderPrintSheet(){
   html += '<tr><td class="ps-label">Пацієнт</td><td>' + psVal(p.name) + '</td><td class="ps-label">Власник</td><td>' + psVal(p.owner) + '</td></tr>';
   html += '<tr><td class="ps-label">Вид</td><td>' + psVal(p.species) + '</td><td class="ps-label">Порода</td><td>' + psVal(p.breed) + '</td></tr>';
   html += '<tr><td class="ps-label">Вага, кг</td><td>' + psVal(p.weight) + '</td><td class="ps-label">Стать</td><td>' + psVal(p.sex) + '</td></tr>';
-  html += '<tr><td class="ps-label">Вік</td><td>' + psVal(p.age) + '</td><td class="ps-label">Телефон</td><td>' + psVal(p.phone) + '</td></tr>';
+  html += '<tr><td class="ps-label">Вік</td><td>' + psVal(ageText(p)) + '</td><td class="ps-label">Телефон</td><td>' + psVal(p.phone) + '</td></tr>';
   html += '<tr><td class="ps-label">Процедура</td><td>' + psVal(p.procedure) + '</td><td class="ps-label">Лікар / анестезіолог</td><td>' + psVal(p.doctor) + '</td></tr>';
   html += '<tr><td class="ps-label">Хірург</td><td colspan="3">' + psVal(p.surgeon) + '</td></tr>';
   html += '</table>';
@@ -2542,13 +2551,26 @@ window.addEventListener('beforeprint', renderPrintSheet);
 
 if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patients.push(p); DB.current = p.id; }
 if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
-DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false; });
+DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false;
+  /* міграція старого текстового поля «Вік» (напр. «7», «7 років») у нові ageYears/ageMonths */
+  if(p.ageYears === undefined) p.ageYears = '';
+  if(p.ageMonths === undefined) p.ageMonths = '';
+  if(p.age !== undefined){
+    if(p.ageYears === '' && p.ageMonths === ''){
+      const m = String(p.age).match(/\d+/);
+      if(m) p.ageYears = m[0];
+    }
+    delete p.age;
+  }
+});
 save();
 syncAlarmSettingsSpeciesToPatient();
 syncBreedSettingsSpeciesToPatient();
 renderAll();
 showHome();
 initVitalsSaveSlider();
+syncTabbarHeight();
+window.addEventListener('resize', syncTabbarHeight);
 
 /* single global ticker drives the main session timer every second */
 setInterval(()=>{
