@@ -8,10 +8,12 @@
 <meta name="apple-mobile-web-app-title" content="Анестезія">
 <meta name="theme-color" content="#0B0B0C">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
-<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120.png">
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-120.png">
 <title>Ветеринарний анестезіологічний протокол</title>
 <style>
 :root{
@@ -40,9 +42,18 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0;
 button{font-family:var(--font); cursor:pointer;}
 
 .topbar{position:sticky; top:0; z-index:20; background:var(--bg2); color:#fff; padding:calc(14px + env(safe-area-inset-top)) 16px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--border);}
-.topbar .brand{display:flex; flex-direction:column; line-height:1.15;}
-.topbar .brand b{font-size:16px; font-weight:600;}
-.topbar .brand span{font-size:12px; color:var(--text2); font-weight:400;}
+.topbar{gap:10px; padding-left:8px;}
+.back-btn{width:40px; height:44px; flex-shrink:0; background:none; border:none; color:var(--text2); display:flex; align-items:center; justify-content:center; padding:0; border-radius:12px;}
+.back-btn:active{background:var(--card2);}
+.back-btn svg{width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round;}
+.topbar .brand{display:flex; flex-direction:column; line-height:1.2; flex:1; min-width:0;}
+.topbar .brand b, .topbar .brand span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.hdr-timer{flex-shrink:0; display:inline-flex; align-items:center; gap:9px; padding:9px 15px; border-radius:999px; border:1.5px solid var(--border-strong); background:var(--card); color:var(--text2); font-family:var(--mono); font-size:17px; font-weight:700; font-variant-numeric:tabular-nums;}
+.hdr-timer-dot{width:9px; height:9px; border-radius:50%; background:var(--text2); flex-shrink:0;}
+.hdr-timer.live{border-color:var(--green-dim); background:rgba(49,209,88,.14); color:var(--green);}
+.hdr-timer.live .hdr-timer-dot{background:var(--green);}
+.topbar .brand b{font-size:20px; font-weight:800;}
+.topbar .brand span{font-size:13px; color:var(--text2); font-weight:400;}
 .topbar select{background:var(--card2); color:#fff; border:1px solid var(--border-strong); border-radius:8px; padding:6px 8px; font-size:13px; max-width:110px;}
 .topbar button.icon, .home-topbar button.icon{background:var(--card2); border:1px solid var(--border-strong); color:#fff; border-radius:8px; padding:6px 10px; font-size:13px; white-space:nowrap;}
 
@@ -86,24 +97,22 @@ button{font-family:var(--font); cursor:pointer;}
 .btn-row{display:flex; gap:8px; flex-wrap:wrap;}
 .pill-btn{border-radius:22px; padding:9px 18px;}
 
-.lab-btn-row{display:flex; flex-wrap:wrap; gap:10px;}
-.lab-btn{min-width:72px; height:72px; padding:6px 8px; border-radius:14px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-weight:700; font-size:12px; text-align:center; line-height:1.15; transition:background .15s,border-color .15s,color .15s;}
-.lab-btn small{font-size:10px; font-weight:600; color:inherit; opacity:.85;}
-.lab-btn.st-todo{background:rgba(242,169,59,.16); border-color:var(--amber); color:var(--amber);}
-.lab-btn.st-done{background:rgba(49,209,88,.16); border-color:var(--green); color:var(--green);}
-.lab-btn:active{opacity:.75;}
-
-.lab-btn-row{display:flex; flex-wrap:wrap; gap:10px;}
-.lab-btn{min-width:72px; height:72px; padding:6px 8px; border-radius:14px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-weight:700; font-size:12px; text-align:center; line-height:1.15; transition:background .15s,border-color .15s,color .15s;}
-.lab-btn small{font-size:10px; font-weight:600; color:inherit; opacity:.85;}
-.lab-btn.st-todo{background:rgba(242,169,59,.16); border-color:var(--amber); color:var(--amber);}
-.lab-btn.st-done{background:rgba(49,209,88,.16); border-color:var(--green); color:var(--green);}
-.lab-btn:active{opacity:.75;}
+/* ---- Дослідження: секції + плитки 3 в ряд (іконка, назва, статус) ---- */
+.lab-section-title{font-size:13px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:.8px; margin:22px 4px 12px;}
+.lab-section-title:first-child{margin-top:4px;}
+.lab-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.lab-tile{min-height:104px; padding:14px 6px 12px; border-radius:18px; border:1.5px solid var(--border); background:var(--card); color:var(--text2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; text-align:center; font-weight:800; font-size:14px; line-height:1.15; overflow-wrap:break-word; transition:background-color .12s ease, border-color .12s ease, color .12s ease;}
+.lab-tile svg{width:26px; height:26px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+.lab-tile small{font-size:12px; font-weight:600; color:inherit; opacity:.9;}
+.lab-tile.st-todo{background:rgba(242,169,59,.14); border-color:var(--amber); color:var(--amber);}
+.lab-tile.st-done{background:rgba(49,209,88,.14); border-color:var(--green); color:var(--green);}
+.lab-tile.lab-long{font-size:12px; letter-spacing:-.1px;}
+.lab-tile:active{opacity:.75;}
 
 #view-labs{padding-bottom:96px;}
-.labs-save-bar{position:fixed; left:0; right:0; bottom:var(--tabbar-h, calc(54px + env(safe-area-inset-bottom))); z-index:25; background:linear-gradient(180deg, rgba(11,11,12,0) 0%, var(--bg) 22%); padding:14px 16px 8px; display:none;}
+.labs-save-bar{position:fixed; left:0; right:0; bottom:var(--tabbar-h, calc(54px + env(safe-area-inset-bottom))); z-index:25; background:var(--bg); border-top:1px solid var(--border); padding:14px 16px 12px; display:none;}
 .labs-save-bar.active{display:block;}
-.labs-mark-btn{display:flex; align-items:center; justify-content:center; gap:8px; font-size:16px; padding:15px 16px; min-height:52px; border-radius:16px; box-shadow:0 6px 20px rgba(49,209,88,.25);}
+.labs-mark-btn{display:flex; align-items:center; justify-content:center; gap:8px; font-size:16px; padding:15px 16px; min-height:52px; border-radius:16px; }
 
 .segmented{display:flex; background:var(--field); border:1px solid var(--border-strong); border-radius:10px; padding:3px; gap:3px;}
 
@@ -118,6 +127,8 @@ button{font-family:var(--font); cursor:pointer;}
 .proc-row-top>span{font-size:14px; word-break:break-word;}
 .proc-asa-row{display:flex; align-items:center; gap:6px;}
 .proc-asa-btns{display:flex; gap:4px;}
+.proc-lbl{margin:0; min-width:74px;}
+.proc-proto-btn{width:auto; min-width:28px; padding:5px 6px; font-family:var(--mono);}
 .proc-asa-btn{border-radius:8px; padding:5px 0; width:28px; border:1.5px solid var(--border-strong); background:var(--field); color:var(--text2); font-weight:700; font-size:11px; text-align:center; min-height:26px;}
 .proc-asa-btn.active{background:var(--purple); border-color:var(--purple); color:#1E1030;}
 
@@ -142,15 +153,20 @@ button{font-family:var(--font); cursor:pointer;}
 .picker-list{flex:1; overflow-y:auto; background:var(--card2); border:1px solid var(--border); border-radius:16px;}
 .picker-row{width:100%; display:flex; justify-content:space-between; align-items:center; gap:8px; padding:14px 14px; background:none; border:none; border-bottom:1px solid var(--border); color:var(--text); font-size:15px; text-align:left;}
 .picker-row:last-child{border-bottom:none;}
+.picker-row.multi{justify-content:flex-start; gap:14px;}
+.picker-row.multi .chk{width:26px; height:26px; border-radius:50%; border:2px solid var(--border-strong); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:transparent; transition:background-color .12s ease, border-color .12s ease;}
+.picker-row.multi.sel{background:rgba(49,209,88,.12);}
+.picker-row.multi.sel .chk{background:var(--green); border-color:var(--green); color:#04220D;}
+.picker-row.multi.sel .nm{font-weight:700; color:var(--text);}
 .picker-row .ck{color:var(--green); font-size:15px; flex-shrink:0;}
 .picker-add-row{display:flex; align-items:center; gap:10px; padding:12px 4px; color:var(--text); font-size:15px; background:none; border:none; text-align:left; width:100%;}
 .picker-add-row .plus{width:22px; height:22px; border-radius:50%; background:var(--green); color:#06210f; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0;}
 .picker-empty{color:var(--text2); font-size:13px; padding:6px 4px 2px;}
 .segmented button{flex:1; background:none; border:none; border-radius:8px; padding:8px 4px; font-size:13px; font-weight:600; color:var(--text2);}
 .segmented button.active{background:var(--card2); color:var(--text); box-shadow:0 0 0 1px var(--border-strong);}
-#v_plane_btns{background:none; border:none; padding:0; gap:8px;}
-#v_plane_btns button{background:var(--field); border:1px solid var(--border-strong); border-radius:14px; padding:10px 4px;}
-#v_plane_btns button.active{background:var(--card2); color:var(--text); box-shadow:0 0 0 1px var(--text2);}
+#v_plane_btns, #p_species_btns, #p_sex_btns{background:none; border:none; padding:0; gap:8px;}
+#v_plane_btns button, #p_species_btns button, #p_sex_btns button{background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:15px 2px; font-size:14px; font-weight:800; color:var(--text2); white-space:nowrap; transition:background-color .12s ease, border-color .12s ease, color .12s ease;}
+#v_plane_btns button.active, #p_species_btns button.active, #p_sex_btns button.active{background:var(--card2); border-color:var(--green); color:var(--green); box-shadow:none;}
 
 /* session header card */
 .session-card{padding:16px;}
@@ -322,20 +338,42 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 .list-row .name{font-size:14px; font-weight:600;}
 
 #homeScreen{max-width:640px; margin:0 auto;}
-.home-topbar{position:sticky; top:0; z-index:20; background:var(--bg2); color:#fff; padding:calc(14px + env(safe-area-inset-top)) 16px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--border); font-size:17px; font-weight:700;}
-.home-body{padding:16px 16px 110px;}
-
-.fab{position:fixed; right:20px; bottom:calc(24px + env(safe-area-inset-bottom)); width:56px; height:56px; border-radius:50%; background:var(--green); color:#04220D; border:none; font-size:26px; font-weight:700; box-shadow:0 6px 18px rgba(0,0,0,.4); z-index:60; display:flex; align-items:center; justify-content:center; line-height:0;}
-.date-sep{font-size:12px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.4px; margin:16px 0 8px; padding-bottom:6px; border-bottom:1px solid var(--border);}
+/* ---- Головний екран «Історія пацієнтів» (новий дизайн) ---- */
+.home-topbar{position:sticky; top:0; z-index:20; background:var(--bg); padding:calc(22px + env(safe-area-inset-top)) 16px 10px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+.home-title{font-size:30px; font-weight:800; letter-spacing:-.4px; color:var(--text); line-height:1.1; margin:0;}
+.home-settings-btn{width:50px; height:50px; flex-shrink:0; border-radius:16px; background:var(--card); border:1px solid var(--border); color:var(--text); display:flex; align-items:center; justify-content:center; padding:0;}
+.home-settings-btn:active{background:var(--card2);}
+.home-settings-btn svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round;}
+.home-body{padding:6px 16px calc(112px + env(safe-area-inset-bottom));}
+.home-search{position:relative; margin-bottom:22px;}
+.home-search svg{position:absolute; left:16px; top:50%; transform:translateY(-50%); width:20px; height:20px; stroke:var(--text2); fill:none; stroke-width:2; stroke-linecap:round; pointer-events:none;}
+.home-search input{width:100%; min-height:52px; border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); padding:13px 16px 13px 46px; font-size:16px;}
+.home-search input::placeholder{color:var(--text2);}
+.home-search input:focus{outline:none; border-color:var(--border-strong);}
+.home-newbar{position:fixed; left:0; right:0; bottom:0; z-index:60; padding:14px 16px calc(14px + env(safe-area-inset-bottom)); background:var(--bg); border-top:1px solid var(--border);}
+.home-newbtn{width:100%; min-height:58px; border:none; border-radius:18px; background:var(--green); color:#04220D; font-size:18px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:12px;}
+.home-newbtn:active{background:var(--green-dim); color:#fff;}
+.home-newbtn svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2.6; stroke-linecap:round;}
+.date-sep{font-size:13px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:.6px; margin:22px 0 12px 4px;}
 .date-sep:first-child{margin-top:0;}
-.patient-item{display:flex; gap:12px; align-items:flex-start; background:var(--field); border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
+.patient-item{display:flex; gap:14px; align-items:flex-start; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:14px 14px 14px 16px; margin-bottom:12px;}
 .patient-item:active{background:var(--card2);}
-.patient-item.is-current{border-color:var(--green-dim); box-shadow:0 0 0 1px var(--green-dim);}
-.patient-item-icon{width:34px; height:34px; border-radius:10px; background:var(--green-dim); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+.patient-item.is-current{border-color:var(--border-strong);}
+.patient-item.is-live{border:1.5px solid var(--green-dim); box-shadow:0 0 0 1px rgba(49,209,88,.25);}
+.patient-item-icon{width:50px; height:50px; border-radius:15px; background:var(--card2); color:var(--text2); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; flex-shrink:0;}
+.patient-item.is-live .patient-item-icon{background:rgba(49,209,88,.18); color:var(--green);}
 .patient-item-body{flex:1; min-width:0;}
-.patient-item-body b{font-size:15px; display:block; margin-bottom:2px;}
-.patient-item-meta{font-size:12px; color:var(--text2); margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-.patient-item-foot{display:flex; gap:14px; font-size:11px; color:var(--text3); flex-wrap:wrap;}
+.patient-item-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:5px;}
+.patient-item-head b{font-size:19px; font-weight:800; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.patient-status{font-size:13px; font-weight:500; color:var(--text2); white-space:nowrap; flex-shrink:0; font-variant-numeric:tabular-nums;}
+.patient-status.live{color:var(--green); background:rgba(49,209,88,.14); border-radius:999px; padding:5px 11px; font-weight:700; display:inline-flex; align-items:center; gap:7px;}
+.patient-status.live::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0;}
+.patient-status.planned{color:var(--amber); background:rgba(242,169,59,.14); border-radius:999px; padding:5px 11px; font-weight:700; display:inline-flex; align-items:center; gap:7px;}
+.patient-status.planned::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--amber); flex-shrink:0;}
+.patient-item-meta{font-size:14px; color:var(--text2); margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.patient-item-foot{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.patient-item-proc{font-size:15px; font-weight:500; color:var(--text); min-width:0; line-height:1.3;}
+.asa-badge{font-family:var(--mono); font-size:13px; font-weight:700; color:var(--purple); border:1px solid #5a3f8a; background:rgba(185,140,255,.10); border-radius:10px; padding:4px 10px; white-space:nowrap; flex-shrink:0;}
 
 .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:50; display:none; align-items:flex-end; justify-content:center;}
 .modal-bg.open{display:flex;}
@@ -383,23 +421,21 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 
 <div id="homeScreen">
   <div class="home-topbar no-print">
-    <b>Історія пацієнтів</b>
-    <button class="icon" onclick="showWorkspace(); showView('settings');" aria-label="Налаштування">⚙</button>
+    <h1 class="home-title">Історія пацієнтів</h1>
+    <button class="home-settings-btn" onclick="showWorkspace(); showView('settings');" aria-label="Налаштування"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg></button>
   </div>
   <div class="home-body">
-    <div class="field"><input id="patientSearchInput" placeholder="Пошук за кличкою" oninput="renderPatientList()"></div>
+    <div class="home-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="patientSearchInput" placeholder="Пошук за кличкою" oninput="renderPatientList()"></div>
     <div id="patientListItems"></div>
   </div>
-  <button class="fab no-print" onclick="openModal('newPatientModal')" aria-label="Новий пацієнт">+</button>
+  <div class="home-newbar no-print"><button class="home-newbtn" onclick="openModal('newPatientModal')" aria-label="Новий пацієнт"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Новий пацієнт</button></div>
 </div>
 
 <div id="appWorkspace" style="display:none;">
 <div class="topbar no-print">
+  <button type="button" class="back-btn" onclick="showHome()" aria-label="Історія пацієнтів"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
   <div class="brand"><b id="hdrPatientName">Новий пацієнт</b><span id="hdrPatientMeta">—</span></div>
-  <div style="display:flex; gap:6px; align-items:center;">
-    <select id="patientSelect" onchange="switchPatient(this.value)"></select>
-    <button class="icon" onclick="showHome()" aria-label="Історія пацієнтів">🕘</button>
-  </div>
+  <div class="hdr-timer" id="hdrTimer" aria-label="Час наркозу"><span class="hdr-timer-dot"></span><span id="hdrTimerText">00:00:00</span></div>
 </div>
 
 <!-- ПАЦІЄНТ -->
@@ -446,14 +482,14 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       </div>
     </div>
     <div class="field"><label>Дата</label><input id="p_date" type="date" oninput="saveField('date', this.value)"></div>
-    <div class="field"><label>Процедура</label>
+    <div class="field"><label>Процедури</label>
       <button type="button" class="field-picker-btn" id="p_procedure_btn" onclick="openProcedurePicker('patient')">
-        <span id="p_procedure_label" class="ph">Оберіть процедуру</span><span class="chev">›</span>
+        <span id="p_procedure_label" class="ph">Оберіть процедури</span><span class="chev">›</span>
       </button>
     </div>
-    <div class="field"><label>Хірург</label>
+    <div class="field"><label>Хірурги</label>
       <button type="button" class="field-picker-btn" id="p_surgeon_btn" onclick="openSurgeonPicker()">
-        <span id="p_surgeon_label" class="ph">Оберіть хірурга</span><span class="chev">›</span>
+        <span id="p_surgeon_label" class="ph">Оберіть хірургів</span><span class="chev">›</span>
       </button>
     </div>
     <div class="field"><label>Анестезіолог</label><input id="p_doctor" oninput="saveField('doctor', this.value)"></div>
@@ -469,11 +505,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 
 <!-- ПЕРЕДОПЕРАЦІЙНІ ДОСЛІДЖЕННЯ -->
 <div class="view" id="view-labs">
-  <div class="card">
-    <h2>Передопераційні дослідження</h2>
-    <div class="sub" style="margin-bottom:8px;">Натисніть на кнопку: сірий — не обрано, жовтий — потрібно зробити, зелений — зроблено</div>
-    <div class="lab-btn-row" id="labButtons"></div>
-  </div>
+  <div id="labButtons"></div>
 </div>
 
 <div class="labs-save-bar no-print" id="labsSaveBar">
@@ -558,9 +590,9 @@ tr td:first-child{font-weight:600; color:var(--text2);}
     </div>
     <div class="field" style="margin-bottom:4px;"><label>Фаза наркозу</label>
       <div class="segmented" id="v_plane_btns">
-        <button type="button" data-value="Індукція" onclick="setVitalsPlane(this)">І</button>
-        <button type="button" data-value="Хірургічна" onclick="setVitalsPlane(this)">Х</button>
-        <button type="button" data-value="Пробудження" onclick="setVitalsPlane(this)">П</button>
+        <button type="button" data-value="Індукція" onclick="setVitalsPlane(this)">Індукція</button>
+        <button type="button" data-value="Хірургічна" onclick="setVitalsPlane(this)">Хірургічна</button>
+        <button type="button" data-value="Пробудження" onclick="setVitalsPlane(this)">Пробудження</button>
       </div>
       <input type="hidden" id="v_plane" value="">
     </div>
@@ -582,7 +614,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
           <button type="button" id="mapModeManualBtn" onclick="setMapMode('manual')" aria-label="Ручне введення">Р</button>
         </div>
       </div>
-      <div class="vfield"><label>Temp<button type="button" class="alarm-dots-btn" id="alarmDots_temp" ondblclick="openAlarmFieldModal('temp')" aria-label="Налаштування аларму Temp (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" min="0" placeholder="--" oninput="clampVitalRange(this,0); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
+      <div class="vfield"><label>Temp<button type="button" class="alarm-dots-btn" id="alarmDots_temp" ondblclick="openAlarmFieldModal('temp')" aria-label="Налаштування аларму Temp (подвійний клік)">•••</button></label><div class="vfield-row"><input id="v_temp" type="number" step="0.1" inputmode="decimal" min="0" placeholder="--" oninput="clampVitalRange(this,0,99.9); markVitalsDirty();" onchange="updateVitalAlarms();"><span class="unit">°C</span></div></div>
       <div class="vfield"><label id="isoSevoLabel">Iso/Sevo</label><div class="vfield-row"><input id="v_isosevo" class="isosevo-input" type="number" step="0.1" inputmode="decimal" placeholder="--" readonly onclick="openIsoSevoWheel()" oninput="markVitalsDirty()"><span class="unit">%</span></div>
         <div class="agent-seg" role="group" aria-label="Анестетик">
           <button type="button" id="agentIsoBtn" onclick="setAgent('iso')" aria-label="Isoflurane">І</button>
@@ -730,8 +762,8 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 
 <div class="modal-bg no-print" id="procedureModal-bg" onclick="if(event.target===this) closeModal('procedureModal')">
   <div class="picker-modal" style="position:relative;">
-    <div class="picker-modal-head"><button onclick="closeModal('procedureModal')">Закрити</button></div>
-    <h3>Процедура</h3>
+    <div class="picker-modal-head"><button onclick="closeModal('procedureModal')">Готово</button></div>
+    <h3>Процедури</h3>
     <div class="picker-search">
       <span class="ic">🔍</span>
       <input id="procedureSearch" placeholder="Пошук процедури" oninput="renderProcedurePicker()">
@@ -743,8 +775,8 @@ tr td:first-child{font-weight:600; color:var(--text2);}
 
 <div class="modal-bg no-print" id="surgeonModal-bg" onclick="if(event.target===this) closeModal('surgeonModal')">
   <div class="picker-modal" style="position:relative;">
-    <div class="picker-modal-head"><button onclick="closeModal('surgeonModal')">Закрити</button></div>
-    <h3>Хірург</h3>
+    <div class="picker-modal-head"><button onclick="closeModal('surgeonModal')">Готово</button></div>
+    <h3>Хірурги</h3>
     <div class="picker-search">
       <span class="ic">🔍</span>
       <input id="surgeonSearch" placeholder="Пошук хірурга" oninput="renderSurgeonPicker()">
@@ -779,7 +811,7 @@ tr td:first-child{font-weight:600; color:var(--text2);}
       </select>
     </div>
     <div class="field"><label>Вага, кг *</label><input id="np_weight" type="number" step="0.1" inputmode="decimal" placeholder="Введіть вагу в кг"></div>
-    <div class="field"><label>Процедура *</label>
+    <div class="field"><label>Процедури *</label>
       <button type="button" class="field-picker-btn" id="np_procedure_btn" onclick="openProcedurePicker('newPatient')">
         <span id="np_procedure_label" class="ph">Пошук та вибір процедури</span><span class="chev">›</span>
       </button>
@@ -908,7 +940,7 @@ const DEFAULT_PROCEDURES = ['Абдомінальна хірургія','Кас�
 
 /* нормалізує список процедур: старі записи-рядки перетворює на об'єкти {name, asaClass, asaEmergency} */
 function normalizeProcedures(list){
-  return (list || []).map(item => (typeof item === 'string') ? {name:item, asaClass:null, asaEmergency:false} : {name:item.name, asaClass:item.asaClass || null, asaEmergency:!!item.asaEmergency});
+  return (list || []).map(item => (typeof item === 'string') ? {name:item, asaClass:null, asaEmergency:false} : {name:item.name, asaClass:item.asaClass || null, asaEmergency:!!item.asaEmergency, protocolIndex:(typeof item.protocolIndex === 'number' ? item.protocolIndex : null), protocolSub:!!item.protocolSub});
 }
 function findProcedure(name){
   return (DB.settings.procedures || []).find(pr => pr.name === name);
@@ -972,8 +1004,9 @@ if(!DB.settings.breeds) DB.settings.breeds = {};
 if(!DB.settings.breeds['Собака']) DB.settings.breeds['Собака'] = [];
 if(!DB.settings.breeds['Кіт']) DB.settings.breeds['Кіт'] = [];
 (function(){
-  const DEFAULT_DOG_BREEDS = ['Лабрадор-ретривер','Німецька вівчарка','Золотистий ретривер','Французький бульдог','Пудель','Бігль','Йоркширський тер’єр','Ротвейлер','Такса','Сибірський хаскі','Чихуахуа','Померанський шпіц','Боксер','Доберман','Австралійська вівчарка','Бордер-колі','Кавалер-кінг-чарльз-спанієль','Ши-тцу','Мопс','Англійський кокер-спанієль','Бостон-тер’єр','Мальтіпу','Джек-рассел-тер’єр','Американський стаффордширський тер’єр','Бернський зенненхунд','Мальтійська болонка','Шнауцер','Далматин','Акіта-іну','Ньюфаундленд'];
+  const DEFAULT_DOG_BREEDS = ['Лабрадор-ретривер','Німецька вівчарка','Золотистий ретривер','Французький бульдог','Пудель','Бігль','Йоркширський тер’єр','Ротвейлер','Такса','Сибірський хаскі','Чихуахуа','Померанський шпіц','Боксер','Доберман','Австралійська вівчарка','Бордер-колі','Кавалер-кінг-чарльз-спанієль','Ши-тцу','Мопс','Англійський кокер-спанієль','Бостон-тер’єр','Мальтіпу','Джек-рассел-тер’єр','Парсон-рассел-тер’єр','Американський стаффордширський тер’єр','Бернський зенненхунд','Мальтійська болонка','Ризеншнауцер','Міттельшнауцер','Цвергшнауцер','Німецький шпіц','Далматин','Акіта-іну','Ньюфаундленд'];
   DEFAULT_DOG_BREEDS.forEach(name=>{ if(!DB.settings.breeds['Собака'].includes(name)) DB.settings.breeds['Собака'].push(name); });
+  DB.settings.breeds['Собака'] = DB.settings.breeds['Собака'].filter(n => n !== 'Шнауцер'); // «Шнауцер» розділено на Ризеншнауцер, Міттельшнауцер і Цвергшнауцер
 })();
 if(!DB.settings.alarmRanges) DB.settings.alarmRanges = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES));
 Object.keys(DEFAULT_ALARM_RANGES).forEach(sp=>{ if(!DB.settings.alarmRanges[sp]) DB.settings.alarmRanges[sp] = JSON.parse(JSON.stringify(DEFAULT_ALARM_RANGES[sp])); });
@@ -983,7 +1016,7 @@ function currentPatient(){ return DB.patients.find(p=>p.id===DB.current); }
 
 function newPatientObj(name){
   return { id: 'p'+Date.now(), name: name||'Новий пацієнт', owner:'', phone:'', species:'Собака', breed:'', weight:'', hct:'', ageYears:'', ageMonths:'', sex:'Самка',
-    date: new Date().toISOString().slice(0,10), procedure:'', doctor:'', surgeon:'', preNotes:'', mapMode:'auto', createdAt: Date.now(),
+    date: new Date().toISOString().slice(0,10), procedure:'', procedures:[], doctor:'', surgeon:'', surgeons:[], preNotes:'', mapMode:'auto', createdAt: Date.now(),
     sessionStart:null, sessionEnd:null, sessionAutoStopped:false, lastVitalSaveAt:null, labs:{},
     asaClass:null, asaEmergency:false,
     eyeLastInstillAt:null, eyePrevInstillAt:null, eyePendingTag:false,
@@ -1087,16 +1120,32 @@ function markAllLabsDone(){
   activeLabTests().forEach(t=>{ if((p.labs[t.id] || 'none') === 'todo') p.labs[t.id] = 'done'; });
   save(); renderLabButtons();
 }
+const LAB_ICONS = {
+  none: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>',
+  todo: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.6v.1"/></svg>',
+  done: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.2 9.5"/></svg>'
+};
+const LAB_SPECIES_TITLES = {'Собака':'Для собак', 'Кіт':'Для котів'};
 function renderLabButtons(){
   const wrap = document.getElementById('labButtons');
   if(!wrap) return;
   const p = currentPatient();
-  wrap.innerHTML = activeLabTests().map(t=>{
+  const tile = t => {
     const st = p && p.labs ? (p.labs[t.id] || 'none') : 'none';
     const cls = st === 'todo' ? 'st-todo' : st === 'done' ? 'st-done' : '';
-    const sub = st === 'todo' ? 'потрібно' : st === 'done' ? 'зроблено' : '—';
-    return `<button type="button" class="lab-btn ${cls}" onclick="cycleLab('${t.id}')"><span>${escapeHtml(t.label)}</span><small>${sub}</small></button>`;
-  }).join('');
+    const sub = st === 'todo' ? 'потрібно' : st === 'done' ? 'зроблено' : 'не обрано';
+    return `<button type="button" class="lab-tile ${cls}${t.label.length > 11 ? ' lab-long' : ''}" onclick="cycleLab('${t.id}')">${LAB_ICONS[st]}<span>${escapeHtml(t.label)}</span><small>${sub}</small></button>`;
+  };
+  const tests = activeLabTests();
+  const general = tests.filter(t => !t.species);
+  const specific = tests.filter(t => t.species);
+  let html = '';
+  if(general.length) html += `<div class="lab-section-title">Загальні</div><div class="lab-grid">${general.map(tile).join('')}</div>`;
+  if(specific.length){
+    const sp = p ? p.species : null;
+    html += `<div class="lab-section-title">${escapeHtml(LAB_SPECIES_TITLES[sp] || 'Для виду')}</div><div class="lab-grid">${specific.map(tile).join('')}</div>`;
+  }
+  wrap.innerHTML = html;
 }
 
 function createPatient(){
@@ -1107,7 +1156,7 @@ function createPatient(){
   const name = nameEl.value.trim();
   const species = speciesEl.value;
   const weight = weightEl.value.trim();
-  const procedure = npSelectedProcedure.trim();
+  const procedure = npSelectedProcedures.join(', ');
 
   if(!name || !species || !weight || !procedure){
     alert('Будь ласка, заповніть усі обов\'язкові поля (позначені *)');
@@ -1118,12 +1167,15 @@ function createPatient(){
   p.species = species;
   p.weight = weight;
   p.procedure = procedure;
+  p.procedures = npSelectedProcedures.slice();
+  if(npSelectedProtocol){ p.doseProtocolIndex = npSelectedProtocol.index; p.doseProtocolSub = npSelectedProtocol.sub; }
   if(npSelectedAsaClass){ p.asaClass = npSelectedAsaClass; p.asaEmergency = npSelectedAsaEmergency; } // категорія ризику ASA, прив'язана до обраної процедури
   p.doctor = DB.settings.defaultAnesthesiologist || '';
   DB.patients.push(p); DB.current = p.id; save(); syncAlarmSettingsSpeciesToPatient();
 
   nameEl.value=''; speciesEl.value=''; weightEl.value='';
-  npSelectedProcedure = '';
+  npSelectedProcedures = [];
+  npSelectedProtocol = null;
   npSelectedAsaClass = null;
   npSelectedAsaEmergency = false;
   document.getElementById('np_procedure_label').textContent = 'Пошук та вибір процедури';
@@ -1159,6 +1211,19 @@ function selectPatientFromList(id){
   showWorkspace();
   showView('patient');
 }
+function formatDateSepRel(ts){
+  const d = new Date(ts), now = new Date();
+  const day0 = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day0(now) - day0(d)) / 86400000);
+  const base = d.getDate() + ' ' + MONTHS_GEN[d.getMonth()];
+  if(diff === 0) return 'Сьогодні · ' + base;
+  if(diff === 1) return 'Вчора · ' + base;
+  return base + (d.getFullYear() !== now.getFullYear() ? ' ' + d.getFullYear() : '');
+}
+function formatDurationClock(ms){
+  const totalMin = Math.max(0, Math.floor(ms/60000));
+  return String(Math.floor(totalMin/60)).padStart(2,'0') + ':' + String(totalMin%60).padStart(2,'0');
+}
 function renderPatientList(){
   const q = (document.getElementById('patientSearchInput').value || '').trim().toLowerCase();
   const wrap = document.getElementById('patientListItems');
@@ -1170,22 +1235,32 @@ function renderPatientList(){
     const ts = p.createdAt || Date.now();
     const d = new Date(ts);
     const dateKey = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
-    if(dateKey !== lastDateKey){ html += `<div class="date-sep">${formatDateSep(ts)}</div>`; lastDateKey = dateKey; }
-    const durMs = p.sessionStart ? ((p.sessionEnd || Date.now()) - p.sessionStart) : null;
-    const durLabel = durMs!=null ? formatDurationShort(durMs) : '—';
-    const meta = [p.species||'—', p.weight ? p.weight+' кг' : '', p.procedure||''].filter(Boolean).join(' · ');
-    const current = p.id === DB.current ? ' is-current' : '';
-    html += `<div class="patient-item${current}" onclick="selectPatientFromList('${p.id}')">
-      <div class="patient-item-icon">🐾</div>
+    if(dateKey !== lastDateKey){ html += `<div class="date-sep">${formatDateSepRel(ts)}</div>`; lastDateKey = dateKey; }
+    const live = !!(p.sessionStart && !p.sessionEnd);
+    let status;
+    if(live) status = `<span class="patient-status live">Триває · ${formatDurationClock(Date.now() - p.sessionStart)}</span>`;
+    else if(p.sessionStart) status = `<span class="patient-status">Завершено · ${formatDurationClock(p.sessionEnd - p.sessionStart)}</span>`;
+    else status = `<span class="patient-status planned">Заплановано</span>`;
+    const meta = [p.species||'', p.breed||'', p.weight ? String(p.weight).replace('.',',')+' кг' : ''].filter(Boolean).join(' · ');
+    const asa = p.asaClass ? `<span class="asa-badge">ASA ${escapeHtml(p.asaClass)}${p.asaEmergency ? '-E' : ''}</span>` : '';
+    const cls = (live ? ' is-live' : '') + (p.id === DB.current ? ' is-current' : '');
+    const initial = ((p.name||'?').trim().charAt(0) || '?').toUpperCase();
+    html += `<div class="patient-item${cls}" onclick="selectPatientFromList('${p.id}')">
+      <div class="patient-item-icon">${escapeHtml(initial)}</div>
       <div class="patient-item-body">
-        <b>${escapeHtml(p.name||'—')}</b>
+        <div class="patient-item-head"><b>${escapeHtml(p.name||'—')}</b>${status}</div>
         <div class="patient-item-meta">${escapeHtml(meta)}</div>
-        <div class="patient-item-foot"><span>📅 ${formatDateShort(ts)}</span><span>⏱ ${durLabel}</span></div>
+        <div class="patient-item-foot"><span class="patient-item-proc">${escapeHtml(p.procedure||'')}</span>${asa}</div>
       </div>
     </div>`;
   });
   wrap.innerHTML = html;
 }
+/* таймер «Триває · чч:хх» на головному екрані оновлюється раз на хвилину, поки екран відкритий */
+setInterval(function(){
+  const home = document.getElementById('homeScreen');
+  if(home && home.style.display !== 'none' && document.querySelector('#patientListItems .patient-item.is-live')) renderPatientList();
+}, 30000);
 
 function deletePatient(){
   if(!currentPatient()) return;
@@ -1430,7 +1505,7 @@ function saveEditSurgeon(idx){
   if(!newName) return;
   const oldName = DB.settings.surgeons[idx];
   DB.settings.surgeons[idx] = newName;
-  DB.patients.forEach(p=>{ if(p.surgeon === oldName) p.surgeon = newName; });
+  DB.patients.forEach(p=>{ if(Array.isArray(p.surgeons)){ p.surgeons = p.surgeons.map(n => n === oldName ? newName : n); p.surgeon = p.surgeons.join(', '); } else if(p.surgeon === oldName) p.surgeon = newName; });
   save();
   editingSurgeonIdx = null;
   renderSurgeonsSettings();
@@ -1460,13 +1535,25 @@ function renderSurgeonsSettings(){
   }).join('');
 }
 
+/* ---- Хірурги пацієнта: можна обрати кількох. p.surgeons — масив; p.surgeon — той самий список через кому (для друку/сумісності) ---- */
+function getPatientSurgeons(p){
+  if(!p) return [];
+  if(Array.isArray(p.surgeons)) return p.surgeons;
+  return p.surgeon ? [p.surgeon] : [];
+}
+function setPatientSurgeons(list){
+  const p = currentPatient(); if(!p) return;
+  p.surgeons = list;
+  p.surgeon = list.join(', ');
+  save(); renderHeader(); renderSurgeonOptions();
+}
 function renderSurgeonOptions(){
   const p = currentPatient();
   const label = document.getElementById('p_surgeon_label');
   if(!label) return;
-  const current = p ? (p.surgeon || '') : '';
-  label.textContent = current || 'Оберіть хірурга';
-  label.classList.toggle('ph', !current);
+  const names = getPatientSurgeons(p);
+  label.textContent = names.length ? names.join(', ') : 'Оберіть хірургів';
+  label.classList.toggle('ph', !names.length);
 }
 
 function openSurgeonPicker(){
@@ -1476,10 +1563,12 @@ function openSurgeonPicker(){
   setTimeout(()=>{ const el = document.getElementById('surgeonSearch'); if(el) el.focus(); }, 250);
 }
 
-function selectSurgeon(name){
-  saveField('surgeon', name);
-  renderSurgeonOptions();
-  closeModal('surgeonModal');
+function toggleSurgeon(name){
+  const cur = getPatientSurgeons(currentPatient()).slice();
+  const i = cur.indexOf(name);
+  if(i >= 0) cur.splice(i,1); else cur.push(name);
+  setPatientSurgeons(cur);
+  renderSurgeonPicker();
 }
 
 function addSurgeonFromSearch(){
@@ -1489,22 +1578,25 @@ function addSurgeonFromSearch(){
   if(!DB.settings.surgeons.includes(q)) DB.settings.surgeons.push(q);
   save();
   renderSurgeonsSettings();
-  selectSurgeon(q);
+  const cur = getPatientSurgeons(currentPatient()).slice();
+  if(!cur.includes(q)) cur.push(q);
+  setPatientSurgeons(cur);
+  document.getElementById('surgeonSearch').value = '';
+  renderSurgeonPicker();
 }
 
 function renderSurgeonPicker(){
   const q = (document.getElementById('surgeonSearch').value || '').trim().toLowerCase();
   const clrBtn = document.getElementById('surgeonSearchClr');
   if(clrBtn) clrBtn.style.display = q ? 'block' : 'none';
-  const p = currentPatient();
-  const current = p ? (p.surgeon || '') : '';
+  const selected = getPatientSurgeons(currentPatient());
   const list = (DB.settings.surgeons || []).filter(name => name.toLowerCase().includes(q));
   const wrap = document.getElementById('surgeonPickerList');
   let html = '';
   if(list.length){
     html += list.map(name=>{
-      const isSel = name === current;
-      return `<button type="button" class="picker-row" onclick="selectSurgeon('${escapeHtml(name).replace(/'/g,"\\'")}')"><span>${escapeHtml(name)}</span>${isSel?'<span class="ck">✓</span>':''}</button>`;
+      const isSel = selected.includes(name);
+      return `<button type="button" class="picker-row multi${isSel?' sel':''}" onclick="toggleSurgeon('${escapeHtml(name).replace(/'/g,"\\'")}')"><span class="chk">✓</span><span class="nm">${escapeHtml(name)}</span></button>`;
     }).join('');
   } else if(q){
     html += `<div class="picker-empty">Немає збігів</div>`;
@@ -1672,6 +1764,19 @@ function setProcedureAsaClass(idx, cls){
   save();
   renderProceduresSettings();
 }
+/* протокол процедури (1–5): тап по обраному перемикає N → N.N → без протоколу; обраний протокол підставляється пацієнту разом з процедурою */
+function setProcedureProtocol(idx, i){
+  const proc = (DB.settings.procedures || [])[idx]; if(!proc) return;
+  if(proc.protocolIndex !== i){
+    proc.protocolIndex = i; proc.protocolSub = false;
+  } else if(!proc.protocolSub){
+    proc.protocolSub = true;
+  } else {
+    proc.protocolIndex = null; proc.protocolSub = false;
+  }
+  save();
+  renderProceduresSettings();
+}
 function addProcedureType(){
   const input = document.getElementById('new_procedure_name');
   const name = (input.value || '').trim();
@@ -1698,7 +1803,7 @@ function saveEditProcedure(idx){
   if(!newName) return;
   const oldName = DB.settings.procedures[idx].name;
   DB.settings.procedures[idx].name = newName;
-  DB.patients.forEach(p=>{ if(p.procedure === oldName) p.procedure = newName; });
+  DB.patients.forEach(p=>{ if(Array.isArray(p.procedures)){ p.procedures = p.procedures.map(n => n === oldName ? newName : n); p.procedure = p.procedures.join(', '); } else if(p.procedure === oldName) p.procedure = newName; });
   save();
   editingProcedureIdx = null;
   renderProceduresSettings();
@@ -1726,6 +1831,11 @@ function renderProceduresSettings(){
       const label = active && emergency ? c+'-E' : c;
       return `<button type="button" class="proc-asa-btn ${active?'active':''}" onclick="setProcedureAsaClass(${i},'${c}')">${escapeHtml(label)}</button>`;
     }).join('');
+    const protoBtns = DOSE_PROTOCOLS.map((n,k)=>{
+      const active = proc.protocolIndex === k;
+      const label = (active && proc.protocolSub) ? (n + '.' + n) : String(n);
+      return `<button type="button" class="proc-asa-btn proc-proto-btn ${active?'active':''}" onclick="setProcedureProtocol(${i},${k})">${label}</button>`;
+    }).join('');
     return `<div class="proc-row">
       <div class="proc-row-top">
         <span class="name">${escapeHtml(proc.name)}</span>
@@ -1735,18 +1845,56 @@ function renderProceduresSettings(){
         </span>
       </div>
       <div class="proc-asa-row">
-        <span class="hint" style="margin:0;">ASA ризик:</span>
+        <span class="hint proc-lbl">ASA ризик:</span>
         <div class="proc-asa-btns">${asaBtns}</div>
+      </div>
+      <div class="proc-asa-row">
+        <span class="hint proc-lbl">Протокол:</span>
+        <div class="proc-asa-btns">${protoBtns}</div>
       </div>
     </div>`;
   }).join('');
 }
 
-/* ---- Procedures: picker modal (used on Пацієнт page and in New Patient modal) ---- */
+/* ---- Procedures: picker modal (used on Пацієнт page and in New Patient modal). Можна обрати кілька процедур.
+   p.procedures — масив; p.procedure — той самий список через кому (для друку/списку пацієнтів) ---- */
 let procedurePickerTarget = 'patient'; // 'patient' | 'newPatient'
-let npSelectedProcedure = '';
+let npSelectedProcedures = [];
 let npSelectedAsaClass = null;
 let npSelectedAsaEmergency = false;
+let npSelectedProtocol = null;
+
+function getPatientProcedures(p){
+  if(!p) return [];
+  if(Array.isArray(p.procedures)) return p.procedures;
+  return p.procedure ? [p.procedure] : [];
+}
+/* з обраних процедур беремо найвищу категорію ASA (для вікових тварин I → II) */
+function highestAsaForProcedures(names, p){
+  let best = null, bestRank = -1;
+  names.forEach(n=>{
+    const risk = findProcedure(n);
+    if(!risk || !risk.asaClass) return;
+    const eff = p ? effectiveAsaForRisk(risk, p) : risk;
+    const rank = ASA_CLASSES.indexOf(eff.asaClass);
+    if(rank > bestRank || (rank === bestRank && eff.asaEmergency && best && !best.asaEmergency)){
+      best = {asaClass: eff.asaClass, asaEmergency: !!eff.asaEmergency}; bestRank = rank;
+    }
+  });
+  return best;
+}
+
+/* протокол з обраних процедур: беремо процедуру з найвищою ASA серед тих, що мають протокол; за однакової ASA — останню обрану */
+function protocolForProcedures(names){
+  let best = null, bestRank = -2;
+  names.forEach(n=>{
+    const pr = findProcedure(n);
+    if(!pr || typeof pr.protocolIndex !== 'number') return;
+    const rank = pr.asaClass ? ASA_CLASSES.indexOf(pr.asaClass) : -1;
+    if(rank >= bestRank){ best = {index: pr.protocolIndex, sub: !!pr.protocolSub}; bestRank = rank; }
+  });
+  return best;
+}
 
 function openProcedurePicker(target){
   procedurePickerTarget = target;
@@ -1756,33 +1904,47 @@ function openProcedurePicker(target){
   setTimeout(()=>{ const el = document.getElementById('procedureSearch'); if(el) el.focus(); }, 250);
 }
 
-function currentProcedureValue(){
-  if(procedurePickerTarget === 'newPatient') return npSelectedProcedure;
-  const p = currentPatient();
-  return p ? (p.procedure || '') : '';
+function currentProcedureValues(){
+  if(procedurePickerTarget === 'newPatient') return npSelectedProcedures;
+  return getPatientProcedures(currentPatient());
 }
 
-function selectProcedure(name){
-  const risk = findProcedure(name); // застосовуємо категорію ризику ASA, прив'язану до процедури в налаштуваннях
-  if(procedurePickerTarget === 'newPatient'){
-    npSelectedProcedure = name;
-    const lbl = document.getElementById('np_procedure_label');
-    lbl.textContent = name; lbl.classList.remove('ph');
-    npSelectedAsaClass = risk ? risk.asaClass : null;
-    npSelectedAsaEmergency = risk ? !!risk.asaEmergency : false;
-  } else {
-    saveField('procedure', name);
-    const lbl = document.getElementById('p_procedure_label');
-    lbl.textContent = name; lbl.classList.remove('ph');
-    if(risk && risk.asaClass){
-      const p = currentPatient();
-      if(p){
-        const eff = effectiveAsaForRisk(risk, p);
-        p.asaClass = eff.asaClass; p.asaEmergency = !!eff.asaEmergency; save(); renderAsaQuick();
-      }
-    }
+function renderProcedureLabels(){
+  const npl = document.getElementById('np_procedure_label');
+  if(npl){
+    npl.textContent = npSelectedProcedures.length ? npSelectedProcedures.join(', ') : 'Пошук та вибір процедури';
+    npl.classList.toggle('ph', !npSelectedProcedures.length);
   }
-  closeModal('procedureModal');
+  const pl = document.getElementById('p_procedure_label');
+  if(pl){
+    const names = getPatientProcedures(currentPatient());
+    pl.textContent = names.length ? names.join(', ') : 'Оберіть процедури';
+    pl.classList.toggle('ph', !names.length);
+  }
+}
+
+function toggleProcedure(name){
+  if(procedurePickerTarget === 'newPatient'){
+    const i = npSelectedProcedures.indexOf(name);
+    if(i >= 0) npSelectedProcedures.splice(i,1); else npSelectedProcedures.push(name);
+    const asa = highestAsaForProcedures(npSelectedProcedures, null);
+    npSelectedAsaClass = asa ? asa.asaClass : null;
+    npSelectedAsaEmergency = asa ? asa.asaEmergency : false;
+    npSelectedProtocol = protocolForProcedures(npSelectedProcedures);
+  } else {
+    const p = currentPatient(); if(!p) return;
+    const cur = getPatientProcedures(p).slice();
+    const i = cur.indexOf(name);
+    if(i >= 0) cur.splice(i,1); else cur.push(name);
+    p.procedures = cur;
+    saveField('procedure', cur.join(', '));
+    const asa = highestAsaForProcedures(cur, p);
+    if(asa){ p.asaClass = asa.asaClass; p.asaEmergency = asa.asaEmergency; save(); renderAsaQuick(); }
+    const proto = protocolForProcedures(cur);
+    if(proto){ p.doseProtocolIndex = proto.index; p.doseProtocolSub = proto.sub; save(); renderDoseButtons(); }
+  }
+  renderProcedureLabels();
+  renderProcedurePicker();
 }
 
 function addProcedureFromSearch(){
@@ -1792,7 +1954,9 @@ function addProcedureFromSearch(){
   if(!DB.settings.procedures.some(pr=>pr.name === q)) DB.settings.procedures.push({name:q, asaClass:null, asaEmergency:false});
   save();
   renderProceduresSettings();
-  selectProcedure(q);
+  if(!currentProcedureValues().includes(q)) toggleProcedure(q);
+  document.getElementById('procedureSearch').value = '';
+  renderProcedurePicker();
 }
 
 function renderProcedurePicker(){
@@ -1800,13 +1964,13 @@ function renderProcedurePicker(){
   const clrBtn = document.getElementById('procedureSearchClr');
   if(clrBtn) clrBtn.style.display = q ? 'block' : 'none';
   const list = (DB.settings.procedures || []).filter(pr => pr.name.toLowerCase().includes(q)).map(pr=>pr.name);
-  const current = currentProcedureValue();
+  const selected = currentProcedureValues();
   const wrap = document.getElementById('procedurePickerList');
   let html = '';
   if(list.length){
     html += list.map(name=>{
-      const isSel = name === current;
-      return `<button type="button" class="picker-row" onclick="selectProcedure('${escapeHtml(name).replace(/'/g,"\\'")}')"><span>${escapeHtml(name)}</span>${isSel?'<span class="ck">✓</span>':''}</button>`;
+      const isSel = selected.includes(name);
+      return `<button type="button" class="picker-row multi${isSel?' sel':''}" onclick="toggleProcedure('${escapeHtml(name).replace(/'/g,"\\'")}')"><span class="chk">✓</span><span class="nm">${escapeHtml(name)}</span></button>`;
     }).join('');
   } else {
     html += `<div class="picker-empty">Немає збігів</div>`;
@@ -1841,11 +2005,19 @@ function updateSaveBarTimer(){
 }
 
 function renderHeader(){
-  const sel = document.getElementById('patientSelect');
-  sel.innerHTML = DB.patients.map(p=>`<option value="${p.id}" ${p.id===DB.current?'selected':''}>${escapeHtml(p.name)}</option>`).join('') || '<option>—</option>';
   const p = currentPatient();
   document.getElementById('hdrPatientName').textContent = p ? p.name : 'Немає пацієнта';
-  document.getElementById('hdrPatientMeta').textContent = p ? [p.species, p.weight?p.weight+' кг':'', p.date].filter(Boolean).join(' · ') : 'Створіть нового пацієнта (+)';
+  document.getElementById('hdrPatientMeta').textContent = p ? [p.species, p.weight ? String(p.weight).replace('.',',')+' кг' : ''].filter(Boolean).join(' · ') : '—';
+  updateHeaderTimer();
+}
+/* таймер наркозу в шапці — видно на всіх вкладках пацієнта */
+function updateHeaderTimer(){
+  const box = document.getElementById('hdrTimer'), txt = document.getElementById('hdrTimerText');
+  if(!box || !txt) return;
+  const p = currentPatient();
+  const live = !!(p && p.sessionStart && !p.sessionEnd);
+  txt.textContent = (p && p.sessionStart) ? formatElapsed((p.sessionEnd || Date.now()) - p.sessionStart) : '00:00:00';
+  box.classList.toggle('live', live);
 }
 
 function fillPatientForm(){
@@ -1860,9 +2032,9 @@ function fillPatientForm(){
   updatePatientToggleFieldsUI();
   const procLbl = document.getElementById('p_procedure_label');
   if(procLbl){
-    const proc = p ? (p.procedure || '') : '';
-    procLbl.textContent = proc || 'Оберіть процедуру';
-    procLbl.classList.toggle('ph', !proc);
+    const procs = getPatientProcedures(p);
+    procLbl.textContent = procs.length ? procs.join(', ') : 'Оберіть процедури';
+    procLbl.classList.toggle('ph', !procs.length);
   }
   renderBreedOptions();
   document.getElementById('drugWeightLabel').textContent = p && p.weight ? (p.weight+' кг') : '— кг (вкажіть на вкладці «Пацієнт»)';
@@ -2153,15 +2325,26 @@ function markVitalsDirty(){
   statusEl.textContent = 'Незбережені зміни'; statusEl.className = 'save-status dirty';
 }
 
-/* Обмеження для полів вітальних показників: заборона від'ємних значень, і опційно максимум (макс. 3-значне число = 999) */
+/* Обмеження для полів вітальних показників: заборона від'ємних значень і обмеження кількості цілих розрядів
+   (max=999 -> 3 цифри, max=99.9 -> 2 цифри). Зайві цифри відкидаються (залишаються перші N), значення НЕ стрибає до максимуму. */
 function clampVitalRange(el, min, max){
   if(el.value === '' || el.value === '-') return;
+  let str = String(el.value);
+  if(max !== undefined){
+    const maxInt = String(Math.floor(max)).length;
+    const neg = str.charAt(0) === '-' ? '-' : '';
+    const body = neg ? str.slice(1) : str;
+    const parts = body.split('.');
+    let intPart = parts[0].replace(/^0+(?=\d)/, '');
+    if(intPart.length > maxInt){
+      intPart = intPart.slice(0, maxInt);
+      str = neg + intPart + (parts.length > 1 ? '.' + parts[1] : '');
+      el.value = str;
+    }
+  }
   let n = parseFloat(el.value);
   if(isNaN(n)) return;
-  let clamped = n;
-  if(min !== undefined && clamped < min) clamped = min;
-  if(max !== undefined && clamped > max) clamped = max;
-  if(clamped !== n) el.value = clamped;
+  if(min !== undefined && n < min) el.value = min;
 }
 
 function addVital(){
@@ -2252,10 +2435,11 @@ function saveVitalEditFromForm(){
   renderEyeButton();
 
   renderVitals();
-  loadVitalsEntryDefaults();
+  const draftRestored = restoreVitalsDraft();
+  if(!draftRestored) loadVitalsEntryDefaults();
   updateVitalsSaveLock();
   const statusEl = document.getElementById('vitalsSaveStatus');
-  if(statusEl){ statusEl.textContent = 'Зміни збережено (запис о ' + savedTime + ')'; statusEl.className = 'save-status saved'; }
+  if(statusEl && !draftRestored){ statusEl.textContent = 'Зміни збережено (запис о ' + savedTime + ')'; statusEl.className = 'save-status saved'; }
 }
 
 /* ---- зволоження очей (нагадування під час анестезії) ----
@@ -2414,22 +2598,68 @@ if('ResizeObserver' in window){
 
 function removeVital(idx){
   const p = currentPatient(); if(!p) return;
-  if(!confirm('Видалити цей запис із журналу?')) return;
-  p.vitals.splice(idx,1);
-  if(editingVitalIndex !== null){
-    if(idx === editingVitalIndex){ cancelVitalEdit(); }
-    else if(idx < editingVitalIndex){ editingVitalIndex--; }
-  }
-  save(); renderVitals();
+  showConfirm('Видалити цей запис із журналу?', ()=>{
+    const pp = currentPatient(); if(!pp || !pp.vitals[idx]) return;
+    pp.vitals.splice(idx,1);
+    if(editingVitalIndex !== null){
+      if(idx === editingVitalIndex){ cancelVitalEdit(); }
+      else if(idx < editingVitalIndex){ editingVitalIndex--; }
+    }
+    save(); renderVitals();
+  });
 }
 
 /* ---- редагування запису в журналі вітальних показників (у вже існуючій формі вгорі) ---- */
 let editingVitalIndex = null; // індекс запису, що редагується (null = звичайний режим додавання нового)
 let editingVitalEyeTag = null; // стан мітки «Очі зволожено» для запису, що редагується (null = не в режимі редагування)
 
+/* ---- чернетка форми: при вході в редагування запису з історії поточні (ще не збережені) значення
+   форми запам'ятовуються й повертаються після збереження змін або скасування редагування ---- */
+let vitalsDraftSnapshot = null;
+const VITAL_DRAFT_FIELD_IDS = ['v_plane','v_hr','v_rr','v_spo2','v_etco2','v_sys','v_dia','v_map','v_temp','v_o2','v_isosevo','v_cri','v_notes','v_peep','v_fio2','v_vent_vp'];
+function snapshotVitalsDraft(){
+  const p = currentPatient();
+  const vals = {};
+  VITAL_DRAFT_FIELD_IDS.forEach(id=>{ const el = document.getElementById(id); if(el) vals[id] = el.value; });
+  const card = document.getElementById('ventParamsCard');
+  const statusEl = document.getElementById('vitalsSaveStatus');
+  vitalsDraftSnapshot = {
+    patientId: p ? p.id : null,
+    vals: vals,
+    rrMode: currentRRMode,
+    ventVPMode: currentVentVPMode,
+    agent: currentAgent,
+    ventPanelOpen: !!(card && card.style.display !== 'none'),
+    statusText: statusEl ? statusEl.textContent : '',
+    statusClass: statusEl ? statusEl.className : ''
+  };
+}
+/* повертає true, якщо чернетку відновлено; false — якщо її не було (тоді викликаючий код ставить значення за замовчуванням) */
+function restoreVitalsDraft(){
+  const snap = vitalsDraftSnapshot;
+  vitalsDraftSnapshot = null;
+  const p = currentPatient();
+  if(!snap || !p || snap.patientId !== p.id) return false;
+  updateMapModeUI();
+  VITAL_DRAFT_FIELD_IDS.forEach(id=>{ const el = document.getElementById(id); if(el && snap.vals[id] !== undefined) el.value = snap.vals[id]; });
+  updateVitalsPlaneUI();
+  currentRRMode = snap.rrMode; updateRRModeUI();
+  currentVentVPMode = snap.ventVPMode; updateVentVPModeUI();
+  setVentParamsPanelVisible(snap.ventPanelOpen);
+  currentAgent = snap.agent; updateAgentUI();
+  recalcMap();
+  if(p.mapMode === 'manual'){ const mapEl = document.getElementById('v_map'); if(mapEl) mapEl.value = snap.vals['v_map'] || ''; }
+  const statusEl = document.getElementById('vitalsSaveStatus');
+  if(statusEl){ statusEl.textContent = snap.statusText; statusEl.className = snap.statusClass; }
+  updateVitalAlarms();
+  updateVitalsSaveLock();
+  return true;
+}
+
 function editVital(idx){
   const p = currentPatient(); if(!p) return;
   const v = p.vitals[idx]; if(!v) return;
+  if(editingVitalIndex === null) snapshotVitalsDraft(); // лише при вході в режим редагування (не при переході між записами)
   editingVitalIndex = idx;
 
   // Фаза наркозу
@@ -2490,7 +2720,7 @@ function cancelVitalEdit(){
   if(banner) banner.style.display = 'none';
   const label = document.getElementById('vitalsSaveBtnLabel');
   if(label) label.textContent = 'Зберегти запис';
-  loadVitalsEntryDefaults();
+  if(!restoreVitalsDraft()) loadVitalsEntryDefaults();
   renderEyeButton();
   renderVitals();
 }
@@ -2573,6 +2803,7 @@ function updateTimerDisplay(p){
 }
 
 function renderSession(){
+  updateHeaderTimer();
   const p = currentPatient();
   const btn = document.getElementById('sess_btn');
   const dot = document.getElementById('sess_dot');
@@ -2618,13 +2849,13 @@ function openModal(id){
     const btn = document.getElementById('np_submit_btn');
     if(btn) btn.textContent = 'Створити пацієнта';
   }
-  const fab = document.querySelector('.fab');
+  const fab = document.querySelector('.home-newbar');
   if(fab) fab.style.display = 'none';
 }
 function closeModal(id){
   document.getElementById(id+'-bg').classList.remove('open');
   const anyOpen = document.querySelector('.modal-bg.open');
-  const fab = document.querySelector('.fab');
+  const fab = document.querySelector('.home-newbar');
   if(fab && !anyOpen) fab.style.display = '';
 }
 
@@ -2782,8 +3013,9 @@ function renderPrintSheet(){
       + '<td>' + psVal(v.cri) + '</td>'
       + '<td>' + psVal(v.plane) + '</td>'
       + '</tr>';
-    if(v.notes && String(v.notes).trim() !== ''){
-      row += '<tr class="ps-vital-notes-row"><td colspan="13">Примітки: ' + escapeHtml(v.notes) + '</td></tr>';
+    const psNoteParts = [(v.notes && String(v.notes).trim() !== '') ? escapeHtml(v.notes) : '', (v.eyeTag ? EYE_TAG : '')].filter(Boolean);
+    if(psNoteParts.length){
+      row += '<tr class="ps-vital-notes-row"><td colspan="13">Примітки: ' + psNoteParts.join('; ') + '</td></tr>';
     }
     return row;
   }).join('') || '<tr><td colspan="13" style="text-align:center; color:#888;">Записів немає</td></tr>';
@@ -2805,8 +3037,8 @@ function renderPrintSheet(){
   html += '<tr><td class="ps-label">Вид</td><td>' + psVal(p.species) + '</td><td class="ps-label">Порода</td><td>' + psVal(p.breed) + '</td></tr>';
   html += '<tr><td class="ps-label">Вага, кг</td><td>' + psVal(p.weight) + '</td><td class="ps-label">Стать</td><td>' + psVal(p.sex) + '</td></tr>';
   html += '<tr><td class="ps-label">Вік</td><td>' + psVal(ageText(p)) + '</td><td class="ps-label">Телефон</td><td>' + psVal(p.phone) + '</td></tr>';
-  html += '<tr><td class="ps-label">Процедура</td><td>' + psVal(p.procedure) + '</td><td class="ps-label">Лікар / анестезіолог</td><td>' + psVal(p.doctor) + '</td></tr>';
-  html += '<tr><td class="ps-label">Хірург</td><td colspan="3">' + psVal(p.surgeon) + '</td></tr>';
+  html += '<tr><td class="ps-label">' + (getPatientProcedures(p).length > 1 ? 'Процедури' : 'Процедура') + '</td><td>' + psVal(getPatientProcedures(p).join(', ')) + '</td><td class="ps-label">Лікар / анестезіолог</td><td>' + psVal(p.doctor) + '</td></tr>';
+  html += '<tr><td class="ps-label">' + (getPatientSurgeons(p).length > 1 ? 'Хірурги' : 'Хірург') + '</td><td colspan="3">' + psVal(getPatientSurgeons(p).join(', ')) + '</td></tr>';
   html += '</table>';
 
   html += '<div class="ps-bar">ASA / Примітки перед анестезією</div>';
@@ -2838,7 +3070,7 @@ window.addEventListener('beforeprint', renderPrintSheet);
 
 if(!DB.patients.length){ const p = newPatientObj('Пацієнт 1'); DB.patients.push(p); DB.current = p.id; }
 if(!DB.current || !currentPatient()) DB.current = DB.patients[0].id;
-DB.patients.forEach(p=>{ if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false;
+DB.patients.forEach(p=>{ if(!Array.isArray(p.procedures)) p.procedures = p.procedure ? [p.procedure] : []; if(!Array.isArray(p.surgeons)) p.surgeons = p.surgeon ? [p.surgeon] : []; if(!p.mapMode) p.mapMode = 'auto'; if(!p.createdAt) p.createdAt = p.date ? new Date(p.date).getTime() : Date.now(); if(!p.labs) p.labs = {}; if(p.phone === undefined) p.phone = ''; if(p.hct === undefined) p.hct = ''; if(p.sessionAutoStopped === undefined) p.sessionAutoStopped = false; if(p.asaClass === undefined) p.asaClass = null; if(p.asaEmergency === undefined) p.asaEmergency = false;
   if(p.eyeLastInstillAt === undefined) p.eyeLastInstillAt = null; if(p.eyePrevInstillAt === undefined) p.eyePrevInstillAt = null; if(p.eyePendingTag === undefined) p.eyePendingTag = false;
   if(p.doseProtocolIndex === undefined) p.doseProtocolIndex = null; if(p.doseProtocolSub === undefined) p.doseProtocolSub = false;
   /* міграція старого текстового поля «Вік» (напр. «7», «7 років») у нові ageYears/ageMonths */
@@ -2864,6 +3096,7 @@ window.addEventListener('resize', syncTabbarHeight);
 setInterval(()=>{
   const p = currentPatient();
   if(p && p.sessionStart && !p.sessionEnd) updateTimerDisplay(p);
+  updateHeaderTimer();
   checkAutoPauseNoRecord();
   updateSaveBarTimer();
   renderEyeButton();
